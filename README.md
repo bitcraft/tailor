@@ -67,12 +67,6 @@ interface is used for this software that is hosted here.  You are welcome to
 fork this project at any time and customize it as you wish.
 
 
-The Name
---------
-
-'purukura' is a term used in Japan for their ubiquitous style of photo booths.
-
-
 Requirements
 ------------
 
