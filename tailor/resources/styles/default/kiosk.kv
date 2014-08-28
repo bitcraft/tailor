@@ -1,0 +1,247 @@
+﻿#:kivy 1.8
+
+<PreviewButton@Button>:
+    text: 'Show Preview'
+
+<FocusWidget@Image>:
+    allow_stretch: True
+
+<ExitButton@Image>:
+    allow_stretch: True
+    keep_ratio: True
+
+<PreviewLabel@Label>:
+    text: 'Touch preview to close'
+    text_size: 500, 100
+    font_size: 30
+
+[AccordionItemTitle2@Widget]:
+    text: ctx.title
+    size_hint: 1, None
+    height: 232
+
+    canvas.before:
+        Color:
+            rgb: 1,1,1
+        Rectangle:
+            source: ctx.item.icon_source
+            pos: self.pos[0], -ctx.item.icon_size[1] + self.pos[1] + self.size[1] + 18
+            size: ctx.item.icon_size
+        PushMatrix
+        Translate:
+            xy: self.center_x, self.center_y
+        Rotate:
+            angle: 90 if ctx.item.orientation == 'horizontal' else 0
+            axis: 0,0,1
+        Translate:
+            xy: -self.center_x, -self.center_y
+    canvas.after:
+        PopMatrix
+
+[AccordionItemTitle@Label]:
+    text: ctx.title
+    normal_background: ctx.item.background_normal if ctx.item.collapse else ctx.item.background_selected
+    disabled_background: ctx.item.background_disabled_normal if ctx.item.collapse else ctx.item.background_disabled_selected
+
+    canvas.before:
+        Color:
+            rgba: self.disabled_color if self.disabled else self.color
+        BorderImage:
+            source: self.disabled_background if self.disabled else self.normal_background
+            pos: self.pos
+            size: self.size
+        PushMatrix
+        Translate:
+            xy: self.center_x, self.center_y
+        Rotate:
+            angle: 90 if ctx.item.orientation == 'horizontal' else 0
+            axis: 0, 0, 1
+        Translate:
+            xy: -self.center_x, -self.center_y
+    canvas.after:
+        PopMatrix
+
+<SharingControls>:
+    opacity: 0.0
+
+    Accordion:
+        orientation: 'vertical'
+        pos: 16,0
+        #min_space: 232
+
+        AccordionItem:
+            title: 'Print Copies'
+            icon_source: 'images/icons/print.png'
+            icon_size: 256, 256
+            collapse: False
+
+            BoxLayout:
+                orientation: 'vertical'
+                pos_hint: {'top': 1}
+
+                Label:
+                    text: 'Number of copies:'
+                    font_size: 40
+
+                BoxLayout:
+                    orientation: 'horizontal'
+                    pos_hint: {'x': .25}
+
+                    Button:
+                        pos_hint: {'top': 1}
+                        size_hint: None, None
+                        height: 64
+                        width: 64
+                        font_size: 45
+                        font_name: 'data/fonts/DejaVuSans.ttf'
+                        text: '-'
+                        on_press: root.remove_print()
+
+                    Label:
+                        pos_hint: {'top': 1}
+                        size_hint: None, None
+                        height: 64
+                        width: 128
+                        text: '%s' % root.prints
+                        font_size: 64
+
+                    Button:
+                        pos_hint: {'top': 1}
+                        size_hint: None, None
+                        height: 64
+                        width: 64
+                        font_size: 45
+                        font_name: 'data/fonts/DejaVuSans.ttf'
+                        text: '+'
+                        on_press: root.add_print()
+
+                Button:
+                    text: 'Print!'
+                    font_size: 50
+                    on_press: root.confirm_print()
+
+                Widget:
+                    size_hint: 1, None
+                    height: 48
+
+        AccordionItem:
+            title: 'Email'
+            icon_source: 'images/icons/stamps/mail.png'
+            icon_size: 256, 256
+
+            uniqueid: 'emailitem'
+
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: 16
+
+                Label:
+                    size_hint: (.5, .25)
+                    font_size: 30
+                    text: 'Email Address'
+
+                # email address input box
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint: 1, None
+                    height: 48
+
+                    TextInput:
+                        pos_hint: {'x': 0}
+                        size_hint: 1.0, 1.0
+                        font_size: 30
+                        id: email_input
+                        multiline: False
+                        on_text: root.check_email_text(self)
+
+                    Button:
+                        size_hint: (None, None)
+                        height: 48
+                        width: 48
+                        color: 0, 0, 0
+                        font_size: 35
+                        font_name: 'data/fonts/DejaVuSans.ttf'
+                        text: "⊗"
+                        on_release: email_input.text = ''
+
+                Button:
+                    text: 'Send!'
+                    font_size: 50
+                    on_press: root.confirm_address()
+
+                Label:
+                    text: 'Emails can take up\nto 10 minutes to deliver'
+                    font_size: 25
+
+
+        IconAccordionItem:
+            title: 'Twitter'
+            icon_source: 'images/icons/stamps/twitter.png'
+            icon_size: 256, 256
+
+            BoxLayout:
+                orientation: 'vertical'
+
+                Button:
+                    text: 'Tweet!\n%s' % root.twitter_acct
+                    font_size: 40
+
+                Label:
+                    text: 'All tweets will be sent to %s' % root.twitter_acct
+                    font_size: 25
+
+
+<PickerScreen>:
+    small_preview_size: 300, 300
+    large_preview_size: 600, 600
+    grid_rows: 2
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        FloatLayout:
+            uniqueid: 'layout'
+            # size_hint: 1, 1
+
+            Image:
+                uniqueid: 'background'
+                allow_stretch: True
+                color: 1, 1, 1, .5
+                size_hint: 3, 1.5
+
+            ScrollView:
+                id: scrollview
+                uniqueid: 'scrollview'
+                size_hint: 1, .8
+                do_scroll_y: False
+                bar_width: 6
+
+                GridLayout:
+                    uniqueid: 'grid'
+                    size_hint: None, 1
+                    rows: root.grid_rows
+                    col_default_width: root.small_preview_size[0]
+                    #row_default_height: root.small_preview_size[1]
+
+        Slider:
+            id: slider
+            uniqueid: 'slider'
+            orientation: 'horizontal'
+            size_hint: 1, .1
+            min: 0
+            max: 1
+            value: 0
+
+        PreviewButton:
+            on_press: root.change_state('preview')
+            size_hint: 1, .1
+
+<SinglePicker>:
+    large_preview_size: 700, 700
+    small_preview_size: 300, 300
+    grid_rows: 3
+
+<CompositePicker>:
+    large_preview_size: 1000, 1000
+    small_preview_size: 300, 300
+    grid_rows: 1

@@ -1,0 +1,13 @@
+tailor is a mashup of:
+
+    - a python twisted service that:
+        - interfaces with an arduino over a virtual tty
+        - captures still images to disk
+        - services preview images over a network port
+        - processes images from camera
+
+    - a kivy application to browse photos
+    - a loose framework of functions that process images and files
+
+all files contained in this directory are copyright leif theden, 2012-2014 and
+are licensed under the gplv3.

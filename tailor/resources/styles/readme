@@ -1,0 +1,2 @@
+tailor styles are kivy 'KV' language files that define how the interface
+looks and acts.  during development, the role of styles will change.

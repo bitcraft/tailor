@@ -1,0 +1,15 @@
+[general]
+dpi = 300
+units = inches
+size = 4,6
+
+[00portrait]
+filename = auto
+area = .31,1.44,3.74,4.98
+autocrop = true
+filter = toaster
+
+[99frame]
+filename = polaroid0.png
+area = 0,0,4,6
+scale=true
