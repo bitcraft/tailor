@@ -1,27 +1,19 @@
-from kivy.config import Config
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.image import Image as CoreImage
-from kivy.core.image import ImageData
 from kivy.graphics.texture import Texture
 from kivy.factory import Factory
 from kivy.loader import Loader
 from kivy.properties import *
 
-from kivy.uix.button import Button
 from kivy.uix.image import Image
-from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
-from kivy.uix.slider import Slider
-from kivy.effects.kinetic import KineticEffect
 from kivy.effects.dampedscroll import DampedScrollEffect
 
-from PIL import Image as PIL_Image
-from six.moves import cStringIO, queue
 from functools import partial
+from six.moves import queue
 import os
 import time
-import pygame
 import logging
 
 from ..config import Config as pkConfig
@@ -38,16 +30,19 @@ jpath = os.path.join
 resource_path = os.path.realpath(jpath(__file__, '..', '..', 'resources'))
 image_path = partial(jpath, resource_path, 'images')
 
+# for template source filename mangling
+#app.get_real_source(self.new_source_prop)
 
 #class MyScrollEffect(DampedScrollEffect):
 #    round_value = BooleanProperty(False)
+
 
 class MyScrollEffect(DampedScrollEffect):
     """ on my system, the large scrollview doesn't work well.
     this is a more computationally involved method of scrolling, but is more
     accurate...and works.
     """
-    friction = NumericProperty(0.01)
+    friction = NumericProperty(0.005)
     min_velocity = NumericProperty(.1)
     spring_constant = NumericProperty(10.0)
     edge_damping = NumericProperty(0.5)
@@ -144,50 +139,56 @@ class PickerScreen(Screen):
 
     def __init__(self, *args, **kwargs):
         super(PickerScreen, self).__init__(*args, **kwargs)
-
-        # these declarations are mainly to keep pycharm from annoying me with
-        # notifications that these attributes are not declared in __init__
-        self.arduino_handler = None
-        self.preview_handler = None
         self.preview_widget = None
-        self.preview_label = None
-        self.preview_exit = None
-        self.preview_button = None
-        self.focus_widget = None
-        self.background = None
-        self.scrollview = None
-        self.layout = None
-        self.grid = None
-        self.locked = None
-        self.loaded = None
-        self.controls = None
-        self.state = 'normal'
-        self.tilt = 90
 
     def on_pre_enter(self):
         # set up the 'normal' state
-        screen_width = Config.getint('graphics', 'width')
+        self.state = 'normal'
 
         # these are pulled from the .kv format file
+        self.view = search(self, 'view')
+        self.top_parent = search(self, 'top_parent')
         self.slider = search(self, 'slider')
-        self.layout = search(self, 'layout')
+        self.drawer = search(self, 'drawer')
+        self.preview_button = search(self, 'preview button')
         self.background = search(self, 'background')
         self.scrollview = search(self, 'scrollview')
         self.grid = search(self, 'grid')
 
-        self.background.source = image_path('galaxy.jpg')
-
         # the grid will expand horizontally as items are added
-        self.grid.bind(minimum_width=self.grid.setter('width'))
+        def f(widget, value):
+            self.grid.width = value
+            #self.slider.max = value
+        self.grid.bind(minimum_width=f)
 
         # TODO: eventually make this related to the screen width, maybe
         self.grid.spacing = (64, 64)
 
-        # slider / scrollview binding
+        self.slider.max = 1
+
+        # slider => scrollview binding
+        def f(scrollview, widget, value):
+            # not sure why value has to be negated here
+            scrollview.effect_x.value = -value * self.grid.minimum_width
+        self.slider.bind(value=partial(f, self.scrollview))
+
+        # scrollview => slider binding
+        def f(slider, widget, value):
+            print "slider", slider, widget, value
+            # avoid 'maximum recursion depth exceeded' error
+            if value >= 0:
+                slider.value = value
+        self.scrollview.effect_x.bind(value=partial(f, self.slider))
+
+        # background parallax effect
         def f(widget, value):
-            self.scrollview.effect_x.value = value
-            self.scrollview.update_from_scroll()
-        self.slider.bind(value_normalized=f)
+            if not self.locked:
+                self.background.pos_hint = {'x': -value - .3, 'y': -.25}
+        self.scrollview.bind(scroll_x=f)
+
+        # kivy's scroll effect doesn't seem to work with a huge scrollview
+        # so set the effect to my homebrew scrolling effect
+        self.scrollview.effect_cls = MyScrollEffect
 
         # tweak the loading so it is quick
         Loader.loading_image = CoreImage(image_path('loading.gif'))
@@ -196,11 +197,6 @@ class PickerScreen(Screen):
                                                       'max-upload-per-frame')
 
         self.scrollview_hidden = False
-        self._scrollview_pos_hint = self.scrollview.pos_hint
-        self._scrollview_pos = self.scrollview.pos
-
-        # the center of the preview image
-        center_x = screen_width - (self.large_preview_size[0] / 2) - 16
 
         # stuff for the arduino/tilt
         self.arduino_handler = ArduinoHandler()
@@ -214,85 +210,76 @@ class PickerScreen(Screen):
         self.focus_widget = Factory.FocusWidget(
             source=image_path('loading.gif'))
         self.focus_widget.allow_stretch = True
-        self.focus_widget.x = center_x - OFFSET
-        self.focus_widget.y = -1000
-        self.focus_widget.size_hint = None, None
-        self.focus_widget.size = self.small_preview_size
-        #self.focus_widget.bind(on_touch_down=self.on_image_touch)
-        self.layout.add_widget(self.focus_widget)
+        self.focus_widget.pos_hint = {'top': -1, 'center_x': .75}
+        self.focus_widget.height = self.height
+        self.focus_widget.bind(on_touch_down=self.on_image_touch)
+        self.add_widget(self.focus_widget)
 
-        #   E X I T   B U T T O N
-        # this button is used to exit the large camera preview window
-        def exit_preview(widget, touch):
-            if widget.collide_point(touch.x, touch.y):
-                self.change_state('normal')
-
-        self.preview_exit = Factory.ExitButton(
-            source=image_path('chevron-right.gif'))
-        #self.preview_exit.bind(on_touch_down=exit_preview)
-        self.preview_exit.size_hint = None, None
-        self.preview_exit.width = 64
-        self.preview_exit.height = 175
-        self.preview_exit.x = 1280
-        self.preview_exit.y = (1024 / 2) - (self.preview_exit.height / 2)
-        self.layout.add_widget(self.preview_exit)
+        #   P R E V I E W   B U T T O N
+        # this button is used to toggle the large camera preview window
+        def f(widget):
+            if not self.locked:
+                if self.state == 'normal':
+                    self.change_state('preview')
+                elif self.state == 'preview':
+                    self.change_state('normal')
+        self.preview_button.bind(on_press=f)
 
         #   P R E V I E W   L A B E L
         # the preview label is used with the focus widget is open
         self.preview_label = Factory.PreviewLabel(pos=(-1000, -1000))
-        self.layout.add_widget(self.preview_label)
+        self.view.add_widget(self.preview_label)
 
-        # the scrollview is amimated to move in and out
-        self.scrollview.original_y = 100
-        self.scrollview.y = self.scrollview.original_y
-        self.scrollview.effect_cls = MyScrollEffect
-        self.scrollview.bind(scroll_x=self.on_picker_scroll)
+        # the background has a parallax effect
+        self.background.source = image_path('galaxy.jpg')
 
-        # the background has a parallax effect, so position is manual now
-        self.background.y = -400
-        self.background.pos = self._calc_bg_pos()
-
-        # locked and loaded  :D
         self.locked = False
         self.loaded = set()
 
-        # schedule a callback to check for new images
-        Clock.schedule_interval(self.scan, 1)
+        Clock.schedule_interval(self.check_new_photos, 1)
 
-    def scan(self, dt):
+    def on_image_touch(self, widget, touch):
+        """ called when any image is touched
+        """
+        if widget.collide_point(touch.x, touch.y):
+            # hide the focus widget
+            if self.scrollview_hidden:
+                self.change_state('normal', widget=widget)
+
+            # show the focus widget
+            elif self.focus_widget is not widget:
+                if widget is self.preview_widget:
+                    return False
+
+                self.change_state('focus', widget=widget)
+
+    def check_new_photos(self, dt):
         """ Scan for new images and scroll to edge if found
         """
-        new = False
-        for filename in self.get_images():
-            if filename not in self.loaded:
-                new = True
-                self.loaded.add(filename)
-                widget = self._create_preview_widget(filename)
-                self.grid.add_widget(widget)
 
-        # move and animate the scrollview to the far edge
-        if new:
-            ani = Animation(
-                scroll_x=.99,
+        new = self.get_images() - self.loaded
+
+        for filename in new:
+            self.loaded.add(filename)
+            widget = Factory.AsyncImage(
+                source=filename,
+                allow_stretch=True)
+            widget.bind(on_touch_down=self.on_image_touch)
+            self.grid.add_widget(widget)
+
+        if new and self.scrollview.effect_x is not None:
+            self.loaded |= new
+            Animation(
+                value_normalized=1,
                 t='in_out_quad',
-                duration=1)
-
-            ani.start(self.scrollview)
-
-    def _create_preview_widget(self, source):
-        # preview widget is a image on the picker screen
-        widget = Factory.AsyncImage(
-            source=source,
-            allow_stretch=True,
-            pos_hint={'top': 1})
-        # widget.bind(on_touch_down=self.on_image_touch)
-        return widget
+                duration=1
+            ).start(self.slider)
 
     def _remove_widget_after_ani(self, ani, widget):
         self.remove_widget(widget)
 
     def show_controls(self, widget, arg):
-        widget.pos_hint = {'x', 0}
+        widget.pos_hint = {'x': 0}
         return False
 
     def unlock(self, dt=None):
@@ -307,8 +294,7 @@ class PickerScreen(Screen):
             self.update_preview()
             return
 
-        screen_width = Config.getint('graphics', 'width')
-        screen_height = Config.getint('graphics', 'height')
+        screen_width, screen_height = self.view.size
 
         new_state = state
         old_state = self.state
@@ -346,37 +332,25 @@ class PickerScreen(Screen):
                 ani.start(self.controls)
 
             # set the background to normal
-            x, y = self._calc_bg_pos()
             ani = Animation(
-                y=y + 100,
-                x=x,
+                size_hint=(3, 1.5),
                 t='in_out_quad',
                 duration=.5)
             ani.start(self.background)
 
-            # show the scrollview
-            x, y = self._scrollview_pos[0], self.scrollview.original_y
-            ani = Animation(
-                x=x,
-                y=y,
-                t='in_out_quad',
-                opacity=1.0,
-                duration=.5)
-            ani.start(self.scrollview)
-
-            # show the camera button
+            # show the scrollview and drawer
             ani = Animation(
                 y=0,
                 t='in_out_quad',
                 opacity=1.0,
                 duration=.5)
-            ani.start(self.preview_button)
+            ani.start(search(self, 'scrollview_area'))
+            ani.start(self.drawer)
 
             # hide the focus widget
             ani = Animation(
-                y=-1000,
-                x=self.focus_widget.x + OFFSET,
-                size=self.small_preview_size,
+                pos_hint={'top': 0},
+                height=screen_height * .25,
                 t='in_out_quad',
                 duration=.5)
 
@@ -400,7 +374,7 @@ class PickerScreen(Screen):
             Animation.cancel_all(self.scrollview)
             Animation.cancel_all(self.background)
             Animation.cancel_all(self.focus_widget)
-            Animation.cancel_all(self.preview_button)
+            Animation.cancel_all(self.drawer)
 
             # set the focus widget to have the same image as the one picked
             # do a bit of mangling to get a more detailed image
@@ -424,39 +398,34 @@ class PickerScreen(Screen):
             ani.start(self.controls)
 
             self.preview_label.pos_hint = {'x': .25, 'y': .47}
-
-            # set the z to something high to ensure it is on top
             self.add_widget(self.controls)
 
-            # hide the scrollview and camera button
+            # hide the scrollview and drawer
             ani = Animation(
                 x=0,
                 y=-1000,
                 t='in_out_quad',
                 opacity=0.0,
                 duration=.7)
-            ani.start(self.scrollview)
-            ani.start(self.preview_button)
+            ani.start(search(self, 'scrollview_area'))
+            ani.start(self.drawer)
 
             # start a simple animation on the background
+            x = self.background.pos_hint['x']
             ani = Animation(
-                y=self.background.y - 100,
-                x=-self.background.width / 2.5,
                 t='in_out_quad',
+                size_hint=(4, 2),
                 duration=.5)
             ani += Animation(
-                x=0,
+                pos_hint={'x': x + 1.5},
                 duration=480)
             ani.start(self.background)
-
-            hh = (screen_height - self.large_preview_size[1]) / 2
 
             # show the focus widget
             ani = Animation(
                 opacity=1.0,
-                y=screen_height - self.large_preview_size[1] - hh,
-                x=(1280 / 2) - 250,
-                size=self.large_preview_size,
+                pos_hint={'top': 1, 'center_x': .75},
+                size_hint=(1, 1),
                 t='in_out_quad',
                 duration=.5)
             ani &= Animation(
@@ -477,22 +446,14 @@ class PickerScreen(Screen):
             Animation.cancel_all(self.scrollview)
             Animation.cancel_all(self.background)
             Animation.cancel_all(self.focus_widget)
-            Animation.cancel_all(self.preview_exit)
-            Animation.cancel_all(self.preview_button)
             Animation.cancel_all(self.preview_widget)
-
-            # show the preview exit button
-            ani = Animation(
-                x=1280 - self.preview_exit.width,
-                t='in_out_quad',
-                duration=.5)
-            ani &= Animation(
-                opacity=1.0,
-                duration=.5)
-            ani.start(self.preview_exit)
+            Animation.cancel_all(self.drawer)
 
             # show the camera preview
             ani = Animation(
+                size_hint=(1, 1),
+                #pos_hint={'x': 0, 'y': 1},
+                x=0,
                 y=0,
                 t='in_out_quad',
                 duration=.5)
@@ -501,19 +462,22 @@ class PickerScreen(Screen):
                 duration=.5)
             ani.start(self.preview_widget)
 
-            # hide the scrollview and camera button
+            # hide the layout
             ani = Animation(
                 x=0,
-                y=-1000,
+                y=-2000,
                 t='in_out_quad',
                 opacity=0.0,
                 duration=.7)
-            ani.start(self.scrollview)
-            ani.start(self.preview_button)
+            ani.start(search(self, 'scrollview_area'))
 
             # schedule a unlock
+            def f(*args):
+                self.unlock()
+                self.preview_button.text = 'Hide Preview'
+
             self.locked = True
-            Clock.schedule_once(self.unlock, .5)
+            Clock.schedule_once(f, .7)
 
             # schedule an interval to update the preview widget
             interval = pkConfig.getfloat('camera', 'preview-interval')
@@ -528,19 +492,8 @@ class PickerScreen(Screen):
             Animation.cancel_all(self.scrollview)
             Animation.cancel_all(self.background)
             Animation.cancel_all(self.focus_widget)
-            Animation.cancel_all(self.preview_exit)
             Animation.cancel_all(self.preview_widget)
-            Animation.cancel_all(self.preview_button)
-
-            # hide the preview exit button
-            ani = Animation(
-                x=1280,
-                t='in_out_quad',
-                duration=.5)
-            ani &= Animation(
-                opacity=0.0,
-                duration=.5)
-            ani.start(self.preview_exit)
+            Animation.cancel_all(self.drawer)
 
             # hide the camera preview
             ani = Animation(
@@ -552,36 +505,21 @@ class PickerScreen(Screen):
                 duration=.5)
             ani.start(self.preview_widget)
 
-            # set the background to normal
-            x, y = self._calc_bg_pos()
-            ani = Animation(
-                y=y + 100,
-                x=x,
-                t='in_out_quad',
-                duration=.5)
-            ani.start(self.background)
-
-            # show the scrollview
-            x, y = self._scrollview_pos[0], self.scrollview.original_y
-            ani = Animation(
-                x=x,
-                y=y,
-                t='in_out_quad',
-                opacity=1.0,
-                duration=.5)
-            ani.start(self.scrollview)
-
-            # show the camera button
+            # show the layout
             ani = Animation(
                 y=0,
                 t='in_out_quad',
                 opacity=1.0,
                 duration=.5)
-            ani.start(self.preview_button)
+            ani.start(search(self, 'scrollview_area'))
 
             # schedule a unlock
+            def f(*args):
+                self.unlock()
+                self.preview_button.text = 'Show Preview'
+
             self.locked = True
-            Clock.schedule_once(self.unlock, .5)
+            Clock.schedule_once(f, .7)
 
             # unschedule the preview updater
             Clock.unschedule(self.update_preview)
@@ -598,6 +536,7 @@ class PickerScreen(Screen):
         texture = Texture.create_from_data(imdata)
 
         if self.preview_widget is None:
+            self.tilt = 90
             tilt_max = pkConfig.getint('arduino', 'max-tilt')
             tilt_min = pkConfig.getint('arduino', 'min-tilt')
 
@@ -614,38 +553,8 @@ class PickerScreen(Screen):
             self.preview_widget = Image(texture=texture, nocache=True)
             self.preview_widget.bind(on_touch_move=on_touch_move)
             self.preview_widget.allow_stretch = True
-            self.preview_widget.size_hint = None, None
-            self.preview_widget.size = (1280, 1024)
-            self.preview_widget.x = (1280 / 2) - (self.preview_widget.width / 2)
-            self.preview_widget.y = -self.preview_widget.height
-            self.layout.add_widget(self.preview_widget)
+            self.preview_widget.x = 0
+            self.preview_widget.y = -2000
+            self.view.add_widget(self.preview_widget)
         else:
             self.preview_widget.texture = texture
-
-    def on_image_touch(self, widget, touch):
-        """ called when any image is touched
-        """
-        if widget.collide_point(touch.x, touch.y):
-            # hide the focus widget
-            if self.scrollview_hidden:
-                self.change_state('normal', widget=widget)
-
-            # show the focus widget
-            elif self.focus_widget is not widget:
-                if widget is self.preview_widget:
-                    return False
-
-                self.change_state('focus', widget=widget)
-
-    def on_picker_scroll(self, widget, value):
-        self.slider.value = value
-        self.scrollview.update_from_scroll()
-        # this is the left/right parallax animation
-        if not self.locked:
-            self.background.pos = self._calc_bg_pos()
-        return True
-
-    def _calc_bg_pos(self):
-        bkg_w = self.background.width * .3
-        return (-self.scrollview.scroll_x * bkg_w - self.width / 2,
-                self.background.pos[1])

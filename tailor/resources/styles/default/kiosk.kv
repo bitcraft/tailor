@@ -8,58 +8,11 @@
 
 <ExitButton@Image>:
     allow_stretch: True
-    keep_ratio: True
 
 <PreviewLabel@Label>:
     text: 'Touch preview to close'
     text_size: 500, 100
     font_size: 30
-
-[AccordionItemTitle2@Widget]:
-    text: ctx.title
-    size_hint: 1, None
-    height: 232
-
-    canvas.before:
-        Color:
-            rgb: 1,1,1
-        Rectangle:
-            source: ctx.item.icon_source
-            pos: self.pos[0], -ctx.item.icon_size[1] + self.pos[1] + self.size[1] + 18
-            size: ctx.item.icon_size
-        PushMatrix
-        Translate:
-            xy: self.center_x, self.center_y
-        Rotate:
-            angle: 90 if ctx.item.orientation == 'horizontal' else 0
-            axis: 0,0,1
-        Translate:
-            xy: -self.center_x, -self.center_y
-    canvas.after:
-        PopMatrix
-
-[AccordionItemTitle@Label]:
-    text: ctx.title
-    normal_background: ctx.item.background_normal if ctx.item.collapse else ctx.item.background_selected
-    disabled_background: ctx.item.background_disabled_normal if ctx.item.collapse else ctx.item.background_disabled_selected
-
-    canvas.before:
-        Color:
-            rgba: self.disabled_color if self.disabled else self.color
-        BorderImage:
-            source: self.disabled_background if self.disabled else self.normal_background
-            pos: self.pos
-            size: self.size
-        PushMatrix
-        Translate:
-            xy: self.center_x, self.center_y
-        Rotate:
-            angle: 90 if ctx.item.orientation == 'horizontal' else 0
-            axis: 0, 0, 1
-        Translate:
-            xy: -self.center_x, -self.center_y
-    canvas.after:
-        PopMatrix
 
 <SharingControls>:
     opacity: 0.0
@@ -67,11 +20,10 @@
     Accordion:
         orientation: 'vertical'
         pos: 16,0
-        #min_space: 232
 
         AccordionItem:
             title: 'Print Copies'
-            icon_source: 'images/icons/print.png'
+            icon_source: 'tailor/resources/images/icons/print.png'
             icon_size: 256, 256
             collapse: False
 
@@ -126,7 +78,7 @@
 
         AccordionItem:
             title: 'Email'
-            icon_source: 'images/icons/stamps/mail.png'
+            icon_source: 'tailor/resources/images/icons/stamps/mail.png'
             icon_size: 256, 256
 
             uniqueid: 'emailitem'
@@ -176,7 +128,7 @@
 
         IconAccordionItem:
             title: 'Twitter'
-            icon_source: 'images/icons/stamps/twitter.png'
+            icon_source: 'tailor/resources/images/icons/stamps/twitter.png'
             icon_size: 256, 256
 
             BoxLayout:
@@ -192,16 +144,18 @@
 
 
 <PickerScreen>:
+    uniqueid: 'top_parent'
     small_preview_size: 300, 300
     large_preview_size: 600, 600
     grid_rows: 2
+    size_hint: 1, 1
 
     BoxLayout:
         orientation: 'vertical'
 
-        FloatLayout:
-            uniqueid: 'layout'
-            # size_hint: 1, 1
+        RelativeLayout:
+            uniqueid: 'view'
+            size_hint: 1, 1
 
             Image:
                 uniqueid: 'background'
@@ -209,32 +163,41 @@
                 color: 1, 1, 1, .5
                 size_hint: 3, 1.5
 
-            ScrollView:
-                id: scrollview
-                uniqueid: 'scrollview'
-                size_hint: 1, .8
-                do_scroll_y: False
-                bar_width: 6
+            BoxLayout:
+                uniqueid: 'scrollview_area'
+                orientation: 'vertical'
 
-                GridLayout:
-                    uniqueid: 'grid'
-                    size_hint: None, 1
-                    rows: root.grid_rows
-                    col_default_width: root.small_preview_size[0]
-                    #row_default_height: root.small_preview_size[1]
+                ScrollView:
+                    id: scrollview
+                    uniqueid: 'scrollview'
+                    pos_hint: {'center_y': .5}
+                    size_hint: 1, .9
+                    do_scroll_y: False
+                    bar_width: 6
 
-        Slider:
-            id: slider
-            uniqueid: 'slider'
-            orientation: 'horizontal'
+                    GridLayout:
+                        uniqueid: 'grid'
+                        rows: root.grid_rows
+                        size_hint: None, 1
+                        col_default_width: root.small_preview_size[0]
+                        #row_default_height: root.small_preview_size[1]
+
+                Slider:
+                    id: slider
+                    uniqueid: 'slider'
+                    size_hint: 1, .1
+                    orientation: 'horizontal'
+                    min: 0
+                    max: 1
+                    value: 0
+
+        BoxLayout:
+            uniqueid: 'drawer'
             size_hint: 1, .1
-            min: 0
-            max: 1
-            value: 0
+            orientation: 'vertical'
 
-        PreviewButton:
-            on_press: root.change_state('preview')
-            size_hint: 1, .1
+            PreviewButton:
+                uniqueid: 'preview button'
 
 <SinglePicker>:
     large_preview_size: 700, 700
@@ -243,5 +206,5 @@
 
 <CompositePicker>:
     large_preview_size: 1000, 1000
-    small_preview_size: 300, 300
+    small_preview_size: 500, 500
     grid_rows: 1

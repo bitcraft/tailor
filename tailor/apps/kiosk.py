@@ -81,7 +81,7 @@ class CompositePicker(PickerScreen):
 
     @staticmethod
     def get_images():
-        return sorted(glob.glob('{0}/*.png'.format(composites_path)))
+        return set(glob.glob('{0}/*.png'.format(composites_path)))
 
 
 class Manager(ScreenManager):

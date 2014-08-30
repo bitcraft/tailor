@@ -6,11 +6,10 @@ import sys
 import os
 
 # make service work without installing tailor into python
-sys.path.append(
-    os.path.realpath(
-        os.path.join(__file__, '..')
-    )
-)
+app_root_path = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
+sys.path.append(app_root_path)
+sys.path.append(os.path.join(app_root_path, 'tailor'))
+
 from twisted.internet import reactor, defer, task, protocol
 from twisted.internet.serialport import SerialPort
 from twisted.protocols import basic
@@ -35,15 +34,12 @@ logger = logging.getLogger("purikura.booth")
 jpath = os.path.join
 
 # paths
-app_root_path = Config.get('paths', 'root')
-app_config_path = jpath(app_root_path, 'config')
 app_resources_path = jpath(app_root_path, 'resources')
 app_sounds_path = jpath(app_resources_path, 'sounds')
 app_images_path = jpath(app_resources_path, 'images')
 all_templates_path = jpath(app_resources_path, 'templates')
 all_images_path = Config.get('paths', 'images')
 shared_path = Config.get('paths', 'shared')
-plugins_path = Config.get('paths', 'plugins')
 
 # event paths
 event_name = Config.get('event', 'name')

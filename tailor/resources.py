@@ -11,7 +11,7 @@ logger = logging.getLogger('purikura.resources')
 # because i am lazy
 jpath = os.path.join
 
-resource_path = os.path.realpath(os.path.join(__file__, 'resources')
+resource_path = os.path.realpath(os.path.join(__file__, 'resources'))
 
 loaded = False
 sounds = None

@@ -6,9 +6,9 @@ amixer -c 0 set Master 100%
 
 while true
 do
-    python bin/service.py &
+    python service.py &
     sleep 5
-    python bin/kiosk.py &&
+    python kiosk.py &&
     OUT=$?
     killall -9 python
     if [ "$OUT" -eq "0" ]; then
