@@ -137,6 +137,7 @@ class Session:
 
         countdown_delay = Config.getint('camera', 'countdown-delay')
         needed_captures = template.needed_captures(self.template)
+        print needed_captures
         captures = 0
         errors = 0
 

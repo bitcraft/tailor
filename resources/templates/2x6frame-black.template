@@ -1,0 +1,37 @@
+[general]
+dpi = 300
+units = inches
+size = 4,6
+background = black
+
+[00portrait]
+filename = auto
+area1 = .37, .15, 1.27, 1.27
+area2 = 2.37, .15, 1.27, 1.27
+autocrop = true
+filter = toaster
+
+[01portrait]
+filename = auto
+area1 = .37, 1.6, 1.27, 1.27
+area2 = 2.37, 1.6, 1.27, 1.27
+autocrop = true
+filter = toaster
+
+[02portrait]
+filename = auto
+area1 = .37, 3.05, 1.27, 1.27
+area2 = 2.37, 3.05, 1.27, 1.27
+autocrop = true
+filter = toaster
+
+[05portrait]
+filename = auto
+area1 = .37, 4.5, 1.27, 1.27
+area2 = 2.37, 4.5, 1.27, 1.27
+autocrop = true
+filter = toaster
+
+[04label]
+filename = frame-black.png
+position1 = 0,0
