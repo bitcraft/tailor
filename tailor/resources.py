@@ -6,12 +6,10 @@ import os
 import pygame
 import logging
 
-logger = logging.getLogger('purikura.resources')
+logger = logging.getLogger('tailor.resources')
 
 # because i am lazy
 jpath = os.path.join
-
-resource_path = os.path.realpath(os.path.join(__file__, 'resources'))
 
 loaded = False
 sounds = None
@@ -19,7 +17,7 @@ images = None
 music = None
 
 
-def load():
+def load(resource_path):
     global sounds, images, music, loaded
 
     if loaded:

@@ -232,6 +232,7 @@ class PickerScreen(Screen):
 
         # the background has a parallax effect
         self.background.source = image_path('galaxy.jpg')
+        self.background.pos_hint = {'x': 0}
 
         self.locked = False
         self.loaded = set()
@@ -259,7 +260,7 @@ class PickerScreen(Screen):
 
         new = self.get_images() - self.loaded
 
-        for filename in new:
+        for filename in sorted(new):
             self.loaded.add(filename)
             widget = Factory.AsyncImage(
                 source=filename,

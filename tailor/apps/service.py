@@ -19,6 +19,8 @@ import serial
 import traceback
 import threading
 import pygame
+pygame.mixer.init()
+
 import re
 
 from tailor import itailor
@@ -62,11 +64,11 @@ if Config.getboolean('paths', 'make-images-path'):
             os.makedirs(d, 0755)
 
 # mixer must be initialized before sounds will play
-pygame.mixer.init(frequency=Config.getint('sound', 'mixer-frequency'),
-                  buffer=Config.getint('sound', 'mixer-buffer'))
+#pygame.mixer.init(frequency=Config.getint('sound', 'mixer-frequency'),
+#                  buffer=Config.getint('sound', 'mixer-buffer'))
 
 # load all the stuff
-resources.load()
+resources.load(app_resources_path)
 
 # i'm lazy!
 bell0 = resources.sounds['bell0']
