@@ -82,10 +82,6 @@ if __name__ == '__main__':
     camera_lock = threading.Lock()
     queue = queue.Queue(10)
     camera = shutter.Camera()
-    
-    print camera.wait_for_event()
-    print camera.list_files()
-    print camera.summary
 
     thread0 = CaptureThread(queue, camera, camera_lock)
     thread0.daemon = True

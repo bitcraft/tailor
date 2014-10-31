@@ -174,7 +174,6 @@ class PickerScreen(Screen):
 
         # scrollview => slider binding
         def f(slider, widget, value):
-            print "slider", slider, widget, value
             # avoid 'maximum recursion depth exceeded' error
             if value >= 0:
                 slider.value = value

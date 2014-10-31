@@ -63,10 +63,6 @@ if Config.getboolean('paths', 'make-images-path'):
         if not isdir:
             os.makedirs(d, 0755)
 
-# mixer must be initialized before sounds will play
-#pygame.mixer.init(frequency=Config.getint('sound', 'mixer-frequency'),
-#                  buffer=Config.getint('sound', 'mixer-buffer'))
-
 # load all the stuff
 resources.load(app_resources_path)
 
@@ -152,17 +148,8 @@ class Session:
         p = self.plugins
         fc0 = p['FileCopy'].new(originals_path)
         fc1 = p['FileCopy'].new(composites_path)
-        #fc3 = p['FileCopy'].new(thumbs_path)
-        #fc4 = p['FileCopy'].new(details_path)
-        #fc5 = p['FileCopy'].new(template_path)
         spool = p['FileCopy'].new(shared_path)
-
-        #th0 = p['ImageThumb'].new(size='256x256', destination='thumbnail.png')
-        #th1 = p['ImageThumb'].new(size='1024x1024', destination='thumbnail.png')
-
         cm = p['Composer'].new(self.template)
-        #fd0 = p['FileDelete'].new()
-        #fd1 = p['FileDelete'].new()
 
         filenames = list()
 
@@ -193,11 +180,6 @@ class Session:
             fn = filename
             original = yield fc0.process(fn)
             filenames.append(original)
-
-            #thumb = yield th0.process(original)
-            #thumb = yield fc3.process(thumb)
-            #detail = yield th1.process(original)
-            #detail = yield fc4.process(detail)
 
         if arduino:
             #arduino.sendCommand(0x81, 0)

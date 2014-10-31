@@ -30,7 +30,7 @@ class PreviewProducer(object):
 
     @defer.inlineCallbacks
     def resumeProducing(self):
-        #logger.debug('started to send previews')
+        logger.debug('started to send previews')
         self._paused = False
         try:
             data = yield self._camera.download_preview()

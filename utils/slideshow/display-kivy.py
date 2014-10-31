@@ -68,7 +68,6 @@ class SlideshowWidget(FloatLayout):
         self.side = 0
 
     def destroy_widget(self, widget, arg):
-        print arg.texture.size
         self.remove_widget(arg)
 
     def scan(self, dt):
