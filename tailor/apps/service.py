@@ -78,10 +78,10 @@ finished = resources.sounds['finished']
 
 # manage volumes a bit
 bell1.set_volume(bell1.get_volume() * 1.0)
-finished.set_volume(finished.get_volume() * .9)
+finished.set_volume(finished.get_volume() * .6)
 
 in_session = False
-
+arduino = None
 
 def get_class(o):
     name = o.__class__.__name__
@@ -110,6 +110,9 @@ class Session:
 
     def capture(self):
         def shutter(result=None):
+            if arduino:
+                arduino.sendCommand(0x82, 0)
+                arduino.sendCommand(0x82, 1)
             d = self.camera.capture_image()
             return d
 
@@ -118,6 +121,9 @@ class Session:
         d = c.start(interval)
         d = d.addCallback(shutter)
         task.deferLater(reactor, 3 * interval, c.stop)
+        if arduino:
+            arduino.sendCommand(0x81, 0)
+            arduino.sendCommand(0x81, 1)
         return d
 
     @defer.inlineCallbacks
@@ -132,14 +138,13 @@ class Session:
         in_session = True
 
         if arduino:
-            arduino.sendCommand(0x82, 0)
-            arduino.sendCommand(0x82, 1)
+            #arduino.sendCommand(0x82, 0)
+            #arduino.sendCommand(0x82, 1)
             arduino.sendCommand(0x82, 2)
             arduino.sendCommand(0x82, 3)
 
         countdown_delay = Config.getint('camera', 'countdown-delay')
         needed_captures = template.needed_captures(self.template)
-        print needed_captures
         captures = 0
         errors = 0
 
@@ -195,8 +200,8 @@ class Session:
             #detail = yield fc4.process(detail)
 
         if arduino:
-            arduino.sendCommand(0x81, 0)
-            arduino.sendCommand(0x81, 1)
+            #arduino.sendCommand(0x81, 0)
+            #arduino.sendCommand(0x81, 1)
             arduino.sendCommand(0x81, 2)
             arduino.sendCommand(0x81, 3)
 
@@ -283,12 +288,13 @@ class ServoServiceFactory(protocol.ServerFactory):
 
 def new():
     import time
+    global arduino
 
     # turn on all the relays on the arduino
     # the lights are wired on NC, so this turns lights off
     def lights_out():
-        arduino.sendCommand(0x81, 0)
-        arduino.sendCommand(0x81, 1)
+        arduino.sendCommand(0x82, 0)
+        arduino.sendCommand(0x82, 1)
         arduino.sendCommand(0x81, 2)
         arduino.sendCommand(0x81, 3)
 

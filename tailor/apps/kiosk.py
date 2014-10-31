@@ -2,6 +2,7 @@
 """
 Operator's kiosk for managing the photobooth
 """
+import pygame
 import sys
 import os
 
@@ -54,6 +55,7 @@ event_name = pkConfig.get('event', 'name')
 event_images_path = jpath(all_images_path, event_name)
 composites_path = jpath(event_images_path, 'composites')
 styles_path = jpath(app_root_path, 'tailor', 'resources', 'styles')
+app_images_path = jpath(app_root_path, 'resources', 'images')
 paths = ('thumbnails', 'detail', 'originals', 'composites')
 
 kv_files = (
@@ -96,11 +98,11 @@ class KioskApp(App):
 
 
 def new():
-    # if pkConfig.getboolean('display', 'hide-mouse'):
-    #    cursor = pygame.cursors.load_xbm(
-    #        os.path.join(app_images_path, 'blank-cursor.xbm'),
-    #        os.path.join(app_images_path, 'blank-cursor-mask.xbm'))
-    #    pygame.mouse.set_cursor(*cursor)
+    if pkConfig.getboolean('display', 'hide-mouse'):
+       cursor = pygame.cursors.load_xbm(
+           os.path.join(app_images_path, 'blank-cursor.xbm'),
+           os.path.join(app_images_path, 'blank-cursor-mask.xbm'))
+       pygame.mouse.set_cursor(*cursor)
 
     app = KioskApp()
     app.manager.add_widget(CompositePicker(name='compositepicker'))

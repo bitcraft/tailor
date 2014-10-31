@@ -535,6 +535,7 @@ class PickerScreen(Screen):
         # textures must be created in the main thread;
         # this is a limitation in pygame
         texture = Texture.create_from_data(imdata)
+        #texture.flip_horizontal()
 
         if self.preview_widget is None:
             self.tilt = 90
