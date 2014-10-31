@@ -106,17 +106,20 @@ class Session:
 
     def capture(self):
         def shutter(result=None):
+            d = self.camera.capture_image()
+            return d
+
+        def lights_out(result=None):
             if arduino:
                 arduino.sendCommand(0x82, 0)
                 arduino.sendCommand(0x82, 1)
-            d = self.camera.capture_image()
-            return d
 
         interval = Config.getint('camera', 'countdown-interval')
         c = task.LoopingCall(bell0.play)
         d = c.start(interval)
         d = d.addCallback(shutter)
         task.deferLater(reactor, 3 * interval, c.stop)
+        task.deferLater(reactor, 2 * interval, lights_out)
         if arduino:
             arduino.sendCommand(0x81, 0)
             arduino.sendCommand(0x81, 1)

@@ -107,7 +107,8 @@ class PreviewHandler(object):
 
 class ArduinoHandler(object):
     def __init__(self):
-        self.queue = queue.Queue(maxsize=4)
+        self.in_queue = queue.Queue(maxsize=4)
+        self.out_queue = queue.Queue(maxsize=100)
         self.lock = threading.Lock()
         self.thread = None
 
@@ -131,7 +132,7 @@ class ArduinoHandler(object):
             while 1:
                 try:
                     logger.debug('waiting for value...')
-                    _value = self.queue.get(timeout=1)
+                    _value = self.in_queue.get(timeout=1)
                 except queue.Empty:
                     logger.debug('thread timeout')
                     break
@@ -139,7 +140,7 @@ class ArduinoHandler(object):
                     logger.debug('sending %s', str(_value))
                     try:
                         conn.send(str(_value) + '\r\n')
-                        self.queue.task_done()
+                        self.in_queue.task_done()
                     except:
                         break
 
@@ -156,12 +157,12 @@ class ArduinoHandler(object):
 
         try:
             logger.debug('adding value to arduino queue')
-            self.queue.put(value, block=False)
+            self.in_queue.put(value, block=False)
         except queue.Full:
             logger.debug('arduino queue is full')
             try:
-                self.queue.get()
-                self.queue.put(value, block=False)
+                self.in_queue.get()
+                self.in_queue.put(value, block=False)
             except (queue.Full, queue.Empty):
                 logger.debug('got some error with arduino queue')
                 pass
