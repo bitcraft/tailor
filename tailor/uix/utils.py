@@ -40,7 +40,6 @@ class PreviewHandler(object):
     def start(self):
         def func():
             self.running = True
-            interval = pkConfig.getfloat('camera', 'preview-interval')
             queue_put = self.queue.put
             pil_open = PIL_Image.open
 
