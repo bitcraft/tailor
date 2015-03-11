@@ -51,7 +51,7 @@ Config.set('postproc', 'retain_distance',
            pkConfig.getint('kiosk', 'touch-retain-distance'))
 
 # paths
-all_images_path = pkConfig.get('paths', 'images')
+all_images_path = os.path.abspath(pkConfig.get('paths', 'images'))
 event_name = pkConfig.get('event', 'name')
 event_images_path = jpath(all_images_path, event_name)
 composites_path = jpath(event_images_path, 'composites')
@@ -84,6 +84,7 @@ class CompositePicker(PickerScreen):
 
     @staticmethod
     def get_images():
+        print composites_path
         return set(glob.glob('{0}/*.png'.format(composites_path)))
 
 
@@ -108,4 +109,3 @@ def new():
     app = KioskApp()
     app.manager.add_widget(CompositePicker(name='compositepicker'))
     return app
-
