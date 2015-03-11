@@ -62,7 +62,7 @@ class PickerScreen(Screen):
         # the grid will expand horizontally as items are added
         def f(widget, value):
             self.grid.width = value
-            #self.slider.max = value
+            # self.slider.max = value
 
         self.grid.bind(minimum_width=f)
 
@@ -122,7 +122,7 @@ class PickerScreen(Screen):
         self.focus_widget.bind(on_touch_down=self.on_image_touch)
         self.add_widget(self.focus_widget)
 
-        #   P R E V I E W   B U T T O N
+        # P R E V I E W   B U T T O N
         # this button is used to toggle the large camera preview window
         def f(widget):
             if not self.locked:
@@ -133,7 +133,7 @@ class PickerScreen(Screen):
 
         self.preview_button.bind(on_press=f)
 
-        #   P R E V I E W   L A B E L
+        # P R E V I E W   L A B E L
         # the preview label is used with the focus widget is open
         self.preview_label = Factory.PreviewLabel(pos=(-1000, -1000))
         self.view.add_widget(self.preview_label)
@@ -213,7 +213,7 @@ class PickerScreen(Screen):
         logger.debug('transitioning state %s', transition)
 
         # ====================================================================
-        #  F O C U S  =>  N O R M A L
+        # F O C U S  =>  N O R M A L
         if transition == ('focus', 'normal'):
             self.scrollview_hidden = False
 
@@ -273,7 +273,7 @@ class PickerScreen(Screen):
             self.locked = True
             Clock.schedule_once(self.unlock, .5)
 
-        #=====================================================================
+        # =====================================================================
         #  N O R M A L  =>  F O C U S
         elif transition == ('normal', 'focus'):
             widget = kwargs['widget']
@@ -443,7 +443,7 @@ class PickerScreen(Screen):
         # textures must be created in the main thread;
         # this is a limitation in pygame
         texture = Texture.create_from_data(imdata)
-        #texture.flip_horizontal()
+        # texture.flip_horizontal()
 
         if self.preview_widget is None:
             self.tilt = 90

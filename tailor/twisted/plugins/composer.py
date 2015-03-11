@@ -15,12 +15,14 @@ how things generally work:
     the composer reads a template
     generate a new config for each image in the template
     using a pool of workers that process each image
-    when workers are finshed, layer images for final output
+    when workers are finished, layer images for final output
 """
 
 # ===========================================================
 # Image manipulation functions
 #
+
+
 def autocrop(image, area):
     iw, ih = image.size
     x, y, w, h = area
@@ -93,7 +95,7 @@ def image_processor(config):
         try:
             image = cache[(w, h)]
         except KeyError:
-            # bug: filters will be out of order, resulting in unpredictable results
+            # bug: filters will be out of order
             image = master.copy()
 
             for key in config.keys():

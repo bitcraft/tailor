@@ -34,7 +34,6 @@ def toaster(image, area):
     image.format = os.path.splitext(scratch)[1][1:]
     image.save(filename=scratch)
     image.close()
-    image = None
     scratch = toaster(scratch, sw, h)
     return scratch
 
