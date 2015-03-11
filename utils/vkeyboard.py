@@ -503,7 +503,7 @@ class VKeyboard(Scatter):
         # It's hard to explain, but do a scheme on a paper, write all
         # the vector i'm calculating, and you'll understand. :)
         diff2 = Vector(self.x + self.width / 2., self.y + self.height) - \
-            Vector(self.to_parent(self.width / 2., self.height))
+                Vector(self.to_parent(self.width / 2., self.height))
         diff -= diff2
 
         # now we have a good "diff", set it as a pos.
@@ -638,8 +638,8 @@ class VKeyboard(Scatter):
         with self.background_key_layer:
             for line_nb in range(1, layout_rows + 1):
                 for pos, size in layout_geometry['LINE_%d' % line_nb]:
-                        BorderImage(texture=texture, pos=pos, size=size,
-                                    border=self.key_border)
+                    BorderImage(texture=texture, pos=pos, size=size,
+                                border=self.key_border)
 
         # then draw the text
         # calculate font_size
@@ -800,5 +800,6 @@ class VKeyboard(Scatter):
 
 if __name__ == '__main__':
     from kivy.base import runTouchApp
+
     vk = VKeyboard(layout='azerty')
     runTouchApp(vk)

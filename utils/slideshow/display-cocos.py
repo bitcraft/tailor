@@ -20,7 +20,7 @@ pyglet.resource.reindex()
 window = None
 
 event = 'test'
-#event_name = 'kali-joshua'
+# event_name = 'kali-joshua'
 
 
 settings = {}

@@ -21,17 +21,20 @@ def handle_data(data):
     global key
     if key is None:
         key = data
-        print 'got key!'
+        print
+        'got key!'
     else:
         if key == data:
-            print 'match!'
+            print
+            'match!'
         else:
-            print 'mismatch!'
+            print
+            'mismatch!'
 
 
 if __name__ == '__main__':
     device = '/dev/input/by-id/usb-GIGATEK_PROMAG_Programmable_Keyboard-event-kbd'
-    #/dev/input/by-id/usb-GIGATEK_PROMAG_Programmable_Keyboard-event-if01
+    # /dev/input/by-id/usb-GIGATEK_PROMAG_Programmable_Keyboard-event-if01
 
     #p = Popen(['myprogram.exe'], stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
     reader = open(device)

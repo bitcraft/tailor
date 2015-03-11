@@ -44,7 +44,7 @@ def load(resource_path):
             path = jpath(resource_path, 'images', filename)
             logger.info("loading %s", path)
             # image = pygame.image.load(path)
-            #images[name] = image
+            # images[name] = image
 
     if Config.has_section('music-files'):
         for name, filename in Config.items('music-files'):

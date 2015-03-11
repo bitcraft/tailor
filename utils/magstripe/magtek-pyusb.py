@@ -138,4 +138,5 @@ class GigaTekReader(object):
 if __name__ == '__main__':
     r = GigaTekReader('starbucks')
     while 1:
-        print r.read_swipe()
+        print
+        r.read_swipe()

@@ -4,7 +4,8 @@ import sys
 
 def handle(decode):
     decode = decode.strip()
-    print decode
+    print
+    decode
     sys.stdout.flush()
 
 

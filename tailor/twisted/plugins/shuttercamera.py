@@ -58,7 +58,7 @@ class ServePreviews(basic.Int32StringReceiver):
         p.resumeProducing()
 
     def connectionLost(self, reason):
-        #logger.debug('lost connection')
+        # logger.debug('lost connection')
         pass
 
     def sendString(self, data):

@@ -15,6 +15,7 @@ def reload(path):
     logger.debug('loading configuration: %s', path)
     Config.read(path)
 
+
 reload(
     os.path.realpath(
         os.path.join(__file__, '..', '..', 'config')

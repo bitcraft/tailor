@@ -23,7 +23,7 @@ def thumbnailer(queue, settings):
 
         image = Image.open(filename)
         image = image.transpose(Image.FLIP_TOP_BOTTOM)
-        #image.thumbnail(settings['thumbnail_size'], Image.ANTIALIAS)
+        # image.thumbnail(settings['thumbnail_size'], Image.ANTIALIAS)
         image = ImageOps.expand(image, border=12, fill=(255, 255, 255))
 
         w, h = image.size

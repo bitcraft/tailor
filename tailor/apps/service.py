@@ -19,6 +19,7 @@ import serial
 import traceback
 import threading
 import pygame
+
 pygame.mixer.init()
 
 import re
@@ -29,6 +30,7 @@ from tailor import template
 from tailor.config import Config
 
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("purikura.booth")
 
@@ -78,6 +80,7 @@ finished.set_volume(finished.get_volume() * .6)
 
 in_session = False
 arduino = None
+
 
 def get_class(o):
     name = o.__class__.__name__
@@ -137,7 +140,7 @@ class Session:
         in_session = True
 
         if arduino:
-            #arduino.sendCommand(0x82, 0)
+            # arduino.sendCommand(0x82, 0)
             #arduino.sendCommand(0x82, 1)
             arduino.sendCommand(0x82, 2)
             arduino.sendCommand(0x82, 3)
@@ -185,7 +188,7 @@ class Session:
             filenames.append(original)
 
         if arduino:
-            #arduino.sendCommand(0x81, 0)
+            # arduino.sendCommand(0x81, 0)
             #arduino.sendCommand(0x81, 1)
             arduino.sendCommand(0x81, 2)
             arduino.sendCommand(0x81, 3)
@@ -273,6 +276,7 @@ class ServoServiceFactory(protocol.ServerFactory):
 
 def new():
     import time
+
     global arduino
 
     # turn on all the relays on the arduino

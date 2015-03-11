@@ -31,7 +31,7 @@ resource_path = os.path.realpath(jpath(__file__, '..', '..', 'resources'))
 image_path = partial(jpath, resource_path, 'images')
 
 # for template source filename mangling
-#app.get_real_source(self.new_source_prop)
+# app.get_real_source(self.new_source_prop)
 
 #class MyScrollEffect(DampedScrollEffect):
 #    round_value = BooleanProperty(False)
@@ -159,6 +159,7 @@ class PickerScreen(Screen):
         def f(widget, value):
             self.grid.width = value
             #self.slider.max = value
+
         self.grid.bind(minimum_width=f)
 
         # TODO: eventually make this related to the screen width, maybe
@@ -170,6 +171,7 @@ class PickerScreen(Screen):
         def f(scrollview, widget, value):
             # not sure why value has to be negated here
             scrollview.effect_x.value = -value * self.grid.minimum_width
+
         self.slider.bind(value=partial(f, self.scrollview))
 
         # scrollview => slider binding
@@ -177,12 +179,14 @@ class PickerScreen(Screen):
             # avoid 'maximum recursion depth exceeded' error
             if value >= 0:
                 slider.value = value
+
         self.scrollview.effect_x.bind(value=partial(f, self.slider))
 
         # background parallax effect
         def f(widget, value):
             if not self.locked:
                 self.background.pos_hint = {'x': -value - .3, 'y': -.25}
+
         self.scrollview.bind(scroll_x=f)
 
         # kivy's scroll effect doesn't seem to work with a huge scrollview
@@ -222,6 +226,7 @@ class PickerScreen(Screen):
                     self.change_state('preview')
                 elif self.state == 'preview':
                     self.change_state('normal')
+
         self.preview_button.bind(on_press=f)
 
         #   P R E V I E W   L A B E L
