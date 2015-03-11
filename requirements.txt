@@ -1,0 +1,4 @@
+kivy
+six
+twisted
+pillow
