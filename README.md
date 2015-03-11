@@ -31,7 +31,7 @@ Webcams are not supported at this time.
 Interaction
 -----------
 
-PURIKURA supports the arduino for interfacing with physical buttons over USB
+tailor supports the arduino for interfacing with physical buttons over USB
 and also has a smartphone-inspired touch interface.  For computer systems
 without a touch screen monitor, the mouse can be used.
 

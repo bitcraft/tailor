@@ -15,7 +15,7 @@ import random, glob, os
 from multiprocessing import Process, Queue
 import subprocess
 
-os.chdir('/home/mjolnir/git/PURIKURA/slideshow/')
+os.chdir('/home/mjolnir/git/tailor/slideshow/')
 
 target_size = 800, 800
 event_name = 'gunnar-dolly'

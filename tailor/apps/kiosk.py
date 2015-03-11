@@ -25,7 +25,7 @@ from kivy.uix.screenmanager import ScreenManager
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("purikura.kiosk-loader")
+logger = logging.getLogger("tailor.kiosk-loader")
 
 DEFAULT_VKEYBOARD_LAYOUT = 'email'
 

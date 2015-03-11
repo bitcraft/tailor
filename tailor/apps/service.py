@@ -32,7 +32,7 @@ from tailor.config import Config
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("purikura.booth")
+logger = logging.getLogger("tailor.booth")
 
 # because i hate typing
 jpath = os.path.join

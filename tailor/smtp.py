@@ -14,7 +14,7 @@ class SenderThread(threading.Thread):
     def run(self):
         sender = pkConfig.get('email', 'sender')
         subject = pkConfig.get('email', 'subject')
-        auth_file = '/home/mjolnir/git/PURIKURA/secrets'
+        auth_file = '/home/mjolnir/git/tailor/secrets'
 
         msg = email.MIMEMultipart.MIMEMultipart('mixed')
         msg['subject'] = subject

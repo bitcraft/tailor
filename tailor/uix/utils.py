@@ -10,7 +10,7 @@ import logging
 from ..config import Config as pkConfig
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('purikura.utils')
+logger = logging.getLogger('tailor.utils')
 
 
 # hack search method because one is not included with kivy

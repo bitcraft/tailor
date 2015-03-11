@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append('/home/mjolnir/git/PURIKURA')
+sys.path.append('/home/mjolnir/git/tailor')
 
 import os
 

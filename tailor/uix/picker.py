@@ -23,7 +23,7 @@ from .utils import PreviewHandler
 from .utils import ArduinoHandler
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('purikura.picker')
+logger = logging.getLogger('tailor.picker')
 
 OFFSET = 172
 jpath = os.path.join

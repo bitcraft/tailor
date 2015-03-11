@@ -13,7 +13,7 @@ import pyglet
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils.slideshow.worker import *
 
-os.chdir('/home/mjolnir/git/PURIKURA/slideshow')
+os.chdir('/home/mjolnir/git/tailor/slideshow')
 
 pyglet.resource.reindex()
 

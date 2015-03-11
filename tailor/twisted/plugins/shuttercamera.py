@@ -14,7 +14,7 @@ import shutter
 
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("purikura.shuttercamera")
+logger = logging.getLogger("tailor.shuttercamera")
 
 
 class PreviewProducer(object):
