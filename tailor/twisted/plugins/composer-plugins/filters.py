@@ -81,7 +81,7 @@ class Toaster(object):
         execute(cmd)
 
         # vignette kungfu
-        #scratch = vignette(scratch, w, h, 'none', 'LavenderBlush3')
+        # scratch = vignette(scratch, w, h, 'none', 'LavenderBlush3')
         #scratch = vignette(scratch, w, h, '#FFD6C2', 'none')
         #scratch = vignette(scratch, w, h, '#E3C2B8', 'none')
         scratch = vignette(scratch, w, h, '#b3a298', 'none')

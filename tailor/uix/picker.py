@@ -33,7 +33,7 @@ image_path = partial(jpath, resource_path, 'images')
 # for template source filename mangling
 # app.get_real_source(self.new_source_prop)
 
-#class MyScrollEffect(DampedScrollEffect):
+# class MyScrollEffect(DampedScrollEffect):
 #    round_value = BooleanProperty(False)
 
 

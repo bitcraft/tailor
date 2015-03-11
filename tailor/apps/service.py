@@ -141,7 +141,7 @@ class Session:
 
         if arduino:
             # arduino.sendCommand(0x82, 0)
-            #arduino.sendCommand(0x82, 1)
+            # arduino.sendCommand(0x82, 1)
             arduino.sendCommand(0x82, 2)
             arduino.sendCommand(0x82, 3)
 
@@ -189,7 +189,7 @@ class Session:
 
         if arduino:
             # arduino.sendCommand(0x81, 0)
-            #arduino.sendCommand(0x81, 1)
+            # arduino.sendCommand(0x81, 1)
             arduino.sendCommand(0x81, 2)
             arduino.sendCommand(0x81, 3)
 
