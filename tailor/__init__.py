@@ -1,4 +1,4 @@
-import smtp
-import config
-import uix
-import apps
+from . import smtp
+from . import config
+from . import uix
+from . import apps

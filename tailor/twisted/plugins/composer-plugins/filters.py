@@ -68,7 +68,7 @@ class Toaster(object):
 
         # colortone
         # scratch = colortone(filename, '#330000', 100, 0, output=scratch)
-        #scratch = colortone(filename, '#220000', 100, 0, output=scratch)
+        # scratch = colortone(filename, '#220000', 100, 0, output=scratch)
         scratch = colortone(filename, '#110000', 105, 0, output=scratch)
 
         brightness = Config.get('postprocessing', 'brightness')

@@ -73,7 +73,7 @@ def quit_pressed():
 
 
 if __name__ == '__main__':
-    pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+    pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     main_surface = pygame.display.get_surface()
 
     pygame.mouse.set_visible(False)

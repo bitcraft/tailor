@@ -11,7 +11,7 @@ features are supported on each platform now.  Currently, full features are
 available on OS X and Linux;  Camera capture is currently unavailable on
 Windows, but it is being worked on.
 
-I use PURIKURA for my professional photobooth service.
+I use Tailor for my professional photobooth service.
 
 
 Cameras
@@ -20,6 +20,8 @@ Cameras
 Any camera supported by libgphoto2 is supported by this software.  An up-to-date
 list is available on their website.  Live-view is functional, and can be used
 to preview photos before they are taken.
+
+https://github.com/bitcraft/shutter
 
 http://www.gphoto.org/proj/libgphoto2/support.php
 
@@ -71,15 +73,26 @@ Requirements
 ------------
 
 This is a general list of software requirements.  Certain functions of this
-software may require additional dependancies.
+software may require additional dependencies.
 
 -  Debian Linux, OS X 10.x, Windows 7+
--  Python 2.7
+-  Shutter (https://github.com/bitcraft/shutter)
+-  Python 2.7 or 3.4
 -  Twisted
--  Kivy
+-  Kivy 1.8+
+-  Pygame
 
 
-All files under the 'tailor' directory are copyright Leif Theden, 2012-2014
+Windows OS Support
+------------------
+
+I'm working towards support of Windows OS.
+
+Kivy and pygame can be downloaded from here:
+http://www.lfd.uci.edu/~gohlke/pythonlibs/
+
+
+All files under the 'tailor' directory are copyright Leif Theden, 2012-2015
 and licensed under the GPLv3.
 
 All other code may or not be GPLv3, please check the source of each file.

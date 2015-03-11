@@ -1,0 +1,5 @@
+# ensure line endings are consistent across platfors
+# required for kivy, as it cannot handle clrf
+# windows users will need a unix line ending aware editor
+* text=auto
+* text eol=lf

@@ -23,6 +23,7 @@ from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager
 
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("purikura.kiosk-loader")
 
@@ -99,10 +100,10 @@ class KioskApp(App):
 
 def new():
     if pkConfig.getboolean('display', 'hide-mouse'):
-       cursor = pygame.cursors.load_xbm(
-           os.path.join(app_images_path, 'blank-cursor.xbm'),
-           os.path.join(app_images_path, 'blank-cursor-mask.xbm'))
-       pygame.mouse.set_cursor(*cursor)
+        cursor = pygame.cursors.load_xbm(
+            os.path.join(app_images_path, 'blank-cursor.xbm'),
+            os.path.join(app_images_path, 'blank-cursor-mask.xbm'))
+        pygame.mouse.set_cursor(*cursor)
 
     app = KioskApp()
     app.manager.add_widget(CompositePicker(name='compositepicker'))

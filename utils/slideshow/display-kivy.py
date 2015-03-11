@@ -36,7 +36,7 @@ settings['originals'] = os.path.join('/', 'home', 'mjolnir', 'events', \
 
 
 
-#Builder.load_file('display-kivy.kv')
+# Builder.load_file('display-kivy.kv')
 
 Loader.num_workers = 3
 Loader.max_upload_per_frame = 2
