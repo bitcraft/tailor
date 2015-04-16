@@ -7,14 +7,14 @@ from zope.interface import implements
 from tailor import itailor
 
 
-class ImageTweetFactory(object):
+class ImageTweetFactory:
     implements(IPlugin)
 
     def new(self, *args, **kwargs):
         return ImageTweet(*args, **kwargs)
 
 
-class ImageTweet(object):
+class ImageTweet:
     implements(itailor.IFileOp)
 
     def __init__(self):

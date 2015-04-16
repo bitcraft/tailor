@@ -6,14 +6,14 @@ from zope.interface import implements
 from tailor import itailor
 
 
-class FileDelete(object):
+class FileDelete:
     implements(itailor.IFileOp)
 
     def process(self, msg, sender=None):
         return threads.deferToThread(os.unlink, msg)
 
 
-class FileDeleteFactory(object):
+class FileDeleteFactory:
     implements(IPlugin, itailor.iTailorPlugin)
     __plugin__ = FileDelete
 

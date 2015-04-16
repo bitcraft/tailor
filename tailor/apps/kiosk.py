@@ -2,32 +2,27 @@
 """
 Operator's kiosk for managing the photobooth
 """
-import sys
 import os
-
-import pygame
-
-
-# make kiosk work without installing tailor into python
-app_root_path = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
-sys.path.append(app_root_path)
-sys.path.append(os.path.join(app_root_path, 'tailor'))
-
 from functools import partial
-import glob
-
-from tailor.config import Config as pkConfig
-from tailor.uix.picker import PickerScreen
+import logging
 
 from kivy.config import Config
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager
 
-import logging
+from tailor.config import Config as pkConfig
+from tailor.uix.picker import PickerScreen
+
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.kiosk-loader")
+
+# make kiosk work without installing tailor into python
+app_root_path = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
+# sys.path.append(app_root_path)
+# sys.path.append(os.path.join(app_root_path, 'tailor'))
+
 
 DEFAULT_VKEYBOARD_LAYOUT = 'email'
 
@@ -61,33 +56,15 @@ styles_path = jpath(app_root_path, 'tailor', 'resources', 'styles')
 app_images_path = jpath(app_root_path, 'resources', 'images')
 paths = ('thumbnails', 'detail', 'originals', 'composites')
 
+
 kv_files = (
-    ('default', (
-        'kiosk.kv',
-    ),
-     ),
+    ('default', ('kiosk.kv', ), ),
 )
 
 for module, filenames in kv_files:
     func = partial(jpath, styles_path, module)
     for filename in filenames:
         Builder.load_file(func(filename))
-
-
-class CompositePicker(PickerScreen):
-    """
-    Image browser that displays composites
-    """
-
-    @staticmethod
-    def get_paths():
-        return composites_path, composites_path, \
-               composites_path, composites_path
-
-    @staticmethod
-    def get_images():
-        print(composites_path)
-        return set(glob.glob('{0}/*.png'.format(composites_path)))
 
 
 class Manager(ScreenManager):
@@ -102,6 +79,8 @@ class KioskApp(App):
 
 
 def new():
+    import pygame
+
     if pkConfig.getboolean('display', 'hide-mouse'):
         cursor = pygame.cursors.load_xbm(
             os.path.join(app_images_path, 'blank-cursor.xbm'),
@@ -109,5 +88,5 @@ def new():
         pygame.mouse.set_cursor(*cursor)
 
     app = KioskApp()
-    app.manager.add_widget(CompositePicker(name='compositepicker'))
+    app.manager.add_widget(PickerScreen(name='compositepicker'))
     return app

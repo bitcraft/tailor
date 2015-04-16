@@ -10,7 +10,7 @@ def execute(cmd):
     subprocess.call(cmd.split())
 
 
-class ColorTone(object):
+class ColorTone:
     implements(itailor.IFileOp)
 
     @staticmethod
@@ -35,7 +35,7 @@ class ColorTone(object):
         return output
 
 
-class Vignette(object):
+class Vignette:
     implements(itailor.IFileOp)
 
     @staticmethod
@@ -55,7 +55,7 @@ class Vignette(object):
         return output
 
 
-class Toaster(object):
+class Toaster:
     implements(itailor.IFileOp)
 
     @staticmethod

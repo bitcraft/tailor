@@ -6,14 +6,14 @@ from tailor import itailor
 import watchdog
 
 
-class FileWatcherFactory(object):
+class FileWatcherFactory:
     implements(IPlugin)
 
     def new(self, *args, **kwargs):
         return FileWatcher(*args, **kwargs)
 
 
-class FileWatcher(object):
+class FileWatcher:
     """
     Simple watcher that uses a glob to track new files
     This class will publish paths to new images

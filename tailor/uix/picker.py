@@ -1,6 +1,8 @@
 from functools import partial
+import glob
 import os
 import logging
+import queue
 
 from kivy.animation import Animation
 from kivy.clock import Clock
@@ -9,10 +11,9 @@ from kivy.factory import Factory
 from kivy.loader import Loader
 from kivy.uix.image import Image
 from kivy.uix.screenmanager import Screen
-
 from kivy.graphics.texture import Texture
 from kivy.properties import *
-import queue
+
 from ..config import Config as pkConfig
 from .sharing import SharingControls
 from .utils import search
@@ -176,6 +177,7 @@ class PickerScreen(Screen):
             widget.bind(on_touch_down=self.on_image_touch)
             self.grid.add_widget(widget)
 
+        # scroll to edge
         if new and self.scrollview.effect_x is not None:
             self.loaded |= new
             Animation(
@@ -346,7 +348,7 @@ class PickerScreen(Screen):
             self.locked = True
             Clock.schedule_once(self.unlock, .5)
 
-        #=====================================================================
+        # =====================================================================
         #  N O R M A L  =>  P R E V I E W
         elif transition == ('normal', 'preview'):
             self.scrollview_hidden = True
@@ -361,7 +363,7 @@ class PickerScreen(Screen):
             # show the camera preview
             ani = Animation(
                 size_hint=(1, 1),
-                #pos_hint={'x': 0, 'y': 1},
+                # pos_hint={'x': 0, 'y': 1},
                 x=0,
                 y=0,
                 t='in_out_quad',
@@ -392,7 +394,7 @@ class PickerScreen(Screen):
             interval = pkConfig.getfloat('camera', 'preview-interval')
             Clock.schedule_interval(self.update_preview, interval)
 
-        #=====================================================================
+        # =====================================================================
         #  P R E V I E W  =>  N O R M A L
         elif transition == ('preview', 'normal'):
             self.scrollview_hidden = False
@@ -468,3 +470,11 @@ class PickerScreen(Screen):
             self.view.add_widget(self.preview_widget)
         else:
             self.preview_widget.texture = texture
+
+    @staticmethod
+    def get_paths():
+        return composites_path, composites_path, composites_path, composites_path
+
+    @staticmethod
+    def get_images():
+        return set(glob.glob('{0}/*.png'.format(composites_path)))

@@ -5,7 +5,7 @@ graph and nodes for plugin/workflow system
 """
 
 
-class Graph(object):
+class Graph:
     def __init__(self):
         self._graph = defaultdict(list)
 

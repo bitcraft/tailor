@@ -112,7 +112,7 @@ def image_processor(config):
     return config, images
 
 
-class Composer(object):
+class Composer:
     """
     uses templates and images to create print layouts
     """
@@ -207,7 +207,7 @@ class Composer(object):
             return self.compose()
 
 
-class ComposerFactory(object):
+class ComposerFactory:
     implements(IPlugin, itailor.iTailorPlugin)
     __plugin__ = Composer
 

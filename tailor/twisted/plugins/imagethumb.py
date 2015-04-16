@@ -6,7 +6,7 @@ from zope.interface import implements
 from tailor import itailor
 
 
-class ImageThumb(object):
+class ImageThumb:
     """
     simple thumbnailer.
 
@@ -31,7 +31,7 @@ class ImageThumb(object):
         return threads.deferToThread(self.thumbnail, filename)
 
 
-class ImageThumbFactory(object):
+class ImageThumbFactory:
     implements(IPlugin, itailor.iTailorPlugin)
     __plugin__ = ImageThumb
 

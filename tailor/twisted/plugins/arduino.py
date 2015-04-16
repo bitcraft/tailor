@@ -4,5 +4,5 @@ from zope.interface import implements
 from tailor import itailor
 
 
-class Arduino(object):
+class Arduino:
     implements(IPlugin, itailor.IFileOp)

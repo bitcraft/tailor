@@ -62,7 +62,7 @@ def map_character(c):
     return key_pages[c]
 
 
-class GigaTekReader(object):
+class GigaTekReader:
     def __init__(self, card_type=None):
         if card_type == None:
             self._expected_length = 167

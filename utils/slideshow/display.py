@@ -48,7 +48,7 @@ def load_resize_and_convert(queue, filename):
     queue.put(image)
 
 
-class TableclothDisplay(object):
+class TableclothDisplay:
     """
     class for showing images that fall onto a scrolling table cloth
     """

@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.shuttercamera")
 
 
-class PreviewProducer(object):
+class PreviewProducer:
     implements(interfaces.IPushProducer)
 
     def __init__(self, proto, camera):
@@ -64,7 +64,7 @@ class ServePreviews(basic.Int32StringReceiver):
         self.transport.write(pack(self.fmt, len(data)) + data)
 
 
-class ShutterCamera(object):
+class ShutterCamera:
     implements(itailor.ICamera)
 
     def __init__(self, *args, **kwargs):
@@ -117,7 +117,7 @@ class ShutterCamera(object):
         return threads.deferToThread(capture)
 
 
-class ShutterCameraFactory(object):
+class ShutterCameraFactory:
     implements(IPlugin, itailor.iTailorPlugin)
     __plugin__ = ShutterCamera
 

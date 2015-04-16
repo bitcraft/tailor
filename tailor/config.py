@@ -3,7 +3,7 @@ __all__ = ('Config',)
 import os.path
 import configparser
 import logging
-import imp
+# import importlib
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -18,8 +18,5 @@ def reload(path):
     Config.read(path)
 
 
-imp.reload(
-    os.path.realpath(
-        os.path.join(__file__, '..', '..', 'config')
-    )
-)
+reload(os.path.join(os.path.dirname(__file__), '..', 'config'))
+# importlib.import_module('config')

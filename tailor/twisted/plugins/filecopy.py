@@ -7,7 +7,7 @@ from zope.interface import implements
 from tailor import itailor
 
 
-class FileCopy(object):
+class FileCopy:
     implements(itailor.IFileOp)
 
     def __init__(self, dest, **kwargs):
@@ -34,7 +34,7 @@ class FileCopy(object):
         return threads.deferToThread(func)
 
 
-class FileCopyFactory(object):
+class FileCopyFactory:
     implements(IPlugin, itailor.iTailorPlugin)
     __plugin__ = FileCopy
 

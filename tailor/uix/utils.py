@@ -32,7 +32,7 @@ def search(root, uniqueid):
     return None
 
 
-class PreviewHandler(object):
+class PreviewHandler:
     def __init__(self):
         self.queue = queue.Queue(maxsize=10)
         self.thread = None
@@ -106,7 +106,7 @@ class PreviewHandler(object):
             self.running = False
 
 
-class ArduinoHandler(object):
+class ArduinoHandler:
     def __init__(self):
         self.in_queue = queue.Queue(maxsize=4)
         self.out_queue = queue.Queue(maxsize=100)

@@ -6,7 +6,7 @@ from tailor import itailor
 import subprocess32
 
 
-class FileSpool(object):
+class FileSpool:
     implements(itailor.IFileOp)
 
     def __init__(self):
@@ -17,7 +17,7 @@ class FileSpool(object):
         return threads.deferToThread(subprocess32.call, cmd)
 
 
-class FileSpoolFactory(object):
+class FileSpoolFactory:
     implements(IPlugin, itailor.iTailorPlugin)
     __plugin__ = FileSpool
 

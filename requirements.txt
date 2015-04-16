@@ -2,3 +2,4 @@ kivy
 twisted
 pillow
 shutter
+yapsy
