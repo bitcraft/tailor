@@ -1,10 +1,11 @@
 __all__ = ('sounds', 'images', 'music', 'load', 'loaded')
 
-from tailor.config import Config
-
 import os
-import pygame
 import logging
+
+import pygame
+
+from tailor.config import Config
 
 logger = logging.getLogger('tailor.resources')
 

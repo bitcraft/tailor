@@ -1,5 +1,4 @@
 from zope.interface import Interface, Attribute
-from .twisted.plugin import IPlugin
 
 
 class iTailorPlugin(Interface):

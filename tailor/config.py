@@ -1,9 +1,11 @@
 __all__ = ('Config',)
 
-from six.moves import configparser
 import os.path
 import logging
 import imp
+
+from six.moves import configparser
+
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.config')

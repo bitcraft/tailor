@@ -1,13 +1,14 @@
-from kivy.core.image import ImageData
-from PIL import Image as PIL_Image
-from six.moves import queue
-from six.moves import cStringIO
-
 import socket
 import threading
 import logging
 
+from kivy.core.image import ImageData
+from PIL import Image as PIL_Image
+
+from six.moves import queue
+from six.moves import cStringIO
 from ..config import Config as pkConfig
+
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.utils')

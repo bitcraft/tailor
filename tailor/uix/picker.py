@@ -1,25 +1,25 @@
-from kivy.animation import Animation
-from kivy.clock import Clock
-from kivy.core.image import Image as CoreImage
-from kivy.graphics.texture import Texture
-from kivy.factory import Factory
-from kivy.loader import Loader
-from kivy.properties import *
-
-from kivy.uix.image import Image
-from kivy.uix.screenmanager import Screen
-
 from functools import partial
-from six.moves import queue
 import os
 import logging
 
+from kivy.animation import Animation
+from kivy.clock import Clock
+from kivy.core.image import Image as CoreImage
+from kivy.factory import Factory
+from kivy.loader import Loader
+from kivy.uix.image import Image
+from kivy.uix.screenmanager import Screen
+
+from kivy.graphics.texture import Texture
+from kivy.properties import *
+from six.moves import queue
 from ..config import Config as pkConfig
 from .sharing import SharingControls
 from .utils import search
 from .effects import TailorScrollEffect
 from .utils import PreviewHandler
 from .utils import ArduinoHandler
+
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.picker')

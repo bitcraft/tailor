@@ -1,10 +1,10 @@
+from PIL import Image
+
 from twisted.plugin import IPlugin
 from twisted.internet import defer
 from twisted.internet import threads
-
 from zope.interface import implements
 from tailor import itailor
-from PIL import Image
 
 
 """

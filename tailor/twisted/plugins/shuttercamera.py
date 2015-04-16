@@ -7,7 +7,6 @@ from twisted.internet import defer
 from twisted.internet import interfaces
 from twisted.internet import threads
 from twisted.protocols import basic
-
 from zope.interface import implements
 from tailor import itailor
 import shutter

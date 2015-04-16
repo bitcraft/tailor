@@ -1,7 +1,6 @@
 import shutil
 from functools import partial
 
-from kivy.uix.accordion import Accordion
 from kivy.uix.accordion import AccordionItem
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
@@ -10,9 +9,9 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 
 from kivy.properties import *
-
 from ..smtp import SenderThread
 from ..config import Config as pkConfig
+
 
 MAXIMUM_PRINTS = pkConfig.getint('kiosk', 'max-prints')
 

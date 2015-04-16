@@ -3,7 +3,6 @@ import shutil
 
 from twisted.plugin import IPlugin
 from twisted.internet import threads
-
 from zope.interface import implements
 from tailor import itailor
 

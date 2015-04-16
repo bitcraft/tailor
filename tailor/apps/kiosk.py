@@ -2,9 +2,11 @@
 """
 Operator's kiosk for managing the photobooth
 """
-import pygame
 import sys
 import os
+
+import pygame
+
 
 # make kiosk work without installing tailor into python
 app_root_path = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
@@ -63,7 +65,7 @@ kv_files = (
     ('default', (
         'kiosk.kv',
     ),
-    ),
+     ),
 )
 
 for module, filenames in kv_files:
