@@ -67,7 +67,7 @@ def image_processor(task_queue, finished_queue, global_config):
     # checked here.  each area key can be filtered, cropped, and is scaled
     # to fit into each area/
 
-    for area in (i for i in config.keys() if i[:4].lower() == 'area'):
+    for area in (i for i in list(config.keys()) if i[:4].lower() == 'area'):
         area = tuple(float(i) for i in config['area'].split(','))
 
         if units == 'pixels':
@@ -89,7 +89,7 @@ def image_processor(task_queue, finished_queue, global_config):
         del temp_image
 
         # bug: filters will be out of order, resulting in unpredictable results
-        for key in config.keys():
+        for key in list(config.keys()):
             try:
                 filters[key](image, (x, y, w, h))
             except KeyError:
@@ -102,7 +102,7 @@ def image_processor(task_queue, finished_queue, global_config):
     # the position keyword can be used if the target file is just positioned,
     # but not scaled.
 
-    for pos in (i for i in config.keys() if i[:8].lower() == 'position'):
+    for pos in (i for i in list(config.keys()) if i[:8].lower() == 'position'):
         pos = image_config[pos]
 
         if units == 'pixels':

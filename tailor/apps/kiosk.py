@@ -84,7 +84,7 @@ class CompositePicker(PickerScreen):
 
     @staticmethod
     def get_images():
-        print composites_path
+        print(composites_path)
         return set(glob.glob('{0}/*.png'.format(composites_path)))
 
 

@@ -98,7 +98,7 @@ def image_processor(config):
             # bug: filters will be out of order
             image = master.copy()
 
-            for key in config.keys():
+            for key in list(config.keys()):
                 try:
                     image = filters[key](image, (x, y, w, h))
                 except KeyError:

@@ -3,6 +3,7 @@ __all__ = ('Config',)
 from six.moves import configparser
 import os.path
 import logging
+import imp
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.config')
@@ -16,7 +17,7 @@ def reload(path):
     Config.read(path)
 
 
-reload(
+imp.reload(
     os.path.realpath(
         os.path.join(__file__, '..', '..', 'config')
     )

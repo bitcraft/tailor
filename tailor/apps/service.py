@@ -63,7 +63,7 @@ if Config.getboolean('paths', 'make-images-path'):
         except:
             raise
         if not isdir:
-            os.makedirs(d, 0755)
+            os.makedirs(d, 0o755)
 
 # load all the stuff
 resources.load(app_resources_path)
@@ -101,7 +101,7 @@ class Session:
         self.plugins = dict((get_class(p), p) for p in
                             getPlugins(itailor.iTailorPlugin))
 
-        for name in self.plugins.keys():
+        for name in list(self.plugins.keys()):
             logger.debug("loaded plugin %s", name)
 
         self.camera = self.plugins['ShutterCamera'].new(
