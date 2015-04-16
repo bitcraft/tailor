@@ -1,9 +1,8 @@
 import pickle
 
-from twisted.plugin import IPlugin
-from twisted.internet import threads
 import twython
 from zope.interface import implements
+
 from tailor import itailor
 
 

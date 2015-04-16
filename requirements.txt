@@ -1,5 +1,6 @@
 kivy
-twisted
 pillow
 shutter
-yapsy
+twython
+zope.interface
+zope.component

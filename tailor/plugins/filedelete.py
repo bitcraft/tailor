@@ -1,8 +1,7 @@
 import os
 
-from twisted.plugin import IPlugin
-from twisted.internet import threads
 from zope.interface import implements
+
 from tailor import itailor
 
 
@@ -14,7 +13,7 @@ class FileDelete:
 
 
 class FileDeleteFactory:
-    implements(IPlugin, itailor.iTailorPlugin)
+    implements(itailor.iTailorPlugin)
     __plugin__ = FileDelete
 
     @classmethod

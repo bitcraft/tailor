@@ -1,9 +1,6 @@
-from twisted.plugin import IPlugin
-from twisted.internet import threads
-
 from zope.interface import implements
+
 from tailor import itailor
-import subprocess32
 
 
 class FileSpool:
@@ -18,7 +15,7 @@ class FileSpool:
 
 
 class FileSpoolFactory:
-    implements(IPlugin, itailor.iTailorPlugin)
+    implements(itailor.iTailorPlugin)
     __plugin__ = FileSpool
 
     @classmethod

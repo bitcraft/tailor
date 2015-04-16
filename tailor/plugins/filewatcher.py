@@ -1,7 +1,5 @@
-from twisted.plugin import IPlugin
-from twisted.internet import defer
-
 from zope.interface import implements
+
 from tailor import itailor
 import watchdog
 

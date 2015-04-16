@@ -1,8 +1,6 @@
 from PIL import Image
-
-from twisted.plugin import IPlugin
-from twisted.internet import threads
 from zope.interface import implements
+
 from tailor import itailor
 
 
@@ -32,7 +30,7 @@ class ImageThumb:
 
 
 class ImageThumbFactory:
-    implements(IPlugin, itailor.iTailorPlugin)
+    implements(itailor.iTailorPlugin)
     __plugin__ = ImageThumb
 
     @classmethod

@@ -1,12 +1,3 @@
-from PIL import Image
-
-from twisted.plugin import IPlugin
-from twisted.internet import defer
-from twisted.internet import threads
-from zope.interface import implements
-from tailor import itailor
-
-
 """
 image processor/composer that manipulates images
 in memory according to an ini-styles template system
@@ -17,11 +8,13 @@ how things generally work:
     using a pool of workers that process each image
     when workers are finished, layer images for final output
 """
+from PIL import Image
+from zope.interface import implements
+
+from tailor import itailor
 
 # ===========================================================
 # Image manipulation functions
-#
-
 
 def autocrop(image, area):
     iw, ih = image.size
@@ -208,7 +201,7 @@ class Composer:
 
 
 class ComposerFactory:
-    implements(IPlugin, itailor.iTailorPlugin)
+    implements(itailor.iTailorPlugin)
     __plugin__ = Composer
 
     @classmethod

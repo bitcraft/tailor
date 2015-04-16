@@ -2,14 +2,10 @@ import threading
 import logging
 from struct import pack
 
-from twisted.plugin import IPlugin
-from twisted.internet import defer
-from twisted.internet import interfaces
-from twisted.internet import threads
-from twisted.protocols import basic
 from zope.interface import implements
-from tailor import itailor
 import shutter
+
+from tailor import itailor
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -118,7 +114,7 @@ class ShutterCamera:
 
 
 class ShutterCameraFactory:
-    implements(IPlugin, itailor.iTailorPlugin)
+    implements(itailor.iTailorPlugin)
     __plugin__ = ShutterCamera
 
     @classmethod
