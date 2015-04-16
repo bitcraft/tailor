@@ -5,8 +5,8 @@ import logging
 from kivy.core.image import ImageData
 from PIL import Image as PIL_Image
 
-from six.moves import queue
-from six.moves import cStringIO
+import queue
+from io import StringIO
 from ..config import Config as pkConfig
 
 
@@ -67,7 +67,7 @@ class PreviewHandler(object):
                     raise
 
                 try:
-                    im = pil_open(cStringIO(str(data)))
+                    im = pil_open(StringIO(str(data)))
                 except IOError:
                     continue
 

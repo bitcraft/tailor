@@ -14,7 +14,7 @@ from twisted.internet import reactor, defer, task, protocol
 from twisted.internet.serialport import SerialPort
 from twisted.protocols import basic
 from twisted.plugin import getPlugins
-from six.moves import configparser
+import configparser
 import serial
 import traceback
 import threading

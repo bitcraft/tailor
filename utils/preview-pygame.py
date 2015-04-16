@@ -11,7 +11,8 @@ import time
 import pygame
 
 import shutter
-from six.moves import queue, cStringIO
+import queue
+from io import StringIO
 
 
 class CaptureThread(threading.Thread):
@@ -56,7 +57,7 @@ class BlitThread(threading.Thread):
         size = self.surface.get_size()
         lock = self.lock
         while self._running:
-            image = load(cStringIO(get())).convert()
+            image = load(StringIO(get())).convert()
             with lock:
                 scale(image, size, screen)
 

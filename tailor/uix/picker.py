@@ -12,7 +12,7 @@ from kivy.uix.screenmanager import Screen
 
 from kivy.graphics.texture import Texture
 from kivy.properties import *
-from six.moves import queue
+import queue
 from ..config import Config as pkConfig
 from .sharing import SharingControls
 from .utils import search

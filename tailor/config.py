@@ -1,10 +1,9 @@
 __all__ = ('Config',)
 
 import os.path
+import configparser
 import logging
 import imp
-
-from six.moves import configparser
 
 
 logging.basicConfig(level=logging.DEBUG)
