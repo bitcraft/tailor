@@ -3,7 +3,7 @@ import threading
 import pickle
 import email
 
-from .config import Config as pkConfig
+from .config import pkConfig as pkConfig
 
 
 class SenderThread(threading.Thread):

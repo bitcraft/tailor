@@ -11,7 +11,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager
 
-from tailor.config import Config as pkConfig
+from tailor.config import pkConfig as pkConfig
 from tailor.uix.picker import PickerScreen
 
 
@@ -48,14 +48,13 @@ Config.set('postproc', 'retain_distance',
            pkConfig.getint('kiosk', 'touch-retain-distance'))
 
 # paths
-all_images_path = os.path.abspath(pkConfig.get('paths', 'images'))
-event_name = pkConfig.get('event', 'name')
-event_images_path = jpath(all_images_path, event_name)
-composites_path = jpath(event_images_path, 'composites')
+# all_images_path = os.path.abspath(pkConfig.get('paths', 'images'))
+# event_name = pkConfig.get('event', 'name')
+# event_images_path = jpath(all_images_path, event_name)
+# composites_path = jpath(event_images_path, 'composites')
 styles_path = jpath(app_root_path, 'tailor', 'resources', 'styles')
 app_images_path = jpath(app_root_path, 'resources', 'images')
-paths = ('thumbnails', 'detail', 'originals', 'composites')
-
+# paths = ('thumbnails', 'detail', 'originals', 'composites')
 
 kv_files = (
     ('default', ('kiosk.kv', ), ),

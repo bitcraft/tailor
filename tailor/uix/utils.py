@@ -1,13 +1,13 @@
 import socket
 import threading
 import logging
+import queue
+from io import StringIO
 
 from kivy.core.image import ImageData
 from PIL import Image as PIL_Image
 
-import queue
-from io import StringIO
-from ..config import Config as pkConfig
+from ..config import pkConfig as pkConfig
 
 
 logging.basicConfig(level=logging.DEBUG)

@@ -1,11 +1,10 @@
-from zope.interface import implements
+from zope.interface import implementer
 
 from tailor import itailor
 
 
+@implementer(itailor.IFileOp)
 class FileSpool:
-    implements(itailor.IFileOp)
-
     def __init__(self):
         self.print_command = 'lpr'
 
@@ -14,13 +13,3 @@ class FileSpool:
         return threads.deferToThread(subprocess32.call, cmd)
 
 
-class FileSpoolFactory:
-    implements(itailor.iTailorPlugin)
-    __plugin__ = FileSpool
-
-    @classmethod
-    def new(cls, *args, **kwargs):
-        return cls.__plugin__(*args, **kwargs)
-
-
-factory = FileSpoolFactory()

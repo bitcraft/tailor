@@ -27,7 +27,7 @@ import re
 from tailor import itailor
 from tailor import resources
 from tailor import template
-from tailor.config import Config
+from tailor.config import pkConfig
 
 import logging
 
@@ -42,12 +42,12 @@ app_resources_path = jpath(app_root_path, 'resources')
 app_sounds_path = jpath(app_resources_path, 'sounds')
 app_images_path = jpath(app_resources_path, 'images')
 all_templates_path = jpath(app_resources_path, 'templates')
-all_images_path = Config.get('paths', 'images')
-shared_path = Config.get('paths', 'shared')
+all_images_path = pkConfig.get('paths', 'images')
+shared_path = pkConfig.get('paths', 'shared')
 
 # event paths
-event_name = Config.get('event', 'name')
-template_path = jpath(all_templates_path, Config.get('event', 'template'))
+event_name = pkConfig.get('event', 'name')
+template_path = jpath(all_templates_path, pkConfig.get('event', 'template'))
 event_images_path = jpath(all_images_path, event_name)
 thumbs_path = jpath(event_images_path, 'thumbnails')
 details_path = jpath(event_images_path, 'detail')
@@ -56,7 +56,7 @@ composites_path = jpath(event_images_path, 'composites')
 paths = ('thumbnails', 'detail', 'originals', 'composites')
 
 # make sure directory structure is usuable
-if Config.getboolean('paths', 'make-images-path'):
+if pkConfig.getboolean('paths', 'make-images-path'):
     for d in (thumbs_path, details_path, originals_path, composites_path):
         try:
             isdir = os.path.isdir(d)
@@ -99,13 +99,13 @@ class Session:
         self.camera = None
 
         self.plugins = dict((get_class(p), p) for p in
-                            getPlugins(itailor.iTailorPlugin))
+                            getPlugins(itailor.ITailorPlugin))
 
         for name in list(self.plugins.keys()):
             logger.debug("loaded plugin %s", name)
 
         self.camera = self.plugins['ShutterCamera'].new(
-            re.compile(Config.get('camera', 'name')))
+            re.compile(pkConfig.get('camera', 'name')))
 
     def capture(self):
         def shutter(result=None):
@@ -117,7 +117,7 @@ class Session:
                 arduino.sendCommand(0x82, 0)
                 arduino.sendCommand(0x82, 1)
 
-        interval = Config.getint('camera', 'countdown-interval')
+        interval = pkConfig.getint('camera', 'countdown-interval')
         c = task.LoopingCall(bell0.play)
         d = c.start(interval)
         d = d.addCallback(shutter)
@@ -145,7 +145,7 @@ class Session:
             arduino.sendCommand(0x82, 2)
             arduino.sendCommand(0x82, 3)
 
-        countdown_delay = Config.getint('camera', 'countdown-delay')
+        countdown_delay = pkConfig.getint('camera', 'countdown-delay')
         needed_captures = template.needed_captures(self.template)
         captures = 0
         errors = 0
@@ -196,7 +196,7 @@ class Session:
         # composite
         d = cm.process(filenames.pop(0))
         d.addCallback(fc1.process)
-        if Config.getboolean('kiosk', 'print'):
+        if pkConfig.getboolean('kiosk', 'print'):
             d.addCallback(spool.process)
         for fn in filenames:
             cm.process(fn)
@@ -301,8 +301,8 @@ def new():
     logger.debug('starting arduino')
     arduino = Arduino(session)
     try:
-        s = SerialPort(arduino, Config.get('arduino', 'port'), reactor,
-                       baudrate=Config.getint('arduino', 'baudrate'))
+        s = SerialPort(arduino, pkConfig.get('arduino', 'port'), reactor,
+                       baudrate=pkConfig.getint('arduino', 'baudrate'))
     except serial.serialutil.SerialException:
         raise
 
@@ -312,7 +312,7 @@ def new():
 
     # arduino servo tilt server
     logger.debug('starting tilt command listener')
-    reactor.listenTCP(Config.getint('arduino', 'tcp-port'),
+    reactor.listenTCP(pkConfig.getint('arduino', 'tcp-port'),
                       ServoServiceFactory(arduino))
 
     return reactor

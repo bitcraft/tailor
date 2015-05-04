@@ -1,8 +1,9 @@
+import asyncio
 import threading
-import logging
 from struct import pack
+import logging
 
-from zope.interface import implements
+from zope.interface import implementer
 import shutter
 
 from tailor import itailor
@@ -13,23 +14,15 @@ logger = logging.getLogger("tailor.shuttercamera")
 
 
 class PreviewProducer:
-    implements(interfaces.IPushProducer)
-
     def __init__(self, proto, camera):
         self._proto = proto
         self._camera = camera
-        self._paused = False
 
-    def pauseProducing(self):
-        self._paused = True
-
-    @defer.inlineCallbacks
     def resumeProducing(self):
         logger.debug('started to send previews')
-        self._paused = False
         try:
             data = yield self._camera.download_preview()
-        except shutter.shutter.ShutterError:
+        except shutter.ShutterError:
             pass
         else:
             self._proto.sendString(data)
@@ -37,14 +30,12 @@ class PreviewProducer:
             self._proto.transport.unregisterProducer()
             self._proto.transport.loseConnection()
 
-    def stopProducing(self):
-        pass
 
-
-class ServePreviews(basic.Int32StringReceiver):
+class ServePreviews(asyncio.StreamWriter):
     fmt = '!I'
 
     def __init__(self, camera):
+        super().__init__()
         self._camera = camera
 
     def connectionMade(self):
@@ -60,17 +51,17 @@ class ServePreviews(basic.Int32StringReceiver):
         self.transport.write(pack(self.fmt, len(data)) + data)
 
 
+@implementer(itailor.ICamera)
 class ShutterCamera:
-    implements(itailor.ICamera)
-
     def __init__(self, *args, **kwargs):
         self.capture_filename = 'capture.jpg'
         self.preview_filename = 'preview.jpg'
         self._camera = shutter.Camera(*args, **kwargs)
         self._lock = threading.Lock()
 
-    def create_producer(self):
-        return ServePreviews(self)
+    def create_streaming_preview_server(self):
+        loop = asyncio.get_event_loop()
+        server = loop.create_server(factory)
 
     def reset(self):
         with self._lock:
@@ -80,46 +71,30 @@ class ShutterCamera:
     def capture_preview(self):
         """ Capture a preview image and save to a file
         """
-
-        def capture():
-            with self._lock:
-                try:
-                    self._camera.capture_preview(self.preview_filename)
-                except shutter.shutter.ShutterError:
-                    pass
-            return self.preview_filename
-
-        return threads.deferToThread(capture)
+        with self._lock:
+            try:
+                self._camera.capture_preview(self.preview_filename)
+            except shutter.ShutterError:
+                # errors are ignored since preview images are not important
+                pass
+        return self.preview_filename
 
     def capture_image(self, filename=None):
         """ Capture a full image and save to a file
         """
+        with self._lock:
+            self._camera.capture_image(self.capture_filename)
+        return self.capture_filename
 
-        def capture():
-            with self._lock:
-                self._camera.capture_image(self.capture_filename)
-            return self.capture_filename
-
-        return threads.deferToThread(capture)
+    def download_capture(self):
+        """ Capture a full image and return data
+        """
+        with self._lock:
+            return self._camera.capture_image().get_data()
 
     def download_preview(self):
         """ Capture preview image and return data
         """
+        with self._lock:
+            return self._camera.capture_preview().get_data()
 
-        def capture():
-            with self._lock:
-                return self._camera.capture_preview().get_data()
-
-        return threads.deferToThread(capture)
-
-
-class ShutterCameraFactory:
-    implements(itailor.iTailorPlugin)
-    __plugin__ = ShutterCamera
-
-    @classmethod
-    def new(cls, *args, **kwargs):
-        return cls.__plugin__(*args, **kwargs)
-
-
-factory = ShutterCameraFactory()

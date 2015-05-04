@@ -1,23 +1,15 @@
 import pickle
 
 import twython
-from zope.interface import implements
+from zope.interface import implementer
 
 from tailor import itailor
 
 
-class ImageTweetFactory:
-    implements(IPlugin)
-
-    def new(self, *args, **kwargs):
-        return ImageTweet(*args, **kwargs)
-
-
+@implementer(itailor.IFileOp)
 class ImageTweet:
-    implements(itailor.IFileOp)
-
     def __init__(self):
-        self._auth = None
+        self._auth = dict()
         self._conn = None
 
     def auth(self, auth_file, *arg, **kwarg):
@@ -26,18 +18,7 @@ class ImageTweet:
         return self.connect()
 
     def process(self, msg, sender=None):
-        def send(result):
-            self._conn.update_status_with_media(msg, status='Test!')
-
-        return threads.deferToThread(send)
+        self._conn.update_status_with_media(msg, status='Test!')
 
     def connect(self):
-        def conn(result):
-            self._conn = result
-
-        d = threads.deferToThread(twython.Twython, **self._auth)
-        d.addCallback(conn)
-        return d
-
-
-factory = ImageTweetFactory
+        twython.Twython(**self._auth)
