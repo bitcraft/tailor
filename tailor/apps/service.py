@@ -11,6 +11,7 @@ import traceback
 import logging
 import pygame
 import networkx as nx
+import zeroconf
 
 from tailor import resources
 from tailor import template
@@ -24,21 +25,6 @@ logger = logging.getLogger("tailor.service")
 # set ProactorEventLoop, to support subprocess on Windows OS
 if os.name == 'nt':
     asyncio.set_event_loop(asyncio.ProactorEventLoop())
-
-
-class Booth:
-    """
-    implements the hardware interface to booth electronics
-    """
-
-    def enable_relay(self, index):
-        pass
-
-    def disable_relay(self, index):
-        pass
-
-    def set_camera_tilt(self, value):
-        pass
 
 
 class ServiceApp:
@@ -62,8 +48,6 @@ class Session:
     def __init__(self):
         logger.debug('building new session...')
 
-        self.template = configparser.ConfigParser()
-        self.template.read(pkConfig['paths']['event_template'])
         self.workflow = None
         self.camera = None
 
@@ -71,9 +55,6 @@ class Session:
 
     def scan_plugins(self):
         from yapsy.PluginManager import PluginManager
-
-
-
 
     def build_workflow(self):
         """

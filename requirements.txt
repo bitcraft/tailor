@@ -1,6 +1,7 @@
 kivy
 networkx
 pillow
+zeroconf
 shutter
 twython
 watchdog
