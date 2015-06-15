@@ -1,0 +1,30 @@
+[general]
+dpi = 300
+units = inches
+size = 2,6
+background = white
+
+[00portrait]
+filename = auto
+area = .37, .15, 1.55, 1.27
+autocrop = true
+
+[01portrait]
+filename = auto
+area = .37, 1.6, 1.55, 1.27
+autocrop = true
+
+[02portrait]
+filename = auto
+area = .37, 3.05, 1.55, 1.27
+autocrop = true
+
+[03portrait]
+filename = auto
+area = .37, 4.5, 1.55, 1.27
+autocrop = true
+
+[99frame]
+filename = frame.png
+position = 0,0
+

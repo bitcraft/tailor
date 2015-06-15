@@ -7,12 +7,11 @@ suitable for any display that is compatible with SDL (framebuffers, etc)
 
 import threading
 import time
-
-import pygame
-
-import shutter
 import queue
 from io import StringIO
+
+import pygame
+import shutter
 
 
 class CaptureThread(threading.Thread):

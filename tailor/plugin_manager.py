@@ -117,7 +117,8 @@ class PluginManager:
             # plugin_locator not used, and plugin_info_ext provided
             # -> compatibility mode
             res = PluginFileLocator()
-            res.setAnalyzers([PluginFileAnalyzerWithInfoFile("info_ext", plugin_info_ext)])
+            res.setAnalyzers(
+                [PluginFileAnalyzerWithInfoFile("info_ext", plugin_info_ext)])
         elif specific_info_ext and specific_locator:
             # both provided... issue a warning that tells "plugin_info_ext"
             # will be ignored
@@ -146,7 +147,6 @@ class PluginManager:
         for categ in categories_filter:
             self.category_mapping[categ] = []
             self._category_file_mapping[categ] = []
-
 
     def setPluginLocator(self, plugin_locator, dir_list=None, picls=None):
         """
@@ -182,7 +182,6 @@ class PluginManager:
         """
         self.category_mapping[category_name].remove(plugin)
 
-
     def appendPluginToCategory(self, plugin, category_name):
         """
         Append a new plugin to the given category.
@@ -214,7 +213,8 @@ class PluginManager:
         .. warning: locatePlugins must be called before !
         """
         if not hasattr(self, '_candidates'):
-            raise RuntimeError("locatePlugins must be called before getPluginCandidates")
+            raise RuntimeError(
+                "locatePlugins must be called before getPluginCandidates")
         return self._candidates[:]
 
     def removePluginCandidate(self, candidateTuple):
@@ -227,7 +227,8 @@ class PluginManager:
         .. warning: locatePlugins must be called before !
         """
         if not hasattr(self, '_candidates'):
-            raise ValueError("locatePlugins must be called before removePluginCandidate")
+            raise ValueError(
+                "locatePlugins must be called before removePluginCandidate")
         self._candidates.remove(candidateTuple)
 
     def appendPluginCandidate(self, candidateTuple):
@@ -240,7 +241,8 @@ class PluginManager:
         .. warning: locatePlugins must be called before !
         """
         if not hasattr(self, '_candidates'):
-            raise ValueError("locatePlugins must be called before removePluginCandidate")
+            raise ValueError(
+                "locatePlugins must be called before removePluginCandidate")
         self._candidates.append(candidateTuple)
 
     def locatePlugins(self):
@@ -290,15 +292,21 @@ class PluginManager:
             try:
                 # use imp to correctly load the plugin as a module
                 if os.path.isdir(candidate_filepath):
-                    candidate_module = imp.load_module(plugin_module_name, None, candidate_filepath,
-                                                       ("py", "r", imp.PKG_DIRECTORY))
+                    candidate_module = imp.load_module(plugin_module_name, None,
+                                                       candidate_filepath,
+                                                       ("py", "r",
+                                                        imp.PKG_DIRECTORY))
                 else:
                     with open(candidate_filepath + ".py", "r") as plugin_file:
-                        candidate_module = imp.load_module(plugin_module_name, plugin_file, candidate_filepath + ".py",
-                                                           ("py", "r", imp.PY_SOURCE))
+                        candidate_module = imp.load_module(plugin_module_name,
+                                                           plugin_file,
+                                                           candidate_filepath + ".py",
+                                                           ("py", "r",
+                                                            imp.PY_SOURCE))
             except Exception:
                 exc_info = sys.exc_info()
-                log.error("Unable to import plugin: %s" % candidate_filepath, exc_info=exc_info)
+                log.error("Unable to import plugin: %s" % candidate_filepath,
+                          exc_info=exc_info)
                 plugin_info.error = exc_info
                 processed_plugins.append(plugin_info)
                 continue
@@ -306,30 +314,39 @@ class PluginManager:
             if "__init__" in os.path.basename(candidate_filepath):
                 sys.path.remove(plugin_info.path)
             # now try to find and initialise the first subclass of the correct plugin interface
-            for element in (getattr(candidate_module, name) for name in dir(candidate_module)):
+            for element in (getattr(candidate_module, name) for name in
+                            dir(candidate_module)):
                 plugin_info_reference = None
                 for category_name in self.categories_interfaces:
                     try:
-                        is_correct_subclass = issubclass(element, self.categories_interfaces[category_name])
+                        is_correct_subclass = issubclass(element,
+                                                         self.categories_interfaces[
+                                                             category_name])
                     except Exception:
                         continue
-                    if is_correct_subclass and element is not self.categories_interfaces[category_name]:
+                    if is_correct_subclass and element is not \
+                            self.categories_interfaces[category_name]:
                         current_category = category_name
-                        if candidate_infofile not in self._category_file_mapping[current_category]:
+                        if candidate_infofile not in \
+                                self._category_file_mapping[current_category]:
                             # we found a new plugin: initialise it and search for the next one
                             if not plugin_info_reference:
                                 try:
-                                    plugin_info.plugin_object = self.instanciateElement(element)
+                                    plugin_info.plugin_object = self.instanciateElement(
+                                        element)
                                     plugin_info_reference = plugin_info
                                 except Exception:
                                     exc_info = sys.exc_info()
-                                    log.error("Unable to create plugin object: %s" % candidate_filepath,
-                                              exc_info=exc_info)
+                                    log.error(
+                                        "Unable to create plugin object: %s" % candidate_filepath,
+                                        exc_info=exc_info)
                                     plugin_info.error = exc_info
                                     break # If it didn't work once it wont again
                             plugin_info.categories.append(current_category)
-                            self.category_mapping[current_category].append(plugin_info_reference)
-                            self._category_file_mapping[current_category].append(candidate_infofile)
+                            self.category_mapping[current_category].append(
+                                plugin_info_reference)
+                            self._category_file_mapping[
+                                current_category].append(candidate_infofile)
         # Remove candidates list since we don't need them any more and
         # don't need to take up the space
         delattr(self, '_candidates')
@@ -349,7 +366,6 @@ class PluginManager:
         """
         self.locatePlugins()
         self.loadPlugins()
-
 
     def getPluginByName(self, name, category="Default"):
         """
@@ -374,7 +390,6 @@ class PluginManager:
                 return plugin_to_activate
         return None
 
-
     def deactivatePluginByName(self, name, category="Default"):
         """
         Desactivate a plugin corresponding to a given category + name.
@@ -390,4 +405,3 @@ class PluginManager:
                 plugin_to_deactivate.deactivate()
                 return plugin_to_deactivate
         return None
-

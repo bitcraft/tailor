@@ -4,8 +4,7 @@ from kivy.effects.dampedscroll import DampedScrollEffect
 from kivy.clock import Clock
 from kivy.properties import *
 
-
-__all__ = ('TailorScrollEffect', )
+__all__ = ('TailorScrollEffect',)
 
 
 class TailorScrollEffect(DampedScrollEffect):
@@ -92,6 +91,7 @@ class TailorScrollEffect(DampedScrollEffect):
             self.value = self.min
             self.velocity = 0
             return
+
         if stop_overscroll == 'max' and self.value <= self.max:
             self.value = self.max
             self.velocity = 0

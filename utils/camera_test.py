@@ -1,5 +1,6 @@
-import shutter
 import time
+
+import shutter
 
 
 def reset():

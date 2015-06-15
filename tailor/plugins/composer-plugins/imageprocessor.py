@@ -115,4 +115,3 @@ def image_processor(task_queue, finished_queue, global_config):
         this_config = dict(config)
         this_config['area'] = (x, y, w, h)
         ready_queue.put(this_config)
-

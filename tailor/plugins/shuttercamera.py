@@ -5,9 +5,7 @@ import logging
 
 from zope.interface import implementer
 import shutter
-
 from tailor import itailor
-
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.shuttercamera")
@@ -97,4 +95,3 @@ class ShutterCamera:
         """
         with self._lock:
             return self._camera.capture_preview().get_data()
-

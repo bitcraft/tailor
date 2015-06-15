@@ -8,5 +8,3 @@ class TemplateWidget:
 
 class TemplateImage:
     pass
-
-

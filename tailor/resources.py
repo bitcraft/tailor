@@ -4,9 +4,7 @@ import os
 import logging
 
 import pygame
-
 from tailor.config import pkConfig
-
 
 logger = logging.getLogger('tailor.resources')
 
@@ -68,4 +66,3 @@ def play_music(name):
             pygame.mixer.music.play(-1)
     except pygame.error:
         pass
-

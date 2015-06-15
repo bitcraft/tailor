@@ -5,7 +5,6 @@ import asyncio
 from zope.interface import implementer
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler, FileSystemEventHandler
-
 from tailor import itailor
 
 
@@ -62,4 +61,3 @@ class FileWatcher:
         self._observer.schedule(self.handler, self._path, self._recursive)
         self._observer.start()
         return self.handler
-

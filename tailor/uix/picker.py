@@ -11,7 +11,6 @@ from kivy.factory import Factory
 from kivy.loader import Loader
 from kivy.uix.image import Image
 from kivy.uix.screenmanager import Screen
-
 from kivy.graphics.texture import Texture
 from kivy.properties import *
 
@@ -21,7 +20,6 @@ from .utils import search
 from .effects import TailorScrollEffect
 from .utils import PreviewHandler
 from .utils import ArduinoHandler
-
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.picker')

@@ -9,7 +9,6 @@ from PIL import Image as PIL_Image
 
 from ..config import pkConfig as pkConfig
 
-
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.utils')
 

@@ -26,7 +26,6 @@ from kivy.properties import *
 
 import random, glob, os
 
-
 target_size = 768, 768
 event_name = 'gunnar-dolly'
 
@@ -56,7 +55,6 @@ def get_files():
 class SlideshowWidget(FloatLayout):
     image_duration = NumericProperty(3)
     new_image_interval = NumericProperty(1)
-
 
     def __init__(self, *arg, **kwarg):
         super(SlideshowWidget, self).__init__(*arg, **kwarg)

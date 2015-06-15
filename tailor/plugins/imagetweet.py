@@ -2,7 +2,6 @@ import pickle
 
 import twython
 from zope.interface import implementer
-
 from tailor import itailor
 
 

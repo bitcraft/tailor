@@ -14,7 +14,6 @@ from kivy.uix.screenmanager import ScreenManager
 from tailor.config import pkConfig as pkConfig
 from tailor.uix.picker import PickerScreen
 
-
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.kiosk-loader")
 
@@ -57,7 +56,7 @@ app_images_path = jpath(app_root_path, 'resources', 'images')
 # paths = ('thumbnails', 'detail', 'originals', 'composites')
 
 kv_files = (
-    ('default', ('kiosk.kv', ), ),
+    ('default', ('kiosk.kv',),),
 )
 
 for module, filenames in kv_files:
@@ -78,13 +77,14 @@ class KioskApp(App):
 
 
 def new():
-    import pygame
-
-    if pkConfig.getboolean('display', 'hide-mouse'):
-        cursor = pygame.cursors.load_xbm(
-            os.path.join(app_images_path, 'blank-cursor.xbm'),
-            os.path.join(app_images_path, 'blank-cursor-mask.xbm'))
-        pygame.mouse.set_cursor(*cursor)
+    # pygame is not default installed on windows kivy portable pkg
+    # import pygame
+    #
+    # if pkConfig.getboolean('display', 'hide-mouse'):
+    #     cursor = pygame.cursors.load_xbm(
+    #         os.path.join(app_images_path, 'blank-cursor.xbm'),
+    #         os.path.join(app_images_path, 'blank-cursor-mask.xbm'))
+    #     pygame.mouse.set_cursor(*cursor)
 
     app = KioskApp()
     app.manager.add_widget(PickerScreen(name='compositepicker'))

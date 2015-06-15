@@ -4,8 +4,8 @@ image processor/composer that manipulates images
 import asyncio
 
 from PIL import Image
-from zope.interface import implementer
 
+from zope.interface import implementer
 from tailor import itailor
 
 

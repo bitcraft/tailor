@@ -1,6 +1,8 @@
 """
 Hardware abstractions for the photobooth
 """
+
+
 def build_interface(spec):
     pass
 

@@ -1,0 +1,92 @@
+{
+  "type": "area",
+  "name": "root",
+  "data": {
+    "dpi": 300,
+    "units": "inches",
+    "rect": [
+      0,
+      0,
+      2,
+      4
+    ]
+  },
+  "children": [
+    {
+      "type": "area",
+      "data": {
+        "rect": [
+          ".37",
+          ".15",
+          "1.55",
+          "1.27"
+        ]
+      },
+      "children": [
+        {
+          "type": "image",
+          "data": {
+            "filename": ""
+          }
+        }
+      ]
+    },
+    {
+      "type": "area",
+      "data": {
+        "rect": [
+          ".37",
+          "1.6",
+          "1.55",
+          "1.27"
+        ]
+      },
+      "children": [
+        {
+          "type": "image",
+          "data": {
+            "filename": ""
+          }
+        }
+      ]
+    },
+    {
+      "type": "area",
+      "data": {
+        "rect": [
+          ".37",
+          "3.05",
+          "1.55",
+          "1.27"
+        ]
+      },
+      "children": [
+        {
+          "type": "image",
+          "data": {
+            "filename": ""
+          }
+        }
+      ]
+    },
+    {
+      "type": "area",
+      "data": {
+        "rect": [
+          ".37",
+          "4.5",
+          "1.55",
+          "1.27"
+        ]
+      },
+      "children": [
+        {
+          "type": "image",
+          "data": {
+            "filename": ""
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 #!/bin/env python
-from PIL import Image
 import sys
+
+from PIL import Image
 
 base = Image.new('RGBA', (1200, 1800))
 areas = ((0, 0), (600, 0))

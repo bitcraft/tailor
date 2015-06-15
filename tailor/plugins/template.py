@@ -4,7 +4,6 @@ default template for INI style templates
 import configparser
 
 from zope.interface import implementer
-
 from tailor import itailor
 
 

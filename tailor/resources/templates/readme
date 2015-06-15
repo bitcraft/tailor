@@ -1,3 +1,21 @@
 templates are 'ini' style files and define print layouts.
 
 please see the tailor wiki to learn how the format works
+
+
+template json format:
+each node is json object
+contains:
+  type
+  name
+  data
+
+name may be blank
+
+area:
+  contains: area, image
+  data: units, dpi, rect
+
+image:
+  contains: none
+  data: image data, fill/fit, anchor

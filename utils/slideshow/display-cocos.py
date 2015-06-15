@@ -9,7 +9,6 @@ from cocos.scenes import *
 from cocos.sprite import Sprite
 import pyglet
 
-
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils.slideshow.worker import *
 
@@ -280,7 +279,6 @@ class BackgroundLayer(cocos.layer.Layer):
         cocos.layer.Layer.on_exit(self)
         self.unschedule(self.scroll)
 
-
     def scroll(self, dt):
         # only tested for images scrolling up
         x = 0
@@ -373,4 +371,3 @@ if __name__ == '__main__':
         raise
     finally:
         [p.terminate() for p in workers]
-

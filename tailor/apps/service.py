@@ -9,14 +9,13 @@ import sys
 import threading
 import traceback
 import logging
+
 import pygame
 import networkx as nx
 import zeroconf
-
 from tailor import resources
 from tailor import template
 from tailor.config import pkConfig
-
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.service")
@@ -65,6 +64,7 @@ class Session:
         self.scan_plugins()
 
         import tailor
+
         self.workflow = nx.Graph()
 
         camera = tailor.plugins.dummy_camera.DummyCamera()
@@ -153,7 +153,8 @@ class Session:
 
             captures += 1
             errors = 0
-            logger.debug('successful capture (%s/%s)', captures, needed_captures)
+            logger.debug('successful capture (%s/%s)', captures,
+                         needed_captures)
 
             if captures < needed_captures:
                 self.play_finished_sound()

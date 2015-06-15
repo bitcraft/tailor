@@ -1,8 +1,8 @@
 from threading import Thread
-from Queue import Queue, Empty
 import time
 import sys
 
+from Queue import Queue, Empty
 
 ON_POSIX = 'posix' in sys.builtin_module_names
 

@@ -1,23 +1,107 @@
 from unittest import TestCase
+
 from tailor.template import *
+from tailor.graph import Node
+import json
+
 
 class TestNode(TestCase):
     def test_node(self):
         self.assertFalse(Node().push(Node()))
-        self.assertTrue(TemplateNode().push(ImageNode(None)))
-
-        n0 = TemplateNode()
-        n1 = TemplateNode()
-        n2 = ImageNode(None)
-        n0.push(n1)
-        n1.push(n2)
-
-        print('g', n0, n0.children)
-        print('g', n1, n1.children)
-        print('g', n2, n2.children)
-
-        render_template_graph(n0)
-        print(needed_captures(n0))
 
     def test_read_config(self):
-        read_template_config('../resources/templates/2x6.template')
+        loader = JSONTemplateBuilder()
+        root = loader.read('../tailor/resources/templates/test_template.json')
+
+
+
+class BuilderTests(TestCase):
+    def build_root_node(self):
+        node = {
+            'type': 'area',
+            'name': 'root',
+            'data': {
+                'dpi': 72,
+                'units': 'inches',
+                'rect': [0, 0, 2, 6]
+            },
+            'children': []
+        }
+        return node
+
+    def test_root_not_area_type_raises_syntaxerror(self):
+        node = self.build_root_node()
+        node['type'] = 'image'
+        loader = JSONTemplateBuilder()
+        with self.assertRaises(JSONTemplateBuilder.SyntaxError):
+            loader.build_root_node(node)
+
+    def test_root_not_named_root_raises_syntaxerror(self):
+        node = self.build_root_node()
+        node['name'] = 'not_root'
+        loader = JSONTemplateBuilder()
+        with self.assertRaises(JSONTemplateBuilder.SyntaxError):
+            loader.build_root_node(node)
+
+    def test_root_missing_name_raises_syntaxerror(self):
+        node = self.build_root_node()
+        del node['name']
+        loader = JSONTemplateBuilder()
+        with self.assertRaises(JSONTemplateBuilder.SyntaxError):
+            loader.build_root_node(node)
+
+    def test_root_missing_dpi_raises_syntaxerror(self):
+        node = self.build_root_node()
+        del node['data']['dpi']
+        loader = JSONTemplateBuilder()
+        with self.assertRaises(JSONTemplateBuilder.SyntaxError):
+            loader.build_root_node(node)
+
+    def test_root_missing_units_raises_syntaxerror(self):
+        node = self.build_root_node()
+        del node['data']['units']
+        loader = JSONTemplateBuilder()
+        with self.assertRaises(JSONTemplateBuilder.SyntaxError):
+            loader.build_root_node(node)
+
+    def test_read_list_convert_float_good_rect_int(self):
+        test_string = """{"rect": [0, 0, 2, 4]}"""
+        data = json.loads(test_string)
+        loader = JSONTemplateBuilder()
+        self.assertEqual(loader.cast_list_float(data['rect']),
+                         [0, 0, 2, 4])
+
+    def test_read_list_convert_float_good_rect_float(self):
+        test_string = """{"rect": ["0.0", "0.1", "2.5", ".4"]}"""
+        data = json.loads(test_string)
+        loader = JSONTemplateBuilder()
+        self.assertEqual(loader.cast_list_float(data['rect']),
+                         [0.0, 0.1, 2.5, .4])
+
+    def test_read_list_convert_float_rect_bad_raises_syntaxerror(self):
+        test_string = """{"rect": ["0.0", "AAA", "2.5", ".4"]}"""
+        data = json.loads(test_string)
+        loader = JSONTemplateBuilder()
+        with self.assertRaises(JSONTemplateBuilder.SyntaxError):
+            loader.cast_list_float(data['rect'])
+
+    def test_missing_type_raises_syntaxerror(self):
+        test_string = """{"data": [1,2,3]}"""
+        data = json.loads(test_string)
+        loader = JSONTemplateBuilder()
+        with self.assertRaises(JSONTemplateBuilder.SyntaxError):
+            loader.build_node(data)
+
+    def test_missing_data_raises_syntaxerror(self):
+        test_string = """{"type": "type"}"""
+        data = json.loads(test_string)
+        loader = JSONTemplateBuilder()
+        with self.assertRaises(JSONTemplateBuilder.SyntaxError):
+            loader.build_node(data)
+
+    def test_invalid_node_type_raises_valueerror(self):
+        test_string = """{"type": "invalid_node_type", "data": "data"}"""
+        data = json.loads(test_string)
+        loader = JSONTemplateBuilder()
+        with self.assertRaises(ValueError):
+            loader.build_node(data)
