@@ -1,20 +1,25 @@
 {
   "type": "area",
   "name": "root",
-  "data": [
+  "data": {
+    "dpi": 300,
+    "units": "inches",
+    "rect": [0, 0, 4, 6]
+  },
+  "children": [
     {
-      "type": "area",
+      "type": "reference",
       "name": "left",
-      "data": [
-        {
-          "type": "template",
-          "name": "template"
-        }
-      ]
+      "data": {
+          "target": "template"
+      }
     },
     {
-      "type": "area",
-      "name": "right"
+      "type": "reference",
+      "name": "right",
+      "data": {
+        "target": "left"
+      }
     }
   ]
 }
