@@ -61,8 +61,6 @@ class AreaNode(Node):
                     child.data = data
                     return
 
-        print('missed')
-
 
 class ImageNode(Node):
     """
