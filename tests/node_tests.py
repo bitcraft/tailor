@@ -9,11 +9,26 @@ class TestNode(TestCase):
     def test_node(self):
         self.assertFalse(Node().push(Node()))
 
-    def test_read_config(self):
+    def test_render(self):
+        renderer = TemplateRenderer()
         loader = JSONTemplateBuilder()
         root = loader.read('../tailor/resources/templates/test_template.json')
 
+        from PIL import Image
 
+        im = Image.new('RGB', (1024, 1024), (128, 0, 0))
+        root.push_image(im)
+
+        im = Image.new('RGB', (1024, 1024), (0, 128, 0))
+        root.push_image(im)
+
+        im = Image.new('RGB', (1024, 1024), (0, 0, 128))
+        root.push_image(im)
+
+        im = Image.new('RGB', (1024, 1024), (255, 255, 0))
+        root.push_image(im)
+
+        renderer.render(root)
 
 class BuilderTests(TestCase):
     def build_root_node(self):
@@ -93,7 +108,7 @@ class BuilderTests(TestCase):
             loader.build_node(data)
 
     def test_missing_data_raises_syntaxerror(self):
-        test_string = """{"type": "type"}"""
+        test_string = """{"type": "area"}"""
         data = json.loads(test_string)
         loader = JSONTemplateBuilder()
         with self.assertRaises(JSONTemplateBuilder.SyntaxError):

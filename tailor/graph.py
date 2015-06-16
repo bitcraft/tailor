@@ -14,7 +14,7 @@ class Node:
             if node not in visited:
                 visited.append(node)
                 stack.extend(node.children)
-        return visited
+        return reversed(visited[1:])
 
     def dfs_children(self):
         visited, stack = list(), [self]
@@ -23,7 +23,11 @@ class Node:
             if node not in visited:
                 visited.insert(0, node)
                 stack.extend(node.children)
-        return visited
+        return reversed(visited[:-1])
+
+    def add_child(self, node):
+        node.parent = self
+        self.children.append(node)
 
     def push(self, node):
         """
@@ -37,7 +41,7 @@ class Node:
         """
         kind = type(node).__name__
         if kind in self.accepts:
-            self.children.append(node)
+            self.add_child(node)
             return True
         else:
             for child in self.children:

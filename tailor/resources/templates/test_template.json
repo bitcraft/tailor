@@ -8,7 +8,7 @@
       0,
       0,
       2,
-      4
+      6
     ]
   },
   "children": [
@@ -24,10 +24,8 @@
       },
       "children": [
         {
-          "type": "image",
-          "data": {
-            "filename": ""
-          }
+          "type": "placeholder",
+          "data": {}
         }
       ]
     },
@@ -43,10 +41,8 @@
       },
       "children": [
         {
-          "type": "image",
-          "data": {
-            "filename": ""
-          }
+          "type": "placeholder",
+          "data": {}
         }
       ]
     },
@@ -62,10 +58,8 @@
       },
       "children": [
         {
-          "type": "image",
-          "data": {
-            "filename": ""
-          }
+          "type": "placeholder",
+          "data": {}
         }
       ]
     },
@@ -81,10 +75,8 @@
       },
       "children": [
         {
-          "type": "image",
-          "data": {
-            "filename": ""
-          }
+          "type": "placeholder",
+          "data": {}
         }
       ]
     }
