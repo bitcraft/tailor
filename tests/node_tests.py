@@ -1,8 +1,8 @@
 from unittest import TestCase
+import json
 
 from tailor.template import *
 from tailor.graph import Node
-import json
 
 
 class TestNode(TestCase):
@@ -29,6 +29,7 @@ class TestNode(TestCase):
         root.push_image(im)
 
         renderer.render(root)
+
 
 class BuilderTests(TestCase):
     def build_root_node(self):

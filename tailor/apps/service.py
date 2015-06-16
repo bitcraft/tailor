@@ -3,7 +3,6 @@
 Controls camera and booth inputs
 """
 import asyncio
-import configparser
 import os
 import sys
 import threading
@@ -12,7 +11,6 @@ import logging
 
 import pygame
 import networkx as nx
-import zeroconf
 from tailor import resources
 from tailor import template
 from tailor.config import pkConfig
@@ -53,7 +51,7 @@ class Session:
         self.build_workflow()
 
     def scan_plugins(self):
-        from yapsy.PluginManager import PluginManager
+        pass
 
     def build_workflow(self):
         """

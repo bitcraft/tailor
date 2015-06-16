@@ -5,12 +5,12 @@ import json
 
 from .graph import Node
 
-
 __all__ = ('JSONTemplateBuilder',
            'AreaNode',
            'ImageNode',
            'ImagePlaceholderNode',
            'TemplateRenderer')
+
 
 def is_number(value):
     """Test if an object is a number.
@@ -63,6 +63,7 @@ class AreaNode(Node):
 
         print('missed')
 
+
 class ImageNode(Node):
     """
     represents an image
@@ -79,7 +80,7 @@ class ImagePlaceholderNode(Node):
     """
     accepts images from a push
     """
-    accepts = (ImageNode, )
+    accepts = (ImageNode,)
 
     def __init__(self, data, name=None):
         super().__init__()
@@ -88,7 +89,7 @@ class ImagePlaceholderNode(Node):
 
 
 class JSONTemplateBuilder:
-    valid_units = ('inches', )
+    valid_units = ('inches',)
 
     class SyntaxError(Exception):
         pass
