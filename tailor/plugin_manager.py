@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-forked.modified from yapsy, leif theden, 2015
+modified from yapsy, leif theden, 2015
 
 
 original license below:

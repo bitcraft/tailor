@@ -98,7 +98,7 @@ class NodeBuilderTests(TestCase):
         area_node = {
             'type': 'area',
             'data': {
-                'rect': [0, 0, 2, 6]
+                'rect': [1, 1, 1, 1]
             },
             'children': [placeholder_node]
         }
@@ -119,6 +119,35 @@ class NodeBuilderTests(TestCase):
         builder = TemplateBuilder()
         root = self.build_root_node()
         return builder.build_graph(root)
+
+    def test_root_has_no_parents(self):
+        root = self.build_test_graph()
+        self.assertEqual(root.parent, None)
+
+    def test_roots_childs_parent_is_root(self):
+        root = self.build_test_graph()
+        child = root.children[0]
+        self.assertEqual(child.parent, root)
+
+    def test_root_determine_rect(self):
+        root = self.build_test_graph()
+        self.assertEqual(root.determine_rect(), [0, 0, 2, 6])
+
+    def test_child_without_rect_has_root_rect(self):
+        root = self.build_test_graph()
+        area = root.children[0]
+        child = area.children[0]  # this is the image placeholder
+        self.assertEqual(child.parent, area)
+        self.assertFalse(hasattr(child, 'rect'))
+        self.assertEqual(child.determine_rect(), area.rect)
+
+    def test_get_root_is_root(self):
+        root = self.build_test_graph()
+        area = root.children[0]
+        child = area.children[0]
+        self.assertEqual(root.get_root(), root)
+        self.assertEqual(area.get_root(), root)
+        self.assertEqual(child.get_root(), root)
 
     def test_missing_type_raises_syntaxerror(self):
         builder = TemplateBuilder()

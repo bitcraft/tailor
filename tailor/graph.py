@@ -5,7 +5,12 @@ class Node:
     accepts = set()
 
     def __init__(self):
-        self.children = list()
+        self.parent = None
+        self._children = list()
+
+    @property
+    def children(self):
+        return list(self._children)
 
     def bfs_children(self):
         visited, stack = list(), [self]
@@ -27,7 +32,7 @@ class Node:
 
     def add_child(self, node):
         node.parent = self
-        self.children.append(node)
+        self._children.append(node)
 
     def push(self, node):
         """
@@ -54,6 +59,28 @@ class Node:
             if isinstance(child, ImagePlaceholderNode):
                 if child.data is None:
                     yield child
+
+    def parents(self):
+        """not really fast since we don't have a ref to parents"""
+        parent = self.parent
+        while parent is not None:
+            yield parent
+            parent = parent.parent
+
+    def determine_rect(self):
+        """search through parents until a rect is found and return it
+           if this node contains a rect, then return that
+        """
+        if hasattr(self, 'rect'):
+            return self.rect
+        else:
+            return self.parent.determine_rect()
+
+    def get_root(self):
+        parent = self
+        while parent.parent is not None:
+            parent = parent.parent
+        return parent
 
 
 class AreaNode(Node):
