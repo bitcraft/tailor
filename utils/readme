@@ -7,6 +7,7 @@ pyglet-patch:
 vkeyboard.py, email.json:
     allows for more formatting options on the kivy vkeyboard
     it must be manually copied into the kivy installation.
+    required because it improves email address input
 
 preview-pygame:
-    fullscreen app to preview the dslr liveview from piggyphoto/libgphoto2
+    fullscreen app to preview the dslr liveview from shutter

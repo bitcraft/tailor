@@ -2,14 +2,10 @@ import asyncio
 import threading
 import logging
 
-from zope.interface import implementer
-from tailor import itailor
-
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.plugins.arduino")
 
 
-@implementer(itailor.IFileOp)
 class Arduino:
     pass
 

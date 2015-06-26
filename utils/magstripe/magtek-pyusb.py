@@ -15,9 +15,6 @@ import usb.util
 
 
 
-
-
-
 # keycode mapping
 key_pages = [
     '', '', '', '',

@@ -1,11 +1,8 @@
 import pickle
 
 import twython
-from zope.interface import implementer
-from tailor import itailor
 
 
-@implementer(itailor.IFileOp)
 class ImageTweet:
     def __init__(self):
         self._auth = dict()

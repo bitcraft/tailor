@@ -1,8 +1,11 @@
+"""
+UNUSED
+
+just kept around for reference
+"""
 import subprocess
 import os
 
-from zope.interface import implementer
-from tailor import itailor
 from tailor.config import pkConfig
 
 
@@ -11,7 +14,6 @@ def execute(cmd):
 
 
 class ColorTone:
-    @implementer(itailor.IFileOp)
     @staticmethod
     def process(filename, color, level, type=0, output=None):
         if output is None:
@@ -35,7 +37,6 @@ class ColorTone:
 
 
 class Vignette:
-    @implementer(itailor.IFileOp)
     @staticmethod
     def process(filename, w, h, color0='none', color1='black', ratio=1.5,
                 output=None):
@@ -54,7 +55,6 @@ class Vignette:
 
 
 class Toaster:
-    @implementer(itailor.IFileOp)
     @staticmethod
     def process(filename, w, h, output=None):
         if output is None:

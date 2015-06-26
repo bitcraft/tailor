@@ -1,24 +1,26 @@
 /*
  photobooth arduino control
- 
+
  pin 2:   switch to start photo session
  pin 3:   unused switch
  pin 4-7: relay
  pin 10:  servo
- 
+
  protocol: command/argument
- 
+
  outgoing => to host:
  0x00: reserved
  0x01: switch trigger [value: pin number]
- 
+
  incoming => from host:
  0x80: set tilt [value: 0-180 ]
  0x81: engage relay [0-3]
  0x82: disengage relay [0-3]
 
- All relays are off when arduino is started
+ All relays are turned off when arduino is started
 
+This file is copyright Leif Theden 2012-2015.
+GPL v3
  */
 
 #include <Servo.h>
@@ -59,20 +61,20 @@ long debounceDelay = 100;
 void setup() {
   // start communication with pc
   Serial.begin(9600);
-  
+
   // switches
   pinMode(2, INPUT_PULLUP);
   pinMode(3, INPUT_PULLUP);
-  
+
   // relays
   pinMode(4, OUTPUT);
   pinMode(5, OUTPUT);
   pinMode(6, OUTPUT);
   pinMode(7, OUTPUT);
-  
+
   // led
   pinMode(ledPin, OUTPUT);
-  
+
   // servo
   tiltServo.attach(tiltServoPin);
 }
@@ -103,7 +105,7 @@ void readPin(int pin) {
       Serial.println();
       Serial.flush();
     }
-  } 
+  }
   else {
     triggerHeld[index] = 0;
   }
@@ -113,14 +115,14 @@ void readPin(int pin) {
 
 void setTilt(byte newValue) {
   int value = (int)newValue;
-  
+
   if (value > tiltPosPositiveLimit) {
     value = tiltPosPositiveLimit;
   }
   if (value < tiltPosNegativeLimit) {
     value = tiltPosNegativeLimit;
   }
-  
+
   if (tiltPosPositiveLimit >= value) {
     if (tiltPosNegativeLimit <= value) {
       tiltPos = value;
@@ -143,7 +145,7 @@ void loop() {
 // Handle incoming serial data (not directly tied to loop())
 void serialEvent() {
   byte cmd;
-  
+
   while (Serial.available()) {
     serBufferData[serBufferIndex] = (byte)Serial.read();
     cmd = serBufferData[0];
@@ -153,26 +155,26 @@ void serialEvent() {
     } else {
       serBufferIndex += 1;
     }
-    
+
     if (serBufferIndex == 0) {
       byte arg = serBufferData[1];
-      
+
       if (cmd == pSetTilt) {
         setTilt(arg);
       }
-      
+
       if (cmd == pRelayOn) {
         int pin = (int)arg;
         pin -= 1;
         digitalWrite(relayMapping[pin], HIGH);
       }
-      
-      if (cmd == pRelayOff) {      
+
+      if (cmd == pRelayOff) {
         int pin = (int)arg;
         pin -= 1;
         digitalWrite(relayMapping[pin], LOW);
       }
-      
+
       break;
     }
   }

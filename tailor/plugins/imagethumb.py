@@ -1,10 +1,6 @@
 from PIL import Image
 
-from zope.interface import implementer
-from tailor import itailor
 
-
-@implementer(itailor.IImageOp)
 class ImageThumb:
     """
     simple thumbnailer.

@@ -1,10 +1,6 @@
 from PIL import Image
 
-from zope.interface import implementer
-from tailor import itailor
 
-
-@implementer(itailor.IImageOp)
 class Autocrop:
     @staticmethod
     def process(image, area):
@@ -25,8 +21,6 @@ class Autocrop:
 
 
 class Scale:
-    implements(itailor.IImageOp)
-
     @staticmethod
     def process(image, area):
         x, y, w, h = area

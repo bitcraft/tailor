@@ -4,14 +4,19 @@
   "data": {
     "dpi": 300,
     "units": "inches",
-    "rect": [0, 0, 4, 6]
+    "rect": [
+      0,
+      0,
+      4,
+      6
+    ]
   },
   "children": [
     {
       "type": "reference",
       "name": "left",
       "data": {
-          "target": "template"
+        "target": "template"
       }
     },
     {

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-This program is the nuts and bolts of the photo booth.
+Unused....just kept around for reference
 """
 import sys
 import os

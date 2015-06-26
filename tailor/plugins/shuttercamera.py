@@ -3,9 +3,7 @@ import threading
 from struct import pack
 import logging
 
-from zope.interface import implementer
 import shutter
-from tailor import itailor
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.shuttercamera")
@@ -49,7 +47,6 @@ class ServePreviews(asyncio.StreamWriter):
         self.transport.write(pack(self.fmt, len(data)) + data)
 
 
-@implementer(itailor.ICamera)
 class ShutterCamera:
     def __init__(self, *args, **kwargs):
         self.capture_filename = 'capture.jpg'

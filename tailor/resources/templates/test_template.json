@@ -1,5 +1,5 @@
 {
-  "type": "area",
+  "type": "root",
   "name": "root",
   "data": {
     "dpi": 300,
@@ -12,6 +12,12 @@
     ]
   },
   "children": [
+    {
+      "type": "image",
+      "data": {
+        "filename": "frame.png"
+      }
+    },
     {
       "type": "area",
       "data": {

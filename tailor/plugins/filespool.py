@@ -1,9 +1,3 @@
-from zope.interface import implementer
-
-from tailor import itailor
-
-
-@implementer(itailor.IFileOp)
 class FileSpool:
     def __init__(self):
         self.print_command = 'lpr'

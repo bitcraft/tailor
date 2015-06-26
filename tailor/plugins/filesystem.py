@@ -2,13 +2,10 @@ import os
 import shutil
 import asyncio
 
-from zope.interface import implementer
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler, FileSystemEventHandler
-from tailor import itailor
 
 
-@implementer(itailor.IFileOp)
 class FileCopy:
     def __init__(self, dest, **kwargs):
         self.dest = dest
@@ -28,13 +25,11 @@ class FileCopy:
         return path
 
 
-@implementer(itailor.IFileOp)
 class FileDelete:
     def process(self, msg):
         os.unlink(msg)
 
 
-@implementer(itailor.IFileOp)
 class FileWatcher:
     """
     Simple watcher that uses a glob to track new files
