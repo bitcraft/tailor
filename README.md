@@ -3,12 +3,12 @@ Tailor
 
 Tailor is a set of hardware plans and software for a wedding/event photo and
 includes image processing, camera control, live slideshow, and touch based
-image browser for kiosk operation.  It is a project in development, but is
-stable enough for general use.
+image browser for kiosk operation.  It is a project in development but stable
+enough for general use.
 
 This project aims for Windows, OS X, and Linux compatibility, but not all
 features are supported on each platform now.  Currently, full features are
-available on OS X and Linux;  Camera capture is currently unavailable on
+available on OS X and Linux;  camera capture is currently unavailable on
 Windows, but it is being worked on.
 
 I use Tailor for my professional photobooth service.
@@ -31,7 +31,7 @@ Webcams are not supported at this time.
 Interaction
 -----------
 
-tailor supports the arduino for interfacing with physical buttons over USB
+Tailor supports the arduino for interfacing with physical buttons over USB
 and also has a smartphone-inspired touch interface.  For computer systems
 without a touch screen monitor, the mouse can be used.
 
@@ -42,8 +42,8 @@ camera live view, and twitter.
 Running the touch interface
 ---------------------------
 
-Service.py runs the camera capture service.
-Kiosk.py runs the touch interface.
+service.py runs the camera capture service.
+kiosk.py runs the touch interface.
 
 Operation under windows will be documented in the future.  Stay tuned.
 
@@ -61,7 +61,7 @@ Getting Help
 
 If you encounter any errors, please issue a bug report.  Also, please note that
 while I am providing the software for free, my time is not free.  If you wish to
-use this software and need help getting you system going I will be accepting
+use this software and need help getting your system going I will be accepting
 paypal donations in exchange for my time.
 
 I reserve all rights to determine what features will be added and how the
@@ -75,12 +75,11 @@ Requirements
 This is a general list of software requirements.  Certain functions of this
 software may require additional dependencies.
 
--  Debian Linux, OS X 10.x, Windows 7+
+-  Debian Linux, OS X 10.x, or Windows 7+
 -  Shutter (https://github.com/bitcraft/shutter)
--  Python 2.7 or 3.4
--  Twisted
--  Kivy 1.8+
--  Pygame
+-  Python 3.4+
+-  Kivy 1.9+
+-  Pygame (for sound)
 
 
 Windows OS Support
@@ -91,6 +90,9 @@ I'm working towards support of Windows OS.
 Kivy and pygame can be downloaded from here:
 http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
+ 
+Legal
+-----
 
 All files under the 'tailor' directory are copyright Leif Theden, 2012-2015
 and licensed under the GPLv3.
