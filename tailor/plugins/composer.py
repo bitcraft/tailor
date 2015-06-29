@@ -6,34 +6,31 @@ import asyncio
 from tailor.template import TemplateRenderer
 
 
+
 class Composer:
     """
     uses templates and images to create print layouts
     """
 
-    def __init__(self, template):
-        self.template = template
+    def __init__(self):
         self.incoming_image_queue = asyncio.Queue()
 
     @asyncio.coroutine
-    def compose(self):
+    def compose(self, template):
         """
-        waits for images
-        filters/resizes each image
-
-        TODO: allow incremental rendering, instead of all at once
+        - waits for images
+        - saves completed image
         """
-        # TODO: JoinableQueue is depreciated, change to Queue
-        queue = asyncio.JoinableQueue()
-
-        for node in self.template.placeholders_needing_image():
-            node.data = yield from self.incoming_image_queue.get()
-
-        queue.join()
         renderer = TemplateRenderer()
-        image = renderer.render(self.template)
-        filename = 'composite.png'
-        image.save(filename)
+        base_image = renderer.create_blank_image(template)
+        lock = asyncio.Lock()
+
+        for node in template.placeholders_needing_image():
+            node.data = yield from self.incoming_image_queue.get()
+            with lock:
+                renderer.render_and_paste(node, base_image)
+
+        return base_image
 
     def process(self, filename):
         self.incoming_image_queue.put(filename)

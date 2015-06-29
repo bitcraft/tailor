@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 from PIL import Image
 
 from tailor.graph import AreaNode, ImageNode, ImagePlaceholderNode
+from threading import Lock
 
 __all__ = ('TemplateRenderer',)
 
@@ -24,55 +25,74 @@ class AreaNodeRenderer(NodeRenderer):
 class TemplateRenderer:
     """
     Render template graphs using PIL
+
+    somewhat thread safe
     """
     mode = 'RGBA'
     resize_filter = Image.LANCZOS
 
     def __init__(self):
-        self.handlers = {
-            AreaNode: self.handle_area_node,
-            ImageNode: self.handle_image_node,
-            ImagePlaceholderNode: self.handle_image_node
+        self.renderers = {
+            AreaNode: self.render_area_node,
+            ImageNode: self.render_image_node,
+            ImagePlaceholderNode: self.render_image_node
         }
-        self.dpi = None
-        self.units = None
-        self.image = None
+        self.lock = Lock()
 
-    def render(self, node):
-        self.dpi = node.dpi
-        self.units = node.units
+    def render_all(self, root):
+        """ Render a new image and all nodes.  Must pass in the root node.
 
-        self.image = self.create_blank_image(node)
-        for i, child in enumerate(node.bfs_children()):
-            self.handle_node(child)
-            # self.image.save('step' + str(i) + '.png')
+        :param root: Root node
+        :return: PIL Image
+        """
+        base_image = self.create_blank_image(root)
 
-        return self.image
+        for i, node in enumerate(root.bfs_children()):
+            self.render_and_paste(node, base_image)
 
-    def handle_node(self, node):
+        return base_image
+
+    def render_and_paste(self, node, base_image):
+        """ Render a node, if there is a result, then paste to the base_image
+
+        :param node: TemplateNode
+        :param base_image: PIL image
+        :return: PIL Image of node, else None
+        """
+        image, rect = self.render_node(node)
+        if image is not None:
+            x, y, w, h = rect
+            self.paste(image, base_image, (x, y))
+
+        return image
+
+    @staticmethod
+    def paste(upper, lower, top_left):
+        # correctly handle the alpha channel transparency.
+        if upper.mode == 'RGBA':
+            lower.paste(upper, top_left, mask=upper)
+        else:
+            lower.paste(upper, top_left)
+
+    def render_node(self, node):
         try:
-            handler = self.handlers[node.__class__]
+            func = self.renderers[node.__class__]
         except KeyError:
             return
+        return func(node)
 
-        handler(node)
-
-    def handle_area_node(self, node):
-        pass
-
-    def handle_image_node(self, node):
+    def render_area_node(self, node):
         # draw = ImageDraw.Draw(self.image)
         # draw.rectangle(rect, (0, 255, 255))
-        if node.data:
-            x1, y1, w, h = self.convert_from_image_to_pixel(node.parent.rect)
-            x1, y1, x2, y2 = self.convert_from_xywh((x1, y1, w, h))
-            im = self.resize_image(node.data, (w, h))
+        return None, None
 
-            # correctly handle the alpha channel transparency.
-            if im.mode == 'RGBA':
-                self.image.paste(im, (x1, y1), mask=im)
-            else:
-                self.image.paste(im, (x1, y1))
+    def render_image_node(self, node):
+        if node.data:
+            root = node.get_root()
+            x, y, w, h = self.convert_rect(node.parent.rect, root.dpi)
+            im = self.resize_image(node.data, (w, h))
+            return im, (x, y, w, h)
+        return None, None
 
     def resize_image(self, source, size):
         """
@@ -80,16 +100,22 @@ class TemplateRenderer:
         :param size: (w, h)
         :return: new PIL image
         """
-        im = source.resize(size, self.resize_filter)
-        return im
+        return source.resize(size, self.resize_filter)
 
     def create_blank_image(self, node):
-        size = node.rect[2:]
-        pixel_size = self.convert_from_image_to_pixel(size)
+        root = node.get_root()
+        size = root.determine_rect()[2:]
+        pixel_size = self.convert_from_image_to_pixel(size, root.dpi)
         return Image.new(self.mode, pixel_size)
 
-    def convert_from_image_to_pixel(self, area):
-        return [int(i * self.dpi) for i in area]
+    def convert_rect(self, rect, dpi):
+        x1, y1, w, h = self.convert_from_image_to_pixel(rect, dpi)
+        x1, y1, x2, y2 = self.convert_from_xywh((x1, y1, w, h))
+        return x1, y1, w, h
+
+    @staticmethod
+    def convert_from_image_to_pixel(area, dpi):
+        return [int(i * dpi) for i in area]
 
     @staticmethod
     def convert_from_xywh(rect):

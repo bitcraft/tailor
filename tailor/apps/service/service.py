@@ -13,7 +13,6 @@ import traceback
 import logging
 
 from tailor import plugins
-from tailor.config import pkConfig
 from tailor.builder import JSONTemplateBuilder
 
 logging.basicConfig(level=logging.DEBUG)
@@ -29,32 +28,27 @@ class ServiceApp:
     """
     implements the application
     """
-
-    def __init__(self):
-        pass
-
     def run(self):
         template_filename = 'tailor/resources/templates/test_template.json'
         template = JSONTemplateBuilder().read(template_filename)
-
         loop = asyncio.get_event_loop()
         session = Session()
         loop.run_until_complete(session.start(template))
 
 
 class Session:
-    def trigger_capture(self):
-        """ set an event to trigger later, causing a capture
-
-        triggers are used to ensure capture events happen at
-        regular intervals, without being affected by the time
-        involved with capturing an image
-
-        :return: asyncio.Handle
-        """
-        loop = asyncio.get_event_loop()
-        interval = pkConfig.getint('camera', 'countdown-interval')
-        return loop.call_later(interval, self.capture)
+    # def trigger_capture(self):
+    #     """ set an event to trigger later, causing a capture
+    #
+    #     triggers are used to ensure capture events happen at
+    #     regular intervals, without being affected by the time
+    #     involved with capturing an image
+    #
+    #     :return: asyncio.Handle
+    #     """
+    #     loop = asyncio.get_event_loop()
+    #     interval = pkConfig.getint('camera', 'countdown-interval')
+    #     return loop.call_later(interval, self.capture)
 
     @asyncio.coroutine
     def countdown(self, duration):
@@ -64,12 +58,6 @@ class Session:
         for i in range(duration):
             # play sound or something
             yield from asyncio.sleep(1)
-
-    @asyncio.coroutine
-    def capture(self):
-        """ get image from the camera
-        """
-        return self.camera.download_capture()
 
     @asyncio.coroutine
     def start(self, template):
@@ -82,11 +70,11 @@ class Session:
         logger.debug('building new session...')
 
         composer = plugins.composer.Composer(template)
-        self.camera = plugins.dummy_camera.DummyCamera()
+        camera = plugins.dummy_camera.DummyCamera()
 
         logger.debug('start new session')
 
-        #needed_captures = template_graph.needed_captures()
+        # needed_captures = template_graph.needed_captures()
         needed_captures = 4
         captures = 0
         errors = 0
@@ -97,7 +85,7 @@ class Session:
             yield from self.countdown(3)
 
             try:
-                image = yield from self.capture()
+                image = yield from camera.download_capture()
             except:
                 errors += 1
                 traceback.print_exc(file=sys.stdout)
@@ -113,7 +101,8 @@ class Session:
 
         from tailor.template import TemplateRenderer
 
+        # eventually do some kind of workflow thing, again
         r = TemplateRenderer()
-        image = r.render(template)
+        image = r.render_all(template)
         image.save('test.png')
         logger.debug('finished the session')

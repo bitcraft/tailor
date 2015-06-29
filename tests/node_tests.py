@@ -84,7 +84,8 @@ class TestRenderer(TestCase):
         im = Image.new('RGB', (1024, 1024), (255, 255, 0))
         root.push_image(im)
 
-        renderer.render(root)
+        image = renderer.render_all(root)
+        image.save('test_image.png')
 
 
 class NodeBuilderTests(TestCase):
