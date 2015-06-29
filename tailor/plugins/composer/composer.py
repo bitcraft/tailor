@@ -1,15 +1,10 @@
-"""
-image processor/composer that manipulates images
-"""
 import asyncio
-
-from tailor.template import TemplateRenderer
-
+from tailor.plugins.composer import TemplateRenderer
 
 
 class Composer:
     """
-    uses templates and images to create print layouts
+    Interface for the Tailor Workflow.  Render template graphs.
     """
 
     def __init__(self):

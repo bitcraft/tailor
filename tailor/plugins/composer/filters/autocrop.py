@@ -1,9 +1,9 @@
 from PIL import Image
+from tailor.plugins.composer import ComposerFilter
 
 
-class Autocrop:
-    @staticmethod
-    def process(image, area):
+class Autocrop(ComposerFilter):
+    def process(self, image, area):
         iw, ih = image.size
         x, y, w, h = area
         r0 = float(w) / h
@@ -17,12 +17,4 @@ class Autocrop:
             iw, ih = image.size
             image = image.crop((cx, 0, iw - cx, ih))
 
-        return image
-
-
-class Scale:
-    @staticmethod
-    def process(image, area):
-        x, y, w, h = area
-        image.resize(w, h)
         return image

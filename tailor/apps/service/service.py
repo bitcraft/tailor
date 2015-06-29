@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 controls camera
 accepts booth inputs
@@ -8,12 +7,14 @@ manages plugin workflow, basically
 """
 import asyncio
 import os
-import sys
 import traceback
 import logging
+import sys
 
 from tailor import plugins
+from tailor.apps.service.service_zc import zeroconf_service
 from tailor.builder import JSONTemplateBuilder
+import tailor.plugins.composer.composer
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.service")
@@ -28,12 +29,14 @@ class ServiceApp:
     """
     implements the application
     """
+
     def run(self):
-        template_filename = 'tailor/resources/templates/test_template.json'
-        template = JSONTemplateBuilder().read(template_filename)
-        loop = asyncio.get_event_loop()
-        session = Session()
-        loop.run_until_complete(session.start(template))
+        with zeroconf_service():
+            template_filename = 'tailor/resources/templates/test_template.json'
+            template = JSONTemplateBuilder().read(template_filename)
+            loop = asyncio.get_event_loop()
+            session = Session()
+            loop.run_until_complete(session.start(template))
 
 
 class Session:
@@ -50,13 +53,20 @@ class Session:
     #     interval = pkConfig.getint('camera', 'countdown-interval')
     #     return loop.call_later(interval, self.capture)
 
+    def __init__(self):
+        pass
+
+    def on_countdown_tick(self):
+        # play sound or something
+        pass
+
     @asyncio.coroutine
     def countdown(self, duration):
         """ countdown from whole seconds
         """
         duration = int(duration)
         for i in range(duration):
-            # play sound or something
+            self.on_countdown_tick()
             yield from asyncio.sleep(1)
 
     @asyncio.coroutine
@@ -67,12 +77,9 @@ class Session:
         Each photo has 3 attempts to take a photo
         If we get 4 photos, or 3 failed attempts, then exit
         """
-        logger.debug('building new session...')
+        logger.debug('starting new session')
 
-        composer = plugins.composer.Composer(template)
         camera = plugins.dummy_camera.DummyCamera()
-
-        logger.debug('start new session')
 
         # needed_captures = template_graph.needed_captures()
         needed_captures = 4
@@ -98,11 +105,3 @@ class Session:
 
             # C A L L B A C K S
             template.push_image(image)
-
-        from tailor.template import TemplateRenderer
-
-        # eventually do some kind of workflow thing, again
-        r = TemplateRenderer()
-        image = r.render_all(template)
-        image.save('test.png')
-        logger.debug('finished the session')

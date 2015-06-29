@@ -1,6 +1,5 @@
 import logging
 import random
-import asyncio
 
 from PIL import Image
 

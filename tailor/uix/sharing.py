@@ -9,7 +9,6 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.config import Config
 from kivy.properties import *
-
 from ..smtp import SenderThread
 from ..config import pkConfig as pkConfig
 

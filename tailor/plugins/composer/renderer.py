@@ -1,35 +1,18 @@
 """
 utilities for templates
 """
-from abc import ABCMeta, abstractmethod
-
 from PIL import Image
 
 from tailor.graph import AreaNode, ImageNode, ImagePlaceholderNode
-from threading import Lock
 
 __all__ = ('TemplateRenderer',)
-
-
-class NodeRenderer(metaclass=ABCMeta):
-    @abstractmethod
-    def render(self, node):
-        pass
-
-
-class AreaNodeRenderer(NodeRenderer):
-    def render(self, node):
-        pass
 
 
 class TemplateRenderer:
     """
     Render template graphs using PIL
-
-    somewhat thread safe
     """
     mode = 'RGBA'
-    resize_filter = Image.LANCZOS
 
     def __init__(self):
         self.renderers = {
@@ -37,7 +20,17 @@ class TemplateRenderer:
             ImageNode: self.render_image_node,
             ImagePlaceholderNode: self.render_image_node
         }
-        self.lock = Lock()
+
+    def render_node(self, node):
+        """ Render one node
+        :param node: TemplateNode
+        :return: (PIL Image or None, Rect or None)
+        """
+        try:
+            func = self.renderers[node.__class__]
+        except KeyError:
+            return
+        return func(node)
 
     def render_all(self, root):
         """ Render a new image and all nodes.  Must pass in the root node.
@@ -74,13 +67,6 @@ class TemplateRenderer:
         else:
             lower.paste(upper, top_left)
 
-    def render_node(self, node):
-        try:
-            func = self.renderers[node.__class__]
-        except KeyError:
-            return
-        return func(node)
-
     def render_area_node(self, node):
         # draw = ImageDraw.Draw(self.image)
         # draw.rectangle(rect, (0, 255, 255))
@@ -89,18 +75,8 @@ class TemplateRenderer:
     def render_image_node(self, node):
         if node.data:
             root = node.get_root()
-            x, y, w, h = self.convert_rect(node.parent.rect, root.dpi)
-            im = self.resize_image(node.data, (w, h))
-            return im, (x, y, w, h)
+            return node.data, self.convert_rect(node.parent.rect, root.dpi)
         return None, None
-
-    def resize_image(self, source, size):
-        """
-        :param source: PIL image
-        :param size: (w, h)
-        :return: new PIL image
-        """
-        return source.resize(size, self.resize_filter)
 
     def create_blank_image(self, node):
         root = node.get_root()

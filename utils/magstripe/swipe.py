@@ -36,7 +36,7 @@ if __name__ == '__main__':
     device = '/dev/input/by-id/usb-GIGATEK_PROMAG_Programmable_Keyboard-event-kbd'
     # /dev/input/by-id/usb-GIGATEK_PROMAG_Programmable_Keyboard-event-if01
 
-    #p = Popen(['myprogram.exe'], stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
+    # p = Popen(['myprogram.exe'], stdout=PIPE, bufsize=1, close_fds=ON_POSIX)
     reader = open(device)
     q = Queue()
     t = Thread(target=enqueue_output, args=(reader, q))

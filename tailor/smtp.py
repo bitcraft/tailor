@@ -1,14 +1,12 @@
 import smtplib
-import threading
 import pickle
 import email
 
 from .config import pkConfig as pkConfig
 
 
-class SenderThread(threading.Thread):
+class SenderThread:
     def __init__(self, address, filename):
-        threading.Thread.__init__(self)
         self.address = address
         self.filename = filename
 

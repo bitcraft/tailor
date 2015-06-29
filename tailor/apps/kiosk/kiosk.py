@@ -10,7 +10,6 @@ from kivy.config import Config
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager
-
 from tailor.config import pkConfig as pkConfig
 from tailor.uix.picker import PickerScreen
 

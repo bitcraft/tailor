@@ -60,8 +60,29 @@ class Node:
                 if child.data is None:
                     yield child
 
+    def needed_captures(self):
+        """Search and return number of images needed
+
+        :param node:
+        :type node:
+        :return:
+        :rtype:
+        """
+        needed = 0
+        for child in self.dfs_children():
+            if isinstance(child, ImagePlaceholderNode):
+                if child.data is None:
+                    needed += 1
+        return needed
+
+    def push_image(self, data):
+        for child in self.dfs_children():
+            if isinstance(child, ImagePlaceholderNode):
+                if child.data is None:
+                    child.data = data
+                    return
+
     def parents(self):
-        """not really fast since we don't have a ref to parents"""
         parent = self.parent
         while parent is not None:
             yield parent
@@ -94,28 +115,6 @@ class AreaNode(Node):
         self.units = units
         self.dpi = dpi
         self.name = name
-
-    def needed_captures(self):
-        """Search and return number of images needed
-
-        :param node:
-        :type node:
-        :return:
-        :rtype:
-        """
-        needed = 0
-        for child in self.dfs_children():
-            if isinstance(child, ImagePlaceholderNode):
-                if child.data is None:
-                    needed += 1
-        return needed
-
-    def push_image(self, data):
-        for child in self.dfs_children():
-            if isinstance(child, ImagePlaceholderNode):
-                if child.data is None:
-                    child.data = data
-                    return
 
 
 class ImageNode(Node):

@@ -4,9 +4,9 @@ import logging
 import queue
 from io import StringIO
 
-from kivy.core.image import ImageData
 from PIL import Image as PIL_Image
 
+from kivy.core.image import ImageData
 from ..config import pkConfig as pkConfig
 
 logging.basicConfig(level=logging.DEBUG)

@@ -1,33 +1,20 @@
 """
 Hardware abstractions for the photobooth
 """
-
-
-def build_interface(spec):
-    pass
-
-
-class Interface:
-    pass
-
-
-class GPIO:
-    pass
+import pyfirmata
 
 
 class Booth:
     """
     implements the hardware interface to booth electronics
     """
+    def __init__(self):
+        main_light = Relay(0)
+        session_light = Relay(1)
 
-    def enable_relay(self, index):
-        pass
-
-    def disable_relay(self, index):
-        pass
-
-    def set_camera_tilt(self, value):
-        pass
+        self.relays = [main_light, session_light]
+        self.triggers = []
+        self.lights = [main_light, session_light]
 
 
 class Relay(object):

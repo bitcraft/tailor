@@ -1,0 +1,3 @@
+The template composer requires PIL
+It is responsible for rendering template graphs for screen and print.
+It also includes plugins and filters to modify images.

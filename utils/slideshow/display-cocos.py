@@ -3,11 +3,12 @@ import os
 import subprocess
 import random
 
+import pyglet
+
 import cocos
 from cocos.actions import *
 from cocos.scenes import *
 from cocos.sprite import Sprite
-import pyglet
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from utils.slideshow.worker import *
@@ -114,7 +115,7 @@ class PanScanLayer(cocos.layer.Layer):
 
         sprite.y = random.randint(height * .25, height * .75)
 
-        #dst = random.randint(width*.25, width*.75), height / 2
+        # dst = random.randint(width*.25, width*.75), height / 2
         dst = width / 2, height / 2
 
         sprite.scale = end_scale * 5
@@ -359,7 +360,7 @@ if __name__ == '__main__':
     pyglet.clock.set_fps_limit(60)
 
     cocos.director.director.init(fullscreen=True, screen=screens[-1])
-    #cocos.director.director.init(fullscreen=True)
+    # cocos.director.director.init(fullscreen=True)
 
     try:
         cocos.director.director.run(next(all_scenes)())

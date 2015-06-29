@@ -103,7 +103,7 @@ class ImagePlaceholderNodeHandlerHandler(TemplateNodeHandler):
     node = ImagePlaceholderNode
 
     def parse_init_args(self, node):
-        return None,
+        return None,  # the comma is not a mistake...leave it
 
 
 class TemplateBuilder:

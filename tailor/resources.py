@@ -4,6 +4,7 @@ import os
 import logging
 
 import pygame
+
 from tailor.config import pkConfig
 
 logger = logging.getLogger('tailor.resources')
