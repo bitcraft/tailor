@@ -1,6 +1,8 @@
+import time
+import logging
+
 import cv2
 from PIL import Image
-import time
 
 # Windows dependencies
 # - Python 2.7.6: http://www.python.org/download/
@@ -13,9 +15,6 @@ import time
 # - pip install numpy
 # - brew tap homebrew/science
 # - brew install opencv
-import logging
-
-from PIL import Image
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.opencvcamera')
@@ -37,15 +36,17 @@ class OpenCVCamera:
         self.close()
 
     def open(self):
-        self.device_context = cv2.VideoCapture(0)
+        dc = cv2.VideoCapture(0)
 
         # give time for webcam to init.
         time.sleep(2)
 
         # 'prime' the capture context...
         # some webcams might not init fully until a capture
-        # is done.  so we do a cpture here to force device to be ready
-        ret, frame = self.device_context.read()
+        # is done.  so we do a capture here to force device to be ready
+        ret, frame = dc.read()
+
+        self.device_context = dc
 
     def close(self):
         self.device_context.release()
@@ -61,7 +62,7 @@ class OpenCVCamera:
         """
         ret, frame = self.device_context.read()
         if ret:
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
         else:
             rgb = None
 
@@ -98,9 +99,7 @@ class OpenCVCamera:
         """
         logger.debug('download_capture')
         image = self.capture_image()
-        image.save('frame.png')
         return image
-        return self.capture_image()
 
     def download_preview(self):
         """ Capture preview image and return data
