@@ -12,9 +12,9 @@ import logging
 import sys
 
 from tailor import plugins
-from tailor.apps.service.service_zc import zeroconf_service
+# from tailor.apps.service.service_zc import zeroconf_service
 from tailor.builder import JSONTemplateBuilder
-import tailor.plugins.composer.composer
+from tailor.plugins.composer.renderer import TemplateRenderer
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.service")
@@ -31,28 +31,14 @@ class ServiceApp:
     """
 
     def run(self):
-        with zeroconf_service():
-            template_filename = 'tailor/resources/templates/test_template.json'
-            template = JSONTemplateBuilder().read(template_filename)
-            loop = asyncio.get_event_loop()
-            session = Session()
-            loop.run_until_complete(session.start(template))
+        template_filename = 'tailor/resources/templates/test_template.json'
+        template_graph_root = JSONTemplateBuilder().read(template_filename)
+        loop = asyncio.get_event_loop()
+        session = Session()
+        loop.run_until_complete(session.start(template_graph_root))
 
 
 class Session:
-    # def trigger_capture(self):
-    #     """ set an event to trigger later, causing a capture
-    #
-    #     triggers are used to ensure capture events happen at
-    #     regular intervals, without being affected by the time
-    #     involved with capturing an image
-    #
-    #     :return: asyncio.Handle
-    #     """
-    #     loop = asyncio.get_event_loop()
-    #     interval = pkConfig.getint('camera', 'countdown-interval')
-    #     return loop.call_later(interval, self.capture)
-
     def __init__(self):
         pass
 
@@ -70,7 +56,7 @@ class Session:
             yield from asyncio.sleep(1)
 
     @asyncio.coroutine
-    def start(self, template):
+    def start(self, root):
         """ new session
 
         Take 4 photos
@@ -79,29 +65,35 @@ class Session:
         """
         logger.debug('starting new session')
 
-        camera = plugins.dummy_camera.DummyCamera()
-
         # needed_captures = template_graph.needed_captures()
         needed_captures = 4
         captures = 0
         errors = 0
 
-        while captures < needed_captures and errors < 3:
-            # wait time_interval seconds
-            yield from asyncio.sleep(1)
-            yield from self.countdown(3)
+        # camera = plugins.dummy_camera.DummyCamera()
+        camera = plugins.opencv_camera.OpenCVCamera()
 
-            try:
-                image = yield from camera.download_capture()
-            except:
-                errors += 1
-                traceback.print_exc(file=sys.stdout)
-                logger.debug('failed capture %s/3', errors)
-                continue
+        with camera:
+            while captures < needed_captures and errors < 3:
+                # wait time_interval seconds
+                # yield from asyncio.sleep(1)
+                # yield from self.countdown(3)
 
-            captures += 1
-            errors = 0
-            logger.debug('capture (%s/%s)', captures, needed_captures)
+                try:
+                    image = camera.download_capture()
+                except:
+                    errors += 1
+                    traceback.print_exc(file=sys.stdout)
+                    logger.debug('failed capture %s/3', errors)
+                    continue
 
-            # C A L L B A C K S
-            template.push_image(image)
+                captures += 1
+                errors = 0
+                logger.debug('capture (%s/%s)', captures, needed_captures)
+
+                # C A L L B A C K S
+                root.push_image(image)
+
+        renderer = TemplateRenderer()
+        image = renderer.render_all(root)
+        image.save('test_service.png')
