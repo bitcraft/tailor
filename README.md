@@ -3,8 +3,8 @@ Tailor
 
 Tailor is a set of hardware plans and software for a wedding/event photo and
 includes image processing, camera control, live slideshow, and touch based
-image browser for kiosk operation.  It is a project in development but stable
-enough for general use.
+image browser for kiosk operation.  It is a project in development and is
+currently in a broken state, as I add better template support.
 
 This project aims for Windows, OS X, and Linux compatibility, but not all
 features are supported on each platform now.  Currently, full features are
@@ -21,11 +21,9 @@ Any camera supported by libgphoto2 is supported by this software.  An up-to-date
 list is available on their website.  Live-view is functional, and can be used
 to preview photos before they are taken.
 
-https://github.com/bitcraft/shutter
+Webcams are supported, but not recommended as they produce poor quality images.
 
 http://www.gphoto.org/proj/libgphoto2/support.php
-
-Webcams are not supported at this time.
 
 
 Interaction
@@ -66,20 +64,21 @@ paypal donations in exchange for my time.
 
 I reserve all rights to determine what features will be added and how the
 interface is used for this software that is hosted here.  You are welcome to
-fork this project at any time and customize it as you wish.
+fork this project at any time and customize it as you wish, subject to the
+restrictions outlined in the file called 'license' found in the repository.
 
 
-Requirements
-------------
+General Requirements
+--------------------
 
 This is a general list of software requirements.  Certain functions of this
 software may require additional dependencies.
 
 -  Debian Linux, OS X 10.x, or Windows 7+
--  Shutter (https://github.com/bitcraft/shutter)
 -  Python 3.4+
 -  Kivy 1.9+
 -  Pygame (for sound)
+-  Arduino with firmata firmware
 
 
 Windows OS Support
@@ -90,7 +89,26 @@ I'm working towards support of Windows OS.
 Kivy and pygame can be downloaded from here:
 http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
- 
+
+Remote Operation
+----------------
+
+Currently, this project requires a dedicated PC, touch screen monitor, and an arduino.  In 
+the near future, it will be possible to run the the booth with a dedicated embedded system
+and a tablet touch screen PC (no apple or android...yet).
+
+The vision is using a low cost system like the Raspberry Pi to operate the camera and printer,
+while a PC tablet (like the microsoft surface x86 only, or yoga) can be used to monitor the
+camera, request additional prints, change template, set up events, or do social ops like
+upload to twitter or facebook.
+
+The result will be a compact and easy-to-transport booth with a portable tablet interface.
+
+Of course, it will still be possible to operate everything on one pc.
+
+Gods willing, an iOS and android app will be available.
+
+
 Legal
 -----
 
