@@ -1,7 +1,6 @@
 """
 image processor/composer that manipulates images
 """
-
 from abc import ABCMeta, abstractmethod
 
 from .renderer import TemplateRenderer

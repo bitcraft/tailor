@@ -13,12 +13,6 @@
   },
   "children": [
     {
-      "type": "image",
-      "data": {
-        "filename": "frame.png"
-      }
-    },
-    {
       "type": "area",
       "data": {
         "rect": [
@@ -85,6 +79,12 @@
           "data": {}
         }
       ]
+    },
+    {
+      "type": "image",
+      "data": {
+        "filename": "frame.png"
+      }
     }
   ]
 }

@@ -1,17 +1,15 @@
 """ Support loading template graphs from json formatted files
 """
 import json
-from abc import ABCMeta, abstractmethod
 
-from tailor.graph import AreaNode, ImageNode, ImagePlaceholderNode
+from tailor.graph import Node
 
 __all__ = ['cast_list_float',
-           'AreaNodeHandlerHandler',
-           'ImageNodeHandlerHandler',
-           'ImagePlaceholderNodeHandlerHandler',
-           'RootNodeHandler',
            'TemplateBuilder',
-           'JSONTemplateBuilder']
+           'JSONTemplateBuilder',
+           'create_root_node',
+           'create_area_node',
+           'create_image_node']
 
 
 def cast_list_float(values):
@@ -21,89 +19,40 @@ def cast_list_float(values):
     :return: list of stuff as floats
     :raises: ValueError TypeError
     """
-    # rect values must be a number
     try:
         return [float(i) for i in values]
     except (ValueError, TypeError):
         raise TemplateBuilder.SyntaxError
 
 
-class TemplateNodeHandler(metaclass=ABCMeta):
-    @abstractmethod
-    def parse_init_args(self, node):
-        """Given a dictionary of data, return a tuple suitable
-           for creating an instance of a class for this handler
-
-           raise syntax errors if needed
-        """
-        raise NotImplementedError
-
-    def create_node(self, data_dict):
-        args = self.parse_init_args(data_dict)
-        name = data_dict.get('name', None)
-        try:
-            node = self.node(*args, name=name)
-        except TypeError:
-            # cause by bad constructor sig.
-            print(self)
-            raise
-        return node
+def create_area_node(json_graph):
+    data = json_graph['data']
+    rect = cast_list_float(data['rect'])
+    units = data.get('units', None)
+    try:
+        dpi = float(data['dpi'])
+    except KeyError:
+        dpi = None
+    return Node('area', {'rect': rect, 'units': units, 'dpi': dpi})
 
 
-class AreaNodeHandlerHandler(TemplateNodeHandler):
-    node = AreaNode
+def create_root_node(json_graph):
+    if not json_graph['name'] == 'root':
+        raise JSONTemplateBuilder.SyntaxError
 
-    def parse_init_args(self, node):
-        data = node['data']
-        rect = cast_list_float(data['rect'])
-        units = data.get('units', None)
-        try:
-            dpi = float(data['dpi'])
-        except KeyError:
-            dpi = None
-        return rect, units, dpi
+    data = json_graph['data']
+    rect = cast_list_float(data['rect'])
+    units = data['units']
+    dpi = float(data['dpi'])
+    return Node('area', {'rect': rect, 'units': units, 'dpi': dpi})
 
 
-class RootNodeHandler(TemplateNodeHandler):
-    node = AreaNode
-
-    def parse_init_args(self, node):
-        try:
-            if not node['name'] == 'root':
-                raise JSONTemplateBuilder.SyntaxError
-        except KeyError:
-            # missing name
-            raise JSONTemplateBuilder.SyntaxError
-
-        data = node['data']
-        rect = cast_list_float(data['rect'])
-
-        try:
-            units = data['units']
-        except KeyError:
-            raise JSONTemplateBuilder.SyntaxError
-
-        try:
-            dpi = float(data['dpi'])
-        except KeyError:
-            raise JSONTemplateBuilder.SyntaxError
-
-        return rect, units, dpi
+def create_image_node(json_graph):
+    return Node('image', {'filename': json_graph['data']['filename']})
 
 
-class ImageNodeHandlerHandler(TemplateNodeHandler):
-    node = ImageNode
-
-    def parse_init_args(self, node):
-        filename = node.get('filename', None)
-        return filename,  # the comma is not a mistake...leave it
-
-
-class ImagePlaceholderNodeHandlerHandler(TemplateNodeHandler):
-    node = ImagePlaceholderNode
-
-    def parse_init_args(self, node):
-        return None,  # the comma is not a mistake...leave it
+def create_placeholder_node(json_graph):
+    return Node('placeholder', json_graph['data'])
 
 
 class TemplateBuilder:
@@ -117,10 +66,10 @@ class TemplateBuilder:
 
     def __init__(self):
         self.handlers = {
-            'root': RootNodeHandler(),
-            'area': AreaNodeHandlerHandler(),
-            'image': ImageNodeHandlerHandler(),
-            'placeholder': ImagePlaceholderNodeHandlerHandler()
+            'root': create_root_node,
+            'area': create_area_node,
+            'image': create_image_node,
+            'placeholder': create_placeholder_node
         }
 
     def build_graph(self, dict_graph):
@@ -152,8 +101,15 @@ class TemplateBuilder:
             # this type is not handled
             raise TemplateBuilder.UnrecognizedNodeTypeError
 
-        return handler.create_node(dict_graph)
+        try:
+            node = handler(dict_graph)
+        except KeyError:
+            # all handlers get args from dict, so a KeyError
+            # indicates the required info. is missing
+            print(node_type, dict_graph)
+            raise TemplateBuilder.SyntaxError
 
+        return node
 
 class JSONTemplateBuilder(TemplateBuilder):
     def read(self, filename):

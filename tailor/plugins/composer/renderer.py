@@ -2,8 +2,8 @@
 utilities for templates
 """
 from PIL import Image
+from .filters.autocrop import Autocrop
 
-from tailor.graph import AreaNode, ImageNode, ImagePlaceholderNode
 
 __all__ = ('TemplateRenderer',)
 
@@ -12,13 +12,13 @@ class TemplateRenderer:
     """
     Render template graphs using PIL
     """
-    mode = 'RGBA'
+    image_mode = 'RGBA'
 
     def __init__(self):
-        self.renderers = {
-            AreaNode: self.render_area_node,
-            ImageNode: self.render_image_node,
-            ImagePlaceholderNode: self.render_image_node
+        self.handlers = {
+            'area': self.render_area_node,
+            'image': self.render_image_node,
+            'placeholder': self.render_cropped_node
         }
 
     def render_node(self, node):
@@ -27,9 +27,9 @@ class TemplateRenderer:
         :return: (PIL Image or None, Rect or None)
         """
         try:
-            func = self.renderers[node.__class__]
+            func = self.handlers[node.kind]
         except KeyError:
-            return
+            return None, None
         return func(node)
 
     def render_all(self, root):
@@ -73,16 +73,33 @@ class TemplateRenderer:
         return None, None
 
     def render_image_node(self, node):
+        # LIMITATIONS: only pastes to area, no scaling
+        if node.filename is not None:
+            node.data = Image.open(node.filename)
+
+        # TODO: scaling options, ect, processing chain
         if node.data:
             root = node.get_root()
-            return node.data, self.convert_rect(node.parent.rect, root.dpi)
+            area = self.convert_rect(node.parent.rect, root.dpi)
+            return node.data, area
+
+        return None, None
+
+    def render_cropped_node(self, node):
+        if node.data:
+            root = node.get_root()
+            # TODO: move these functions into a processing chain
+            area = self.convert_rect(node.parent.rect, root.dpi)
+            image = Autocrop().process(node.data, area)
+            return image, area
+        # TODO: lazy loading of images
         return None, None
 
     def create_blank_image(self, node):
         root = node.get_root()
         size = root.determine_rect()[2:]
         pixel_size = self.convert_from_image_to_pixel(size, root.dpi)
-        return Image.new(self.mode, pixel_size)
+        return Image.new(self.image_mode, pixel_size)
 
     def convert_rect(self, rect, dpi):
         x1, y1, w, h = self.convert_from_image_to_pixel(rect, dpi)

@@ -6,6 +6,6 @@ class Scale(ComposerFilter):
     resize_filter = Image.LANCZOS
 
     def process(self, image, area):
-        x, y, w, h = area
+        w, h = area[2:]
         image.resize(w, h)
         return image

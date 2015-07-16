@@ -44,7 +44,7 @@ class OpenCVCamera:
         # 'prime' the capture context...
         # some webcams might not init fully until a capture
         # is done.  so we do a capture here to force device to be ready
-        ret, frame = dc.read()
+        dc.read()
 
         self.device_context = dc
 
@@ -89,10 +89,10 @@ class OpenCVCamera:
     def save_capture(self, filename=None):
         """ Capture a full image and save to a file
         """
-        logger.debug('capture_image, not implemented')
         # frame = self.capture_frame()
         # cv2.imwrite('capture.jpg', frame)
         # return 'capture.jpg'
+        logger.debug('capture_image, not implemented')
 
     def download_capture(self):
         """ Capture a full image and return data
