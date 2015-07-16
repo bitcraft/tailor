@@ -17,7 +17,7 @@ def reload(path):
     pkConfig.read(config_path)
 
     app_root_path = os.path.realpath(os.path.join(__file__, '..', '..'))
-    app_resources_path = jpath(app_root_path, 'resources')
+    app_resources_path = jpath(app_root_path, 'tailor', 'resources')
     all_templates_path = jpath(app_resources_path, 'templates')
     all_images_path = pkConfig.get('paths', 'images')
     event_name = pkConfig.get('event', 'name')

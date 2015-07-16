@@ -1,7 +1,9 @@
 """ Support loading template graphs from json formatted files
 """
 import json
+import os.path
 
+from tailor.config import pkConfig
 from tailor.graph import Node
 
 __all__ = ['cast_list_float',
@@ -48,7 +50,9 @@ def create_root_node(json_graph):
 
 
 def create_image_node(json_graph):
-    return Node('image', {'filename': json_graph['data']['filename']})
+    filename = json_graph['data']['filename']
+    path = os.path.join(pkConfig['paths']['app_templates'], filename)
+    return Node('image', {'filename': path})
 
 
 def create_placeholder_node(json_graph):
