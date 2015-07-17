@@ -6,3 +6,4 @@ twython
 watchdog
 yapsy
 pyfirmata
+pypubsub

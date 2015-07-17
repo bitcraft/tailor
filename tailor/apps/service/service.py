@@ -12,7 +12,7 @@ import logging
 import sys
 
 from tailor import plugins
-# from tailor.apps.service.service_zc import zeroconf_service
+from tailor.zc import zv_service_context
 from tailor.builder import JSONTemplateBuilder
 from tailor.plugins.composer.renderer import TemplateRenderer
 
@@ -35,7 +35,24 @@ class ServiceApp:
         template_graph_root = JSONTemplateBuilder().read(template_filename)
         loop = asyncio.get_event_loop()
         session = Session()
-        loop.run_until_complete(session.start(template_graph_root))
+
+        # firmata
+        from tailor.hardware import trigger_firmata_check
+        trigger_firmata_check()
+
+        # wait for input from booth
+
+        type_name = '_tailor._tcp.local.'
+        desc = 'tailor test zc'
+        properties = dict()
+        addr = '127.0.0.1'
+        port = 80
+
+        try:
+            with zv_service_context(type_name, desc, properties, addr, port):
+                loop.run_until_complete(session.start(template_graph_root))
+        except:  # eventually put the windows specific socket error here
+            raise
 
 
 class Session:
@@ -95,5 +112,4 @@ class Session:
                 root.push_image(image)
 
         renderer = TemplateRenderer()
-        image = renderer.render_all(root)
-        image.save('test_service.png')
+        yield from renderer.render_all_and_save(root, 'test_service.png')

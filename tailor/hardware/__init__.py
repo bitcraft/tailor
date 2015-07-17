@@ -2,6 +2,41 @@
 Hardware abstractions for the photobooth
 """
 import pyfirmata
+import asyncio
+import mock
+
+delay = 10 / 1000.
+
+board = None
+pin = None
+
+def trigger_firmata_check():
+    global board, pin
+
+    loop = asyncio.get_event_loop()
+    loop.call_later(delay, check_firmata_inputs)
+
+    # setup firmata
+    #board = pyfirmata.Arduino('/dev/tty.usbserial-A6008rIF')
+    board = mock.MagicMock(spec=pyfirmata.Arduino)
+    pin = board.get_pin('d:i:7')  # digital, input, pin #7
+
+def check_firmata_inputs():
+    trigger_firmata_check()
+    # value = pin.read()
+
+    # check for session trigger
+    value = 0
+    if value:
+        pass
+
+# new functionality: WAIT FOR PIN
+# instead of explicitly polling, use asyncio and wai for input from firmata
+@asyncio.coroutine
+def wait_for_trigger():
+    f = asyncio.Future()
+    f._result = 1
+    return f
 
 
 class Booth:
@@ -17,7 +52,7 @@ class Booth:
         self.lights = [main_light, session_light]
 
 
-class Relay(object):
+class Relay:
     def __init__(self, arduino, index, normal_state=0):
         self._arduino = arduino
         self._index = index

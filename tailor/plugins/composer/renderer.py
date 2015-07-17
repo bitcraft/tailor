@@ -1,6 +1,9 @@
 """
 utilities for templates
+
+needs asyncio audit
 """
+import asyncio
 from PIL import Image
 from .filters.autocrop import Autocrop
 
@@ -38,12 +41,21 @@ class TemplateRenderer:
         :param root: Root node
         :return: PIL Image
         """
-        base_image = self.create_blank_image(root)
+        def func():
+            base_image = self.create_blank_image(root)
 
-        for i, node in enumerate(root.bfs_children()):
-            self.render_and_paste(node, base_image)
+            for i, node in enumerate(root.bfs_children()):
+                self.render_and_paste(node, base_image)
 
-        return base_image
+            return base_image
+
+        loop = asyncio.get_event_loop()
+        return loop.run_in_executor(None, func)
+
+    def render_all_and_save(self, root, filename):
+        image = yield from self.render_all(root)
+        loop = asyncio.get_event_loop()
+        return loop.run_in_executor(None, image.save, filename)
 
     def render_and_paste(self, node, base_image):
         """ Render a node, if there is a result, then paste to the base_image

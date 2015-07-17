@@ -1,7 +1,12 @@
+"""
+needs asyncio audit
+"""
+
 import time
 import logging
 
 import cv2
+# import asyncio
 from PIL import Image
 
 # Windows dependencies
