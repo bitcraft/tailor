@@ -34,9 +34,11 @@ def check_firmata_inputs():
 # instead of explicitly polling, use asyncio and wai for input from firmata
 @asyncio.coroutine
 def wait_for_trigger():
-    f = asyncio.Future()
-    f._result = 1
-    return f
+    import time
+    end = time.time() + 5
+    while time.time() < end:
+        yield
+    return 1
 
 
 class Booth:

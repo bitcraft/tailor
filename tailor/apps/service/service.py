@@ -14,7 +14,7 @@ import sys
 from contextlib import ExitStack
 
 from tailor import plugins
-from tailor.zc import zv_service_context, load_services_from_json
+from tailor.zc import zc_service_context, load_services_from_json
 from tailor.builder import JSONTemplateBuilder
 from tailor.plugins.composer.renderer import TemplateRenderer
 
@@ -38,15 +38,9 @@ class ServiceApp:
         loop = asyncio.get_event_loop()
         session = Session()
 
-        # firmata
-        from tailor.hardware import trigger_firmata_check
-        trigger_firmata_check()
-
-        # wait for input from booth
-
         with ExitStack() as stack:
             for service_info in load_services_from_json():
-                context = zv_service_context(service_info)
+                context = zc_service_context(service_info)
                 stack.enter_context(context)
 
             loop.run_until_complete(session.start(template_graph_root))
@@ -77,6 +71,13 @@ class Session:
         Each photo has 3 attempts to take a photo
         If we get 4 photos, or 3 failed attempts, then exit
         """
+        # firmata
+        from tailor.hardware import wait_for_trigger
+
+        # wait for input from booth
+        print('waiting....')
+        yield from wait_for_trigger()
+
         logger.debug('starting new session')
 
         # needed_captures = template_graph.needed_captures()

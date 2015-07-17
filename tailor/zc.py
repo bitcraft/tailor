@@ -5,12 +5,12 @@ from contextlib import contextmanager
 from zeroconf import ServiceInfo, Zeroconf
 
 __all__ = [
-    'zv_service_context',
+    'zc_service_context',
     'load_services_from_json']
 
 
 @contextmanager
-def zv_service_context(service_info):
+def zc_service_context(service_info):
     zeroconf = Zeroconf()
     zeroconf.register_service(service_info)
     try:
