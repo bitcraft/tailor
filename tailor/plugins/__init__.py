@@ -1,3 +1,7 @@
 from . import dummy_camera
 from . import composer
-from . import opencv_camera
+
+try:
+    from . import opencv_camera
+except ImportError:
+    pass

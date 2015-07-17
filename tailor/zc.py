@@ -1,34 +1,38 @@
 import socket
+import json
 from contextlib import contextmanager
 
 from zeroconf import ServiceInfo, Zeroconf
 
+__all__ = [
+    'zv_service_context',
+    'load_services_from_json']
+
 
 @contextmanager
-def zv_service_context(type_name, desc, properties, addr, port):
-    desc_label = desc + '.' + type_name
-
-    info = ServiceInfo(type_name, desc_label,
-                       socket.inet_aton(addr), port, 0, 0,
-                       properties)
-
+def zv_service_context(service_info):
     zeroconf = Zeroconf()
-    print('reg')
-    zeroconf.register_service(info)
-    yield
-    print('dereg')
-    zeroconf.unregister_service(info)
-    zeroconf.close()
+    zeroconf.register_service(service_info)
+    try:
+        yield
+    except:
+        raise
+    finally:
+        zeroconf.unregister_service(service_info)
+        zeroconf.close()
 
 
-if __name__ == '__main__':
-    import time
+def load_services_from_json():
+    filename = 'config/zeroconf.json'
+    with open(filename) as fp:
+        json_data = json.load(fp)
 
-    type_name = '_http._tcp.local.'
-    desc = 'tailor test zc'
-    properties = dict()
-    addr = '127.0.0.1'
-    port = 8080
+    for service_data in json_data['services']:
+        config = service_data['config']
+        type_name = config['type']
+        desc_label = config['description'] + '.' + type_name
+        addr = socket.inet_aton(config['addr'])
+        port = int(config['port'])
+        properties = config['properties']
 
-    with zv_service_context(type_name, desc, properties, addr, port):
-        time.sleep(10)
+        yield ServiceInfo(type_name, desc_label, addr, port, 0, 0, properties)

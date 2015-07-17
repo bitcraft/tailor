@@ -1,10 +1,13 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+#!/usr/bin/env python
+
+""" Example of announcing a service (in this case, a fake HTTP server) """
 
 import logging
 import socket
 import sys
+from time import sleep
 
-from zeroconf import __version__, ServiceInfo, Zeroconf
+from zeroconf import ServiceInfo, Zeroconf
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
@@ -12,28 +15,23 @@ if __name__ == '__main__':
         assert sys.argv[1:] == ['--debug']
         logging.getLogger('zeroconf').setLevel(logging.DEBUG)
 
-    # Test a few module features, including service registration, service
-    # query (for Zoe), and service unregistration.
-    print("Multicast DNS Service Discovery for Python, version %s" % (__version__,))
-    r = Zeroconf()
-    print("1. Testing registration of a service...")
-    desc = {'version': '0.10', 'a': 'test value', 'b': 'another value'}
+    desc = {'path': '/~paulsm/'}
+    desc = dict()
+
     info = ServiceInfo("_http._tcp.local.",
-                       "My Service Name._http._tcp.local.",
-                       socket.inet_aton("127.0.0.1"), 1234, 0, 0, desc)
-    print("   Registering service...")
-    r.register_service(info)
-    print("   Registration done.")
-    print("2. Testing query of service information...")
-    print("   Getting ZOE service: %s" % (
-        r.get_service_info("_http._tcp.local.", "ZOE._http._tcp.local.")))
-    print("   Query done.")
-    print("3. Testing query of own service...")
-    info = r.get_service_info("_http._tcp.local.", "My Service Name._http._tcp.local.")
-    assert info
-    print("   Getting self: %s" % (info,))
-    print("   Query done.")
-    print("4. Testing unregister of service information...")
-    r.unregister_service(info)
-    print("   Unregister done.")
-    r.close()
+                       "Paul's Test Web Site._http._tcp.local.",
+                       socket.inet_aton("127.0.0.1"), 80, 0, 0,
+                       desc)
+
+    zeroconf = Zeroconf()
+    print("Registration of a service, press Ctrl-C to exit...")
+    zeroconf.register_service(info)
+    try:
+        while True:
+            sleep(0.1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        print("Unregistering...")
+        zeroconf.unregister_service(info)
+        zeroconf.close()

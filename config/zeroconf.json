@@ -1,0 +1,24 @@
+{
+  "services": [
+    {
+      "name": "Example #1",
+      "config": {
+        "type": "_tailor._tcp.local",
+        "description": "tailor test #1",
+        "properties": {},
+        "addr": "127.0.0.1",
+        "port": "80"
+      }
+    },
+    {
+      "name": "Example #2",
+      "config": {
+        "type": "_tailor._tcp.local",
+        "description": "tailor test #2",
+        "properties": {},
+        "addr": "127.0.0.1",
+        "port": "80"
+      }
+    }
+  ]
+}

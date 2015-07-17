@@ -86,11 +86,14 @@ class TemplateRenderer:
 
     def render_image_node(self, node):
         # LIMITATIONS: only pastes to area, no scaling
-        if node.filename is not None:
-            node.data = Image.open(node.filename)
+        try:
+            if node.filename is not None:
+                node.data = Image.open(node.filename)
+        except FileNotFoundError:
+            node.data = None
 
         # TODO: scaling options, ect, processing chain
-        if node.data:
+        if node.data is not None:
             root = node.get_root()
             area = self.convert_rect(node.parent.rect, root.dpi)
             return node.data, area

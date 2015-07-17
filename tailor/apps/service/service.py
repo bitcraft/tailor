@@ -11,8 +11,10 @@ import traceback
 import logging
 import sys
 
+from contextlib import ExitStack
+
 from tailor import plugins
-from tailor.zc import zv_service_context
+from tailor.zc import zv_service_context, load_services_from_json
 from tailor.builder import JSONTemplateBuilder
 from tailor.plugins.composer.renderer import TemplateRenderer
 
@@ -42,17 +44,12 @@ class ServiceApp:
 
         # wait for input from booth
 
-        type_name = '_tailor._tcp.local.'
-        desc = 'tailor test zc'
-        properties = dict()
-        addr = '127.0.0.1'
-        port = 80
+        with ExitStack() as stack:
+            for service_info in load_services_from_json():
+                context = zv_service_context(service_info)
+                stack.enter_context(context)
 
-        try:
-            with zv_service_context(type_name, desc, properties, addr, port):
-                loop.run_until_complete(session.start(template_graph_root))
-        except:  # eventually put the windows specific socket error here
-            raise
+            loop.run_until_complete(session.start(template_graph_root))
 
 
 class Session:
@@ -87,13 +84,13 @@ class Session:
         captures = 0
         errors = 0
 
-        # camera = plugins.dummy_camera.DummyCamera()
-        camera = plugins.opencv_camera.OpenCVCamera()
+        camera = plugins.dummy_camera.DummyCamera()
+        # camera = plugins.opencv_camera.OpenCVCamera()
 
         with camera:
             while captures < needed_captures and errors < 3:
                 # wait time_interval seconds
-                # yield from asyncio.sleep(1)
+                # yield from asyncio.sleep(10)
                 # yield from self.countdown(3)
 
                 try:

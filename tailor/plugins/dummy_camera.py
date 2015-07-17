@@ -15,22 +15,25 @@ class DummyCamera:
     """
     image_size = 1024, 1024
 
-    def __init__(self):
-        self.preview_image = Image.new('RGB', self.image_size, (128, 0, 0))
+    def __enter__(self):
+        self.open()
+
+    def __exit__(self, *args):
+        self.close()
 
     def open(self):
         """ Initialize device or driver
 
         :return:
         """
-        pass
+        self.preview_image = Image.new('RGB', self.image_size, (128, 0, 0))
 
     def close(self):
         """ Uninitialize device or driver
 
         :return:
         """
-        pass
+        del self.preview_image
 
     def reset(self):
         pass
