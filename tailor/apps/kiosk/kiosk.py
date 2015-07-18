@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.kiosk-loader")
 
 # make kiosk work without installing tailor into python
-app_root_path = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
+app_root_path = os.path.realpath(os.path.join(__file__, '..', '..', '..', '..'))
 # sys.path.append(app_root_path)
 # sys.path.append(os.path.join(app_root_path, 'tailor'))
 
