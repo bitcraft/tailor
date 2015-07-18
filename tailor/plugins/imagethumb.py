@@ -9,6 +9,7 @@ class ImageThumb:
     spawns a thread that resizes the image.
     creates a square crop to the size passed
     """
+
     def __init__(self, size, destination):
         self.size = size
         self.destination = destination

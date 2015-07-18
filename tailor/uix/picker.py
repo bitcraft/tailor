@@ -28,6 +28,7 @@ jpath = os.path.join
 resource_path = os.path.realpath(jpath(__file__, '..', '..', 'resources'))
 image_path = partial(jpath, resource_path, 'images')
 
+
 # for template source filename mangling
 # app.get_real_source(self.new_source_prop)
 

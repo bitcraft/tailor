@@ -31,6 +31,7 @@ class OpenCVCamera:
 
     Emits auto generated PIL images.
     """
+
     def __init__(self):
         self.device_context = None
 

@@ -7,7 +7,6 @@ import asyncio
 from PIL import Image
 from .filters.autocrop import Autocrop
 
-
 __all__ = ('TemplateRenderer',)
 
 
@@ -41,6 +40,7 @@ class TemplateRenderer:
         :param root: Root node
         :return: PIL Image
         """
+
         def func():
             base_image = self.create_blank_image(root)
 

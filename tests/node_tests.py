@@ -136,10 +136,10 @@ class NodeBuilderTests(TestCase):
         with self.assertRaises(TemplateBuilder.UnrecognizedNodeTypeError):
             builder.build_node(root)
 
-    # def test_push_image(self):
-    #     graph = self.build_test_graph()
-    #     image = Mock()
-    #
-    #     self.assertEqual(graph.children[0].children[0].data, None)
-    #     graph.push_image(image)
-    #     self.assertEqual(graph.children[0].children[0].data, image)
+            # def test_push_image(self):
+            #     graph = self.build_test_graph()
+            #     image = Mock()
+            #
+            #     self.assertEqual(graph.children[0].children[0].data, None)
+            #     graph.push_image(image)
+            #     self.assertEqual(graph.children[0].children[0].data, image)

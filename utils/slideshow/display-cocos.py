@@ -320,17 +320,20 @@ if __name__ == '__main__':
 
     del temp, transitions
 
+
     def next_scene(dt=0):
         scene = next(all_scenes)()
 
         transition = random.choice(all_transitions)
         cocos.director.director.replace(transition(scene, duration=1))
 
+
     def panscan_scene(dt=0):
         pyglet.clock.schedule_once(next_scene, 15)
         scene = cocos.scene.Scene(
             PanScanLayer())
         return scene
+
 
     def pile_scene(dt=0):
         pyglet.clock.schedule_once(next_scene, 10)
@@ -339,12 +342,14 @@ if __name__ == '__main__':
             PhotoPileLayer())
         return scene
 
+
     def scroll_scene(dt=0):
         pyglet.clock.schedule_once(next_scene, 25)
         scene = cocos.scene.Scene(
             BackgroundLayer('../images/seamless-montage.png'),
             ScrollingLayer())
         return scene
+
 
     all_scenes = [panscan_scene, pile_scene, scroll_scene]
     all_scenes = itertools.cycle(all_scenes)

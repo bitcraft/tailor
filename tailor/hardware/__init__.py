@@ -10,6 +10,7 @@ delay = 10 / 1000.
 board = None
 pin = None
 
+
 def trigger_firmata_check():
     global board, pin
 
@@ -21,6 +22,7 @@ def trigger_firmata_check():
     board = mock.MagicMock(spec=pyfirmata.Arduino)
     pin = board.get_pin('d:i:7')  # digital, input, pin #7
 
+
 def check_firmata_inputs():
     trigger_firmata_check()
     # value = pin.read()
@@ -29,6 +31,7 @@ def check_firmata_inputs():
     value = 0
     if value:
         pass
+
 
 # new functionality: WAIT FOR PIN
 # instead of explicitly polling, use asyncio and wai for input from firmata
@@ -45,6 +48,7 @@ class Booth:
     """
     implements the hardware interface to booth electronics
     """
+
     def __init__(self):
         main_light = Relay(0)
         session_light = Relay(1)

@@ -115,6 +115,7 @@ class TemplateBuilder:
 
         return node
 
+
 class JSONTemplateBuilder(TemplateBuilder):
     def read(self, filename):
         with open(filename) as fp:
