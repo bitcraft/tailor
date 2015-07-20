@@ -4,7 +4,7 @@ def main():
 
     logging.basicConfig(level=logging.DEBUG)
 
-    app = kiosk.KioskApp()
+    app = kiosk.new()
     app.run()
 
 

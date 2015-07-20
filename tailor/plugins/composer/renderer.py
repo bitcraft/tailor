@@ -34,6 +34,7 @@ class TemplateRenderer:
             return None, None
         return func(node)
 
+    @asyncio.coroutine
     def render_all(self, root):
         """ Render a new image and all nodes.  Must pass in the root node.
 
@@ -52,6 +53,7 @@ class TemplateRenderer:
         loop = asyncio.get_event_loop()
         return loop.run_in_executor(None, func)
 
+    @asyncio.coroutine
     def render_all_and_save(self, root, filename):
         image = yield from self.render_all(root)
         loop = asyncio.get_event_loop()

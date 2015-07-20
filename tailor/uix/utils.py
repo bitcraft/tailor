@@ -2,11 +2,6 @@ import socket
 import threading
 import logging
 import queue
-from io import StringIO
-
-from PIL import Image as PIL_Image
-
-from kivy.core.image import ImageData
 from ..config import pkConfig as pkConfig
 
 logging.basicConfig(level=logging.DEBUG)
@@ -29,80 +24,6 @@ def search(root, uniqueid):
                 return child
 
     return None
-
-
-class PreviewHandler:
-    def __init__(self):
-        self.queue = queue.Queue(maxsize=10)
-        self.thread = None
-        self.running = False
-
-    def start(self):
-        def func():
-            self.running = True
-            queue_put = self.queue.put
-            pil_open = PIL_Image.open
-
-            host = 'localhost'
-            port = 23453
-            buffer_size = 1024
-
-            while self.running:
-                try:
-                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    s.connect((host, port))
-                except:
-                    raise
-
-                data = ''
-                try:
-                    chunk = s.recv(buffer_size)
-                    while len(chunk):
-                        data += chunk
-                        chunk = s.recv(buffer_size)
-                    s.close()
-                    data = data[4:]
-                except:
-                    raise
-
-                try:
-                    im = pil_open(StringIO(str(data)))
-                except IOError:
-                    continue
-
-                # HACK
-                w, h = im.size
-                ww = 1.55 * 300
-                hh = 1.27 * 300
-                scale = hh / h
-                sw = int(w * scale)
-                cx = int((sw - ww) / 2)
-                im = im.resize((int(sw), int(hh)), PIL_Image.ANTIALIAS)
-                im = im.crop((int(cx), 0, int(sw - cx), int(hh)))
-                im.load()
-
-                im = im.transpose(PIL_Image.FLIP_TOP_BOTTOM)
-                imdata = ImageData(im.size[0],
-                                   im.size[1],
-                                   im.mode.lower(),
-                                   im.tostring())
-
-                # this will block until the consumer has taken an image
-                # it's a good thing (tm)
-                queue_put(imdata)
-
-        if self.thread is None:
-            logger.debug('starting the preview handler')
-            self.thread = threading.Thread(target=func)
-            self.thread.daemon = True
-            self.thread.start()
-
-    def stop(self):
-        if self.thread is None:
-            logger.debug('want to stop preview thread, but is not running')
-        else:
-            logger.debug('stopping the preview handler')
-            self.running = False
 
 
 class ArduinoHandler:
