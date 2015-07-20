@@ -72,7 +72,7 @@ class Session:
         If we get 4 photos, or 3 failed attempts, then exit
         """
         # firmata
-        from tailor.hardware import wait_for_trigger
+        from tailor.hardware.arduino import wait_for_trigger
 
         # wait for input from booth
         print('waiting....')
