@@ -1,13 +1,4 @@
-magtek-pyusb.py / swipe.py:
-    experiments in using a cardreader for console access
-
-pyglet-patch:
-    fixes opengl issues on some linux systems
-
 vkeyboard.py, email.json:
     allows for more formatting options on the kivy vkeyboard
     it must be manually copied into the kivy installation.
     required because it improves email address input
-
-preview-pygame:
-    fullscreen app to preview the dslr liveview from shutter
