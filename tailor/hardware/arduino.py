@@ -1,41 +1,30 @@
-import pyfirmata
+from pymata_aio.pymata_core import PymataCore
+from pymata_aio.constants import Constants
 import asyncio
-import mock
-
-delay = 10 / 1000.
-
-board = None
-pin = None
 
 
-def trigger_firmata_check():
-    global board, pin
-
-    loop = asyncio.get_event_loop()
-    loop.call_later(delay, check_firmata_inputs)
-
-    # setup firmata
-    #board = pyfirmata.Arduino('/dev/tty.usbserial-A6008rIF')
-    board = mock.MagicMock(spec=pyfirmata.Arduino)
-    pin = board.get_pin('d:i:7')  # digital, input, pin #7
 
 
-def check_firmata_inputs():
-    trigger_firmata_check()
-    # value = pin.read()
-
-    # check for session trigger
-    value = 0
-    if value:
-        pass
-
-
-# new functionality: WAIT FOR PIN
-# instead of explicitly polling, use asyncio and wai for input from firmata
 @asyncio.coroutine
 def wait_for_trigger():
-    import time
-    end = time.time() + 5
-    while time.time() < end:
-        yield
-    return 1
+    board = PymataCore(com_port='/dev/cu.usbmodem641')
+    yield from board.start()
+
+    yield from board.set_pin_mode(6, Constants.OUTPUT, )
+    yield from board.set_pin_mode(7, Constants.OUTPUT, )
+    yield from board.set_pin_mode(2, Constants.INPUT, )
+
+    # set the pin to 128
+    yield from board.digital_write(6, 1)
+    yield from asyncio.sleep(.2)
+    yield from board.digital_write(6, 0)
+    yield from asyncio.sleep(.2)
+    yield from board.digital_write(7, 1)
+    yield from asyncio.sleep(.2)
+    yield from board.digital_write(7, 0)
+    yield from asyncio.sleep(.2)
+
+
+
+    # shutdown
+    yield from board.shutdown()

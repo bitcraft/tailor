@@ -2,6 +2,5 @@ kivy
 pillow
 zeroconf
 shutter
-watchdog
-pyfirmata
 pysdl2
+pymata-aio
