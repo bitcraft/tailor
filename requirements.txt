@@ -2,9 +2,6 @@ kivy
 pillow
 zeroconf
 shutter
-twython
 watchdog
-yapsy
 pyfirmata
-pypubsub
 pysdl2

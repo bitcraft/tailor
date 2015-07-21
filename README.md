@@ -13,6 +13,8 @@ Windows, but it is being worked on.
 
 I use Tailor for my professional photobooth service.
 
+The name "tailor" is currently just a stand-in and may change at any time.
+
 
 Cameras
 -------
@@ -21,7 +23,7 @@ Any camera supported by libgphoto2 is supported by this software.  An up-to-date
 list is available on their website.  Live-view is functional, and can be used
 to preview photos before they are taken.
 
-Webcams are supported, but not recommended as they produce poor quality images.
+Webcams are supported but not recommended as they produce poor quality images.
 
 http://www.gphoto.org/proj/libgphoto2/support.php
 
