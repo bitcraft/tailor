@@ -16,6 +16,7 @@ class PreviewHandler:
     Currently is just hammers the host and rapidly opens and closes a socket.
     should instead open socket, stream data and close after a timeout (30 seconds?).
     """
+
     def __init__(self):
         self.queue = queue.Queue(maxsize=10)
         self.thread = None
@@ -94,4 +95,3 @@ class PreviewHandler:
     @staticmethod
     def create_kivy_image_data(image):
         return ImageData(image.size[0], image.size[1], image.mode.lower(), image.tostring())
-

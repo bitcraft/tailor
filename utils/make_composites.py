@@ -96,6 +96,7 @@ def async_open(filename):
 
 if __name__ == "__main__":
     import time
+
     start = time.time()
     loop = asyncio.get_event_loop()
     template_filename = normpath('tailor/resources/templates/test_template.json')
