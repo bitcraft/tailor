@@ -4,7 +4,7 @@ Tailor
 Tailor is a set of hardware plans and software for a wedding/event photo and
 includes image processing, camera control, live slideshow, and touch based
 image browser for kiosk operation.  It is a project in development and is
-currently in a broken state, as I add better template support.
+currently in a broken state as I add better template support.
 
 This project aims for Windows, OS X, and Linux compatibility, but not all
 features are supported on each platform now.  Currently, full features are
@@ -71,13 +71,12 @@ restrictions outlined in the file called 'license' found in the repository.
 General Requirements
 --------------------
 
-This is a general list of software requirements.  Certain functions of this
+This is a general list of requirements.  Certain functions of this
 software may require additional dependencies.
 
 -  Debian Linux, OS X 10.x, or Windows 7+
 -  Python 3.4+
 -  Kivy 1.9+
--  Pygame (for sound)
 -  Arduino with firmata firmware
 
 
@@ -95,7 +94,7 @@ Remote Operation
 
 Currently, this project requires a dedicated PC, touch screen monitor, and an arduino.  In 
 the near future, it will be possible to run the the booth with a dedicated embedded system
-and a tablet touch screen PC (no apple or android...yet).
+and a tablet touch screen PC for control (no apple or android...yet).
 
 The vision is using a low cost system like the Raspberry Pi to operate the camera and printer,
 while a PC tablet (like the microsoft surface x86 only, or yoga) can be used to monitor the

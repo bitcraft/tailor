@@ -7,3 +7,4 @@ watchdog
 yapsy
 pyfirmata
 pypubsub
+pysdl2
