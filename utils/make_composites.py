@@ -82,7 +82,7 @@ def async_consume_filenames(filename_queue, image_queue):
 
 @asyncio.coroutine
 def async_queue_filenames(filename_queue, files):
-    assert(len(files) % 4 == 0)
+    # assert(len(files) % 4 == 0)
     for index, filename in enumerate(files):
         yield from filename_queue.put(filename)
     yield from filename_queue.put(None)

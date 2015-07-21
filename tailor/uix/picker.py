@@ -130,7 +130,7 @@ class PickerScreen(Screen):
 
             # show the focus widget
             elif self.focus_widget is not widget:
-                return False
+                self.change_state('focus', widget=widget)
 
     def check_new_photos(self, dt):
         """ Scan for new images and scroll to edge if found
@@ -247,6 +247,8 @@ class PickerScreen(Screen):
         # =====================================================================
         #  N O R M A L  =>  F O C U S
 
+        print('change')
+
         widget = kwargs['widget']
         self.scrollview_hidden = True
 
@@ -318,8 +320,15 @@ class PickerScreen(Screen):
         Clock.schedule_once(self.unlock, .5)
 
     @staticmethod
+    def get_paths():
+        path = '~/events/carrie-jon/composites/'
+        path = os.path.expanduser(path)
+        path = os.path.normpath(path)
+        return path, path, path, path
+
+    @staticmethod
     def get_images():
-        path = '~/events/carrie-jon/originals/'
+        path = '~/events/carrie-jon/composites/'
         path = os.path.expanduser(path)
         path = os.path.normpath(path)
         return set(glob.glob('{0}/*.png'.format(path)))
