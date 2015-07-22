@@ -3,8 +3,6 @@ from pymata_aio.constants import Constants
 import asyncio
 
 
-
-
 @asyncio.coroutine
 def wait_for_trigger():
     board = PymataCore(com_port='/dev/cu.usbmodem641')
@@ -23,8 +21,6 @@ def wait_for_trigger():
     yield from asyncio.sleep(.2)
     yield from board.digital_write(7, 0)
     yield from asyncio.sleep(.2)
-
-
 
     # shutdown
     yield from board.shutdown()
