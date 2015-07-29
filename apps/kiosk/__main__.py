@@ -1,11 +1,11 @@
 def main():
     import logging
-    from tailor.apps.server import server
+    from kiosk import new
 
     logging.basicConfig(level=logging.DEBUG)
 
-    app = server.ServerApp()
-    app.run(debug=True)
+    app = new()
+    app.run()
 
 
 if __name__ == "__main__":

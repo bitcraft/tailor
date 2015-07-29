@@ -91,7 +91,7 @@ class Session:
         with camera:
             while captures < needed_captures and errors < 3:
                 # wait time_interval seconds
-                # yield from asyncio.sleep(10)
+                yield from asyncio.sleep(.5)
                 # yield from self.countdown(3)
 
                 try:

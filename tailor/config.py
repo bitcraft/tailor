@@ -23,6 +23,7 @@ def reload(path):
     event_name = pkConfig.get('event', 'name')
     event_images_path = jpath(all_images_path, event_name)
 
+    # TODO: eventually incorperate zeroconf discovery
     paths = {
         'app_resources': app_resources_path,
         'app_sounds': jpath(app_resources_path, 'sounds'),
@@ -38,6 +39,9 @@ def reload(path):
     }
 
     pkConfig['paths'] = paths
+    pkConfig['remote_server'] = {'protocol': 'http',
+                                 'host': '127.0.0.1',
+                                 'port': 5000}
 
 
 reload(os.path.join(os.path.dirname(__file__), '..', 'config'))

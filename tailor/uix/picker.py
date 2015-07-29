@@ -2,6 +2,7 @@ from functools import partial
 import glob
 import os
 import logging
+from urllib.parse import urlparse
 
 from kivy.animation import Animation
 from kivy.clock import Clock
@@ -11,11 +12,12 @@ from kivy.loader import Loader
 from kivy.network.urlrequest import UrlRequest
 from kivy.uix.screenmanager import Screen
 from kivy.properties import *
-from ..config import pkConfig as pkConfig
+
+from .effects import TailorScrollEffect
 from .sharing import SharingControls
 from .utils import search
-from .effects import TailorScrollEffect
 from .utils import ArduinoHandler
+from ..config import pkConfig as pkConfig
 from natsort import natsorted
 
 logging.basicConfig(level=logging.DEBUG)
@@ -25,6 +27,8 @@ OFFSET = 172
 jpath = os.path.join
 resource_path = os.path.realpath(jpath(__file__, '..', '..', 'resources'))
 image_path = partial(jpath, resource_path, 'images')
+
+polling_interval = 5
 
 
 class PickerScreen(Screen):
@@ -47,6 +51,8 @@ class PickerScreen(Screen):
         self.background = search(self, 'background')
         self.scrollview = search(self, 'scrollview')
         self.grid = search(self, 'grid')
+
+        self.focus_widget = None
 
         # the grid will expand horizontally as items are added
         def f(widget, value):
@@ -88,25 +94,11 @@ class PickerScreen(Screen):
 
         # tweak the loading so it is quick
         Loader.loading_image = CoreImage(image_path('loading.gif'))
-        Loader.num_workers = pkConfig.getint('kiosk', 'loaders')
-        Loader.max_upload_per_frame = pkConfig.getint('kiosk',
-                                                      'max-upload-per-frame')
 
         self.scrollview_hidden = False
 
         # stuff for the arduino/tilt
         self.arduino_handler = ArduinoHandler()
-
-        # F O C U S   W I D G E T
-        # the focus widget is the large preview image that is shown if the user
-        # touches a small widget on the screen
-        self.focus_widget = Factory.FocusWidget(
-            source=image_path('loading.gif'))
-        self.focus_widget.allow_stretch = True
-        self.focus_widget.pos_hint = {'top': -1, 'center_x': .75}
-        self.focus_widget.height = self.height
-        self.focus_widget.bind(on_touch_down=self.on_image_touch)
-        self.add_widget(self.focus_widget)
 
         # P R E V I E W   L A B E L
         # the preview label is used with the focus widget is open
@@ -120,7 +112,8 @@ class PickerScreen(Screen):
         self.locked = False
         self.loaded = set()
 
-        Clock.schedule_interval(self.check_new_photos, 1)
+        self.check_new_photos(None)
+        Clock.schedule_interval(self.check_new_photos, polling_interval)
 
     def on_image_touch(self, widget, touch):
         """ called when any image is touched
@@ -138,14 +131,21 @@ class PickerScreen(Screen):
         images = set(results['files'])
         new = natsorted(images - self.loaded)
         self.loaded.update(new)
-        self.add_new_images(new)
+
+        # retrieve small images, not large
+        to_get = list()
+        for url in new:
+            new_url = url + '?size=small'
+            to_get.append(new_url)
+
+        self.fetch_images(to_get)
 
     def get_images(self):
-        url = 'http://127.0.0.1:5000/files'
+        url = '{protocol}://{host}:{port}/files'.format(**pkConfig['remote_server'])
         on_success = self.handle_new_images_response
         req = UrlRequest(url, on_success)
 
-    def add_new_images(self, new):
+    def fetch_images(self, new):
         for filename in new:
             widget = Factory.AsyncImage(
                 source=filename,
@@ -173,6 +173,19 @@ class PickerScreen(Screen):
 
     def unlock(self, dt=None):
         self.locked = False
+
+    def new_focus_widget(self, source):
+        # F O C U S   W I D G E T
+        # the focus widget is the large preview image that is shown if the user
+        # touches a small widget on the screen
+        widget = Factory.AsyncImage(source=source)
+        widget.allow_stretch = True
+        widget.pos_hint = {'top': -1, 'center_x': .75}
+        widget.height = self.height
+        widget.bind(on_touch_down=self.on_image_touch)
+
+        self.focus_widget = widget
+        self.add_widget(widget)
 
     def change_state(self, state, **kwargs):
         if self.locked:
@@ -265,24 +278,25 @@ class PickerScreen(Screen):
         widget = kwargs['widget']
         self.scrollview_hidden = True
 
+
         # cancel all running animations
         Animation.cancel_all(self.scrollview)
         Animation.cancel_all(self.background)
-        Animation.cancel_all(self.focus_widget)
         Animation.cancel_all(self.drawer)
 
         # set the focus widget to have the same image as the one picked
         # do a bit of mangling to get a more detailed image
-        thumb, detail, original, comp = self.get_paths()
-        filename = jpath(detail, os.path.basename(widget.source))
-        original = jpath(original, os.path.basename(widget.source))
 
         # get a medium resolution image for the preview
-        self.focus_widget.source = filename
+
+        o = urlparse(widget.source)
+        source = o.scheme + "://" + o.netloc + o.path
+
+        self.new_focus_widget(source)
 
         # show the controls
         self.controls = SharingControls()
-        self.controls.filename = original
+        self.controls.filename = source
         self.controls.size_hint = .40, 1
         self.controls.opacity = 0
 
