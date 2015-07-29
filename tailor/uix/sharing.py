@@ -1,14 +1,14 @@
-import shutil
 from functools import partial
 
+from kivy.config import Config
+from kivy.properties import *
+from kivy.network.urlrequest import UrlRequest
 from kivy.uix.accordion import AccordionItem
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.config import Config
-from kivy.properties import *
 from ..smtp import SenderThread
 from ..config import pkConfig as pkConfig
 
@@ -49,12 +49,15 @@ class SharingControls(FloatLayout):
             widget.on_touch_up = derp
             widget.on_touch_motion = derp
 
-    def do_print(self, popup, widget):
+    def do_print(self):
+        url = 'http://127.0.0.1:5000/print/' + self.filename
+        for i in range(self.prints):
+            req = UrlRequest(url)
+
+    def handle_print_touch(self, popup, widget):
         popup.dismiss()
 
-        for i in range(self.prints):
-            filename = '/home/mjolnir/smb-printsrv/temp-preint-{}.png'.format(i)
-            shutil.copyfile(self.filename, filename)
+        self.do_print()
 
         layout = BoxLayout(orientation='vertical')
         label = Label(
@@ -130,7 +133,7 @@ class SharingControls(FloatLayout):
             auto_dismiss=False)
 
         button0.bind(on_release=partial(
-            self.do_print, popup))
+            self.handle_print_touch, popup))
 
         button1.bind(on_release=popup.dismiss)
         popup.open()

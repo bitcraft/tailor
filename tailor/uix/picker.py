@@ -8,6 +8,7 @@ from kivy.clock import Clock
 from kivy.core.image import Image as CoreImage
 from kivy.factory import Factory
 from kivy.loader import Loader
+from kivy.network.urlrequest import UrlRequest
 from kivy.uix.screenmanager import Screen
 from kivy.properties import *
 from ..config import pkConfig as pkConfig
@@ -15,6 +16,7 @@ from .sharing import SharingControls
 from .utils import search
 from .effects import TailorScrollEffect
 from .utils import ArduinoHandler
+from natsort import natsorted
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.picker')
@@ -132,23 +134,34 @@ class PickerScreen(Screen):
             elif self.focus_widget is not widget:
                 self.change_state('focus', widget=widget)
 
-    def check_new_photos(self, dt):
-        """ Scan for new images and scroll to edge if found
-        """
+    def handle_new_images_response(self, req, results):
+        images = set(results['files'])
+        new = natsorted(images - self.loaded)
+        self.loaded.update(new)
+        self.add_new_images(new)
 
-        new = self.get_images() - self.loaded
+    def get_images(self):
+        url = 'http://127.0.0.1:5000/files'
+        on_success = self.handle_new_images_response
+        req = UrlRequest(url, on_success)
 
-        for filename in sorted(new):
-            self.loaded.add(filename)
+    def add_new_images(self, new):
+        for filename in new:
             widget = Factory.AsyncImage(
                 source=filename,
                 allow_stretch=True)
             widget.bind(on_touch_down=self.on_image_touch)
             self.grid.add_widget(widget)
+        self.scroll_to_end()
 
+    def check_new_photos(self, dt):
+        """ Scan for new images and scroll to edge if found
+        """
+        self.get_images()
+
+    def scroll_to_end(self):
         # scroll to edge
-        if new and self.scrollview.effect_x is not None:
-            self.loaded |= new
+        if self.scrollview.effect_x is not None:
             Animation(
                 value_normalized=1,
                 t='in_out_quad',
@@ -319,16 +332,3 @@ class PickerScreen(Screen):
         self.locked = True
         Clock.schedule_once(self.unlock, .5)
 
-    @staticmethod
-    def get_paths():
-        path = '~/events/carrie-jon/composites/'
-        path = os.path.expanduser(path)
-        path = os.path.normpath(path)
-        return path, path, path, path
-
-    @staticmethod
-    def get_images():
-        path = '~/events/carrie-jon/composites/'
-        path = os.path.expanduser(path)
-        path = os.path.normpath(path)
-        return set(glob.glob('{0}/*.png'.format(path)))

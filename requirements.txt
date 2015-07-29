@@ -4,3 +4,4 @@ zeroconf
 shutter
 pysdl2
 pymata-aio
+flask
