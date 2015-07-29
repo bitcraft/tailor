@@ -1,15 +1,26 @@
-# -*- coding: utf-8; -*-
-
-from argparse import ArgumentParser
 import logging
 
-logger = logging.getLogger("tailor.apps.service.__main__")
+logger = logging.getLogger()
 
-from tailor.apps.service import service
+from argparse import ArgumentParser
 
-if __name__ == "__main__":
+
+def main():
+    from service import ServiceApp
+
     parser = ArgumentParser(prog="tailor", description="tailor camera service")
     args = parser.parse_args()
 
-    app = service.ServiceApp()
+    app = ServiceApp()
     app.run()
+
+
+if __name__ == "__main__":
+    import sys
+    import os
+
+    # hack to allow tailor to run without installing
+    sys.path.append(os.path.normpath(
+        os.path.join(os.path.dirname(__file__), '..', '..')))
+
+    main()

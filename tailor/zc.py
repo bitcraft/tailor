@@ -22,12 +22,7 @@ def zc_service_context(service_info):
         zeroconf.close()
 
 
-def load_services_from_json():
-    filename = 'config/zeroconf.json'
-    with open(filename) as fp:
-        json_data = json.load(fp)
-
-    for service_data in json_data['services']:
+def new_service_from_json(service_data):
         config = service_data['config']
         type_name = config['type']
         desc_label = config['description'] + '.' + type_name
@@ -36,3 +31,13 @@ def load_services_from_json():
         properties = config['properties']
 
         yield ServiceInfo(type_name, desc_label, addr, port, 0, 0, properties)
+
+
+def load_services_from_config():
+    # TODO: move to more generic loader
+    filename = 'config/server.json'
+    with open(filename) as fp:
+        json_data = json.load(fp)
+
+    for service_data in json_data['zeroconf-servers']:
+        yield new_service_from_json(service_data)

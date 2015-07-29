@@ -9,10 +9,10 @@ from kivy.core.image import Image as CoreImage
 from kivy.factory import Factory
 from kivy.loader import Loader
 from kivy.network.urlrequest import UrlRequest
+from kivy.properties import *
 from kivy.uix.screenmanager import Screen
 from natsort import natsorted
 
-from kivy.properties import *
 from .effects import TailorScrollEffect
 from .sharing import SharingControls
 from .utils import search

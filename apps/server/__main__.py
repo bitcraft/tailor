@@ -1,8 +1,11 @@
-def main():
-    import logging
-    from server import ServerApp
+import logging
 
-    logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
+
+
+
+def main():
+    from server import ServerApp
 
     app = ServerApp()
     app.run(debug=True)

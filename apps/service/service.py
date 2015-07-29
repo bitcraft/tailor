@@ -13,11 +13,10 @@ import sys
 from contextlib import ExitStack
 
 from tailor import plugins
-from tailor.zc import zc_service_context, load_services_from_json
+from tailor.zc import zc_service_context, load_services_from_config
 from tailor.builder import JSONTemplateBuilder
 from tailor.plugins.composer.renderer import TemplateRenderer
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.service")
 
 
@@ -37,8 +36,15 @@ class ServiceApp:
         loop = asyncio.get_event_loop()
         session = Session()
 
+        # @asyncio.coroutine
+        # def sessions_loop():
+        #     while running:
+        #         wait_for_trigger()
+        #         image = from sessions()
+        #         postin_image_to_server(image)
+
         with ExitStack() as stack:
-            for service_info in load_services_from_json():
+            for service_info in load_services_from_config():
                 context = zc_service_context(service_info)
                 stack.enter_context(context)
 
@@ -46,9 +52,6 @@ class ServiceApp:
 
 
 class Session:
-    def __init__(self):
-        pass
-
     def on_countdown_tick(self):
         # play sound or something
         pass
@@ -90,8 +93,9 @@ class Session:
         with camera:
             while captures < needed_captures and errors < 3:
                 # wait time_interval seconds
-                yield from asyncio.sleep(.5)
                 # yield from self.countdown(3)
+
+                yield from asyncio.sleep(.5)
 
                 try:
                     image = camera.download_capture()
@@ -110,3 +114,5 @@ class Session:
 
         renderer = TemplateRenderer()
         yield from renderer.render_all_and_save(root, 'test_service.png')
+
+        return root

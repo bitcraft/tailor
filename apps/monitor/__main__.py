@@ -1,12 +1,22 @@
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
+
+
 def main():
-    import logging
-    from tailor.apps.monitor import monitor
+    from monitor import MonitorApp
 
-    logging.basicConfig(level=logging.DEBUG)
-
-    app = monitor.MonitorApp()
+    app = MonitorApp()
     app.run()
 
 
 if __name__ == "__main__":
+    import sys
+    import os
+
+    # hack to allow tailor to run without installing
+    sys.path.append(os.path.normpath(
+        os.path.join(os.path.dirname(__file__), '..', '..')))
+
     main()
