@@ -3,11 +3,13 @@ given a template and folder, make a bunch of composites
 """
 import glob
 import os.path
-from PIL import Image
-from tailor.builder import JSONTemplateBuilder
-from tailor.plugins.composer.renderer import TemplateRenderer
 import asyncio
 import copy
+
+from PIL import Image
+
+from tailor.builder import JSONTemplateBuilder
+from tailor.plugins.composer.renderer import TemplateRenderer
 
 
 def normpath(path):
@@ -28,7 +30,8 @@ def render_all_files(template, files):
     tasks = set()
     tasks.add(create_task(async_queue_filenames(filename_queue, files)))
     tasks.add(create_task(async_consume_filenames(filename_queue, image_queue)))
-    tasks.add(create_task(async_consume_images(template, renderer, image_queue)))
+    tasks.add(
+        create_task(async_consume_images(template, renderer, image_queue)))
     tasks.add(filename_queue.join())
 
     yield from asyncio.wait(tasks)
@@ -99,7 +102,8 @@ if __name__ == "__main__":
 
     start = time.time()
     loop = asyncio.get_event_loop()
-    template_filename = normpath('tailor/resources/templates/test_template.json')
+    template_filename = normpath(
+        'tailor/resources/templates/test_template.json')
     template_master = JSONTemplateBuilder().read(template_filename)
     folder = normpath('~/events/carrie-jon/originals/')
     files = glob.glob('{0}/*.jpg'.format(folder))

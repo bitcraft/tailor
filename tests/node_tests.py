@@ -1,7 +1,5 @@
 from unittest import TestCase
 
-from mock import Mock
-
 from tailor.builder import *
 
 

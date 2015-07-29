@@ -10,7 +10,6 @@ import os
 import traceback
 import logging
 import sys
-
 from contextlib import ExitStack
 
 from tailor import plugins

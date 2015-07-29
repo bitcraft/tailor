@@ -3,6 +3,7 @@ import logging
 import socket
 import threading
 from io import StringIO
+
 from PIL import Image as PIL_Image
 from kivy.core.image import ImageData
 
@@ -94,4 +95,5 @@ class PreviewHandler:
 
     @staticmethod
     def create_kivy_image_data(image):
-        return ImageData(image.size[0], image.size[1], image.mode.lower(), image.tostring())
+        return ImageData(image.size[0], image.size[1], image.mode.lower(),
+                         image.tostring())

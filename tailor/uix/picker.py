@@ -1,5 +1,4 @@
 from functools import partial
-import glob
 import os
 import logging
 from urllib.parse import urlparse
@@ -11,14 +10,14 @@ from kivy.factory import Factory
 from kivy.loader import Loader
 from kivy.network.urlrequest import UrlRequest
 from kivy.uix.screenmanager import Screen
-from kivy.properties import *
+from natsort import natsorted
 
+from kivy.properties import *
 from .effects import TailorScrollEffect
 from .sharing import SharingControls
 from .utils import search
 from .utils import ArduinoHandler
 from ..config import pkConfig as pkConfig
-from natsort import natsorted
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.picker')
@@ -141,7 +140,8 @@ class PickerScreen(Screen):
         self.fetch_images(to_get)
 
     def get_images(self):
-        url = '{protocol}://{host}:{port}/files'.format(**pkConfig['remote_server'])
+        url = '{protocol}://{host}:{port}/files'.format(
+            **pkConfig['remote_server'])
         on_success = self.handle_new_images_response
         req = UrlRequest(url, on_success)
 
@@ -345,4 +345,3 @@ class PickerScreen(Screen):
         # schedule a unlock
         self.locked = True
         Clock.schedule_once(self.unlock, .5)
-

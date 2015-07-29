@@ -1,18 +1,17 @@
 from glob import glob
+from os.path import join
+import os
+
 from flask import Flask, request, jsonify, send_from_directory
 
-from os.path import join
-
 from tailor.config import pkConfig
-import os
 
 app = Flask(__name__)
 
 
-#monitor_folder = 'C:\\Users\\Leif\\events\\carrie-jon\\composites\\'
+# monitor_folder = 'C:\\Users\\Leif\\events\\carrie-jon\\composites\\'
 monitor_folder = '/Users/leif/events/heather-matt/composites/'
 glob_string = '*png'
-
 
 
 def get_filenames_to_serve():
@@ -47,7 +46,6 @@ def retrieve_file(filename):
         return send_from_directory(path, filename)
     except:
         pass
-
 
 
 @app.route('/print/<filename>')

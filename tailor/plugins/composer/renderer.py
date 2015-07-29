@@ -4,7 +4,9 @@ utilities for templates
 needs asyncio audit
 """
 import asyncio
+
 from PIL import Image
+
 from .filters.autocrop import Autocrop
 
 __all__ = ('TemplateRenderer',)

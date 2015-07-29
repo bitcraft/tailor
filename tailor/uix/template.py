@@ -10,6 +10,7 @@ only one templateimage widget will be open, and it is created when the
 copmposite screen is used.
 """
 from kivy.uix.relativelayout import RelativeLayout
+
 from tailor.graph import ImagePlaceholderNode
 
 

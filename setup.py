@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-#encoding: utf-8
-#python setup.py sdist upload -r pypi
+# encoding: utf-8
+# python setup.py sdist upload -r pypi
 from setuptools import setup
-
 
 setup(name="tailor",
       version='0.0.1',
@@ -26,4 +25,4 @@ setup(name="tailor",
           "Topic :: Multimedia :: Graphics",
           "Topic :: Multimedia :: Graphics :: Capture :: Digital Camera"
       ],
-)
+      )

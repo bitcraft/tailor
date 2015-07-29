@@ -2,6 +2,7 @@ import time
 
 from kivy.effects.dampedscroll import DampedScrollEffect
 from kivy.clock import Clock
+
 from kivy.properties import *
 
 __all__ = ('TailorScrollEffect',)

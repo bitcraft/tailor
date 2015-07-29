@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from tailor.builder import JSONTemplateBuilder
 from tailor.plugins.composer.renderer import TemplateRenderer
 

@@ -1,7 +1,7 @@
 import logging
 from struct import pack
-import shutter
 
+import shutter
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("purikura.shuttercamera")

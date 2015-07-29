@@ -2,6 +2,7 @@ import socket
 import threading
 import logging
 import queue
+
 from ..config import pkConfig as pkConfig
 
 logging.basicConfig(level=logging.DEBUG)

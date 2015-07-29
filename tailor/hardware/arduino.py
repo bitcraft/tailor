@@ -1,6 +1,7 @@
+import asyncio
+
 from pymata_aio.pymata_core import PymataCore
 from pymata_aio.constants import Constants
-import asyncio
 
 
 @asyncio.coroutine

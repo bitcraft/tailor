@@ -1,5 +1,6 @@
-from tailor.plugins.composer import ComposerFilter
 from PIL import Image
+
+from tailor.plugins.composer import ComposerFilter
 
 
 class Scale(ComposerFilter):

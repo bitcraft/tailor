@@ -1,12 +1,12 @@
 import queue
+
 from kivy.clock import Clock
 from kivy.core.camera import CameraBase
+
 from kivy.graphics.texture import Texture
-from kivy.uix.image import Image
 
 
 class TailorStreamingCamera(CameraBase):
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.queue = queue.Queue()
@@ -48,4 +48,3 @@ class TailorStreamingCamera(CameraBase):
             return
 
         return image_data
-
