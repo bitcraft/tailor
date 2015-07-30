@@ -5,3 +5,4 @@ shutter
 pysdl2
 flask
 natsort
+netifaces

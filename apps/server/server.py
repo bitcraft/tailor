@@ -9,9 +9,12 @@ from tailor.config import pkConfig
 app = Flask(__name__)
 
 
-# monitor_folder = 'C:\\Users\\Leif\\events\\carrie-jon\\composites\\'
-monitor_folder = '/Users/leif/events/heather-matt/composites/'
+monitor_folder = 'C:\\Users\\Leif\\events\\carrie-jon\\composites\\'
+#  monitor_folder = '/Users/leif/events/heather-matt/composites/'
 glob_string = '*png'
+
+
+config = dict()
 
 
 def get_filenames_to_serve():
@@ -25,7 +28,7 @@ def get_glob_string(path):
 
 
 def build_url(filename):
-    url = '{protocol}://{host}:{port}'.format(**pkConfig['remote_server'])
+    url = '{protocol}://{host}:{port}'.format(**config)
     return '{}/files/{}'.format(url, filename)
 
 
@@ -55,4 +58,7 @@ def print_file(filename):
 
 
 def ServerApp():
+    from tailor.net import guess_local_ip_addresses
+    config.update(pkConfig['remote_server'])
+    config['host'] = guess_local_ip_addresses()
     return app

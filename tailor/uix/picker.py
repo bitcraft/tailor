@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.image import Image as CoreImage
+from kivy.core.window import Window
 from kivy.factory import Factory
 from kivy.loader import Loader
 from kivy.network.urlrequest import UrlRequest
@@ -28,6 +29,27 @@ resource_path = os.path.realpath(jpath(__file__, '..', '..', 'resources'))
 image_path = partial(jpath, resource_path, 'images')
 
 polling_interval = 5
+
+
+# TODO: move to more generic loader
+def install_zc_listener(callback):
+    from zeroconf import ServiceBrowser, Zeroconf
+    import json
+
+    filename = 'config/kiosk.json'
+    with open(filename) as fp:
+        json_data = json.load(fp)
+
+    listeners = json_data['zeroconf-listeners']
+    listener = listeners.pop()
+
+    config = listener['config']
+    service_type = config['type']
+
+    zeroconf = Zeroconf()
+    browser = ServiceBrowser(zeroconf, service_type, handlers=[callback])
+
+    return zeroconf
 
 
 class PickerScreen(Screen):
@@ -96,9 +118,6 @@ class PickerScreen(Screen):
 
         self.scrollview_hidden = False
 
-        # stuff for the arduino/tilt
-        self.arduino_handler = ArduinoHandler()
-
         # P R E V I E W   L A B E L
         # the preview label is used with the focus widget is open
         self.preview_label = Factory.PreviewLabel(pos=(-1000, -1000))
@@ -110,9 +129,24 @@ class PickerScreen(Screen):
 
         self.locked = False
         self.loaded = set()
+        self.animated_widgets = list()
+        self.remote_server = None
 
-        self.check_new_photos(None)
+        install_zc_listener(self.on_new_zc_info)
+
+        self.check_new_photos()
         Clock.schedule_interval(self.check_new_photos, polling_interval)
+
+    def on_new_zc_info(self, zeroconf, service_type, name, state_change):
+        from zeroconf import ServiceStateChange
+        import socket
+
+        if state_change is ServiceStateChange.Added:
+            info = zeroconf.get_service_info(service_type, name)
+            if info:
+                self.remote_server = {'protocol': 'http',
+                                      'host': socket.inet_ntoa(info.address),
+                                      'port': info.port}
 
     def on_image_touch(self, widget, touch):
         """ called when any image is touched
@@ -129,19 +163,23 @@ class PickerScreen(Screen):
     def handle_new_images_response(self, req, results):
         images = set(results['files'])
         new = natsorted(images - self.loaded)
-        self.loaded.update(new)
 
-        # retrieve small images, not large
-        to_get = list()
-        for url in new:
-            new_url = url + '?size=small'
-            to_get.append(new_url)
+        if new:
+            self.loaded.update(new)
 
-        self.fetch_images(to_get)
+            # retrieve small images, not large
+            to_get = list()
+            for url in new:
+                new_url = url + '?size=small'
+                to_get.append(new_url)
+
+            self.fetch_images(to_get)
 
     def get_images(self):
-        url = '{protocol}://{host}:{port}/files'.format(
-            **pkConfig['remote_server'])
+        if self.remote_server is None:
+            return
+
+        url = '{protocol}://{host}:{port}/files'.format(**self.remote_server)
         on_success = self.handle_new_images_response
         req = UrlRequest(url, on_success)
 
@@ -154,7 +192,7 @@ class PickerScreen(Screen):
             self.grid.add_widget(widget)
         self.scroll_to_end()
 
-    def check_new_photos(self, dt):
+    def check_new_photos(self, dt=None):
         """ Scan for new images and scroll to edge if found
         """
         self.get_images()
@@ -168,14 +206,10 @@ class PickerScreen(Screen):
                 duration=1
             ).start(self.slider)
 
-    def _remove_widget_after_ani(self, ani, widget):
-        self.remove_widget(widget)
-
     def unlock(self, dt=None):
         self.locked = False
 
     def new_focus_widget(self, source):
-        # F O C U S   W I D G E T
         # the focus widget is the large preview image that is shown if the user
         # touches a small widget on the screen
         widget = Factory.AsyncImage(source=source)
@@ -186,6 +220,12 @@ class PickerScreen(Screen):
 
         self.focus_widget = widget
         self.add_widget(widget)
+
+    def stop_running_animations(self):
+        for widget in self.animated_widgets:
+            Animation.stop_all(widget)
+
+        self.animated_widgets.clear()
 
     def change_state(self, state, **kwargs):
         if self.locked:
@@ -199,12 +239,18 @@ class PickerScreen(Screen):
         logger.debug('transitioning state %s', transition)
 
         if transition == ('focus', 'normal'):
+            self.stop_running_animations()
             self.transition_focus_normal(**kwargs)
         elif transition == ('normal', 'focus'):
+            self.stop_running_animations()
             self.transition_normal_focus(**kwargs)
         else:
             print('invalid state:', state)
             raise RuntimeError
+
+    def start_and_log(self, ani, target):
+        self.animated_widgets.append(target)
+        ani.start(target)
 
     def transition_focus_normal(self, *args, **kwargs):
         # ====================================================================
@@ -213,15 +259,7 @@ class PickerScreen(Screen):
 
         self.scrollview_hidden = False
 
-        # cancel all running animations
-        Animation.cancel_all(self.controls)
-        Animation.cancel_all(self.scrollview)
-        Animation.cancel_all(self.background)
-        Animation.cancel_all(self.focus_widget)
-
         # close the keyboard
-        from kivy.core.window import Window
-
         Window.release_all_keyboards()
 
         # disable the controls (workaround until 1.8.0)
@@ -231,17 +269,17 @@ class PickerScreen(Screen):
         ani = Animation(
             opacity=0.0,
             duration=.3)
-        ani.bind(on_complete=self._remove_widget_after_ani)
+        # ani.bind(on_complete=self._remove_widget_after_ani)
         ani.start(self.preview_label)
         if self.controls:
-            ani.start(self.controls)
+            self.start_and_log(ani, self.controls)
 
         # set the background to normal
         ani = Animation(
             size_hint=(3, 1.5),
             t='in_out_quad',
             duration=.5)
-        ani.start(self.background)
+        self.start_and_log(ani, self.background)
 
         # show the scrollview and drawer
         ani = Animation(
@@ -249,8 +287,8 @@ class PickerScreen(Screen):
             t='in_out_quad',
             opacity=1.0,
             duration=.5)
-        ani.start(search(self, 'scrollview_area'))
-        ani.start(self.drawer)
+        self.start_and_log(ani, search(self, 'scrollview_area'))
+        self.start_and_log(ani, self.drawer)
 
         # hide the focus widget
         ani = Animation(
@@ -263,7 +301,7 @@ class PickerScreen(Screen):
             opacity=0.0,
             duration=.5)
 
-        ani.start(self.focus_widget)
+        self.start_and_log(ani, self.focus_widget)
 
         # schedule a unlock
         self.locked = True
@@ -272,26 +310,15 @@ class PickerScreen(Screen):
     def transition_normal_focus(self, *args, **kwargs):
         # =====================================================================
         #  N O R M A L  =>  F O C U S
-
-        print('change')
-
         widget = kwargs['widget']
         self.scrollview_hidden = True
-
-
-        # cancel all running animations
-        Animation.cancel_all(self.scrollview)
-        Animation.cancel_all(self.background)
-        Animation.cancel_all(self.drawer)
 
         # set the focus widget to have the same image as the one picked
         # do a bit of mangling to get a more detailed image
 
-        # get a medium resolution image for the preview
-
+        # get a high resolution (full image_size) for the preview
         o = urlparse(widget.source)
         source = o.scheme + "://" + o.netloc + o.path
-
         self.new_focus_widget(source)
 
         # show the controls
@@ -300,11 +327,12 @@ class PickerScreen(Screen):
         self.controls.size_hint = .40, 1
         self.controls.opacity = 0
 
+        # animate showing the controls
         ani = Animation(
             opacity=1.0,
             duration=.3)
-        ani.start(self.preview_label)
-        ani.start(self.controls)
+        self.start_and_log(ani, self.preview_label)
+        self.start_and_log(ani, self.controls)
 
         self.preview_label.pos_hint = {'x': .25, 'y': .47}
         self.add_widget(self.controls)
@@ -316,8 +344,8 @@ class PickerScreen(Screen):
             t='in_out_quad',
             opacity=0.0,
             duration=.7)
-        ani.start(search(self, 'scrollview_area'))
-        ani.start(self.drawer)
+        self.start_and_log(ani, search(self, 'scrollview_area'))
+        self.start_and_log(ani, self.drawer)
 
         # start a simple animation on the background
         x = self.background.pos_hint['x']
@@ -328,7 +356,7 @@ class PickerScreen(Screen):
         ani += Animation(
             pos_hint={'x': x + 1.5},
             duration=480)
-        ani.start(self.background)
+        self.start_and_log(ani, self.background)
 
         # show the focus widget
         ani = Animation(
@@ -340,7 +368,7 @@ class PickerScreen(Screen):
         ani &= Animation(
             opacity=1.0,
             duration=.5)
-        ani.start(self.focus_widget)
+        self.start_and_log(ani, self.focus_widget)
 
         # schedule a unlock
         self.locked = True

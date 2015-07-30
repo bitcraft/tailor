@@ -37,11 +37,18 @@ def reload(path):
         'event_originals': jpath(event_images_path, 'originals'),
         'event_composites': jpath(event_images_path, 'composites'),
     }
-
     pkConfig['paths'] = paths
+
+    # TODO: move to more generic loader
+    import json
+    filename = 'config/server.json'
+    with open(filename) as fp:
+        json_data = json.load(fp)
+
+    interface_config = json_data['interface']
     pkConfig['remote_server'] = {'protocol': 'http',
                                  'host': '127.0.0.1',
-                                 'port': 5000}
+                                 'port': interface_config['port']}
 
 
 reload(os.path.join(os.path.dirname(__file__), '..', 'config'))

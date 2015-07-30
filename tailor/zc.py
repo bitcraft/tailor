@@ -3,6 +3,7 @@ import json
 from contextlib import contextmanager
 
 from zeroconf import ServiceInfo, Zeroconf
+from . import net
 
 __all__ = [
     'zc_service_context',
@@ -15,7 +16,7 @@ config = dict()
 @contextmanager
 def zc_service_context(service_info):
     zeroconf = Zeroconf()
-    zeroconf.register_service(service_info)
+    zeroconf.register_service(service_info, ttl=1)
     try:
         yield
     except:
@@ -30,7 +31,7 @@ def new_service_from_json(service_data):
     type_name = service_config['type']
     desc_label = service_config['description'] + '.' + type_name
 
-    addr = socket.inet_aton(config['host'])
+    addr = socket.inet_aton(config['addr'])
     port = int(config['port'])
 
     properties = service_config['properties']
@@ -45,8 +46,9 @@ def load_services_from_config():
         json_data = json.load(fp)
 
     interface_config = json_data['interface']
-    config['host'] = interface_config['host']
+    # config['host'] = interface_config['host']
     config['port'] = interface_config['port']
+    config['addr'] = net.guess_local_ip_addresses()
 
     for service_data in json_data['zeroconf-servers']:
         yield new_service_from_json(service_data)

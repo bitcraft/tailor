@@ -3,12 +3,14 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 
-
 def main():
+    from tailor.net import guess_local_ip_addresses
     from server import ServerApp
 
+    addr = guess_local_ip_addresses()
+
     app = ServerApp()
-    app.run(debug=True)
+    app.run(host=addr, debug=True)
 
 
 if __name__ == "__main__":
