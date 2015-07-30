@@ -24,6 +24,7 @@ def on_service_state_change(zeroconf, service_type, name, state_change):
             print("  No info")
         print('\n')
 
+
 if __name__ == '__main__':
     # TODO: move to more generic loader
     filename = 'config/kiosk.json'

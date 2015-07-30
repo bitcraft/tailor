@@ -3,7 +3,6 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 
-
 def main():
     from monitor import MonitorApp
 

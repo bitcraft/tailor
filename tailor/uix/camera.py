@@ -2,7 +2,6 @@ import queue
 
 from kivy.clock import Clock
 from kivy.core.camera import CameraBase
-
 from kivy.graphics.texture import Texture
 
 

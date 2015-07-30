@@ -3,12 +3,12 @@ import json
 from contextlib import contextmanager
 
 from zeroconf import ServiceInfo, Zeroconf
+
 from . import net
 
 __all__ = [
     'zc_service_context',
     'load_services_from_json']
-
 
 config = dict()
 

@@ -1,7 +1,6 @@
 import netifaces
 import re
 
-
 local_addr = re.compile('^(169\.254|127)')
 
 
@@ -19,4 +18,3 @@ def guess_local_ip_addresses():
                 continue
 
             return iface['addr']
-

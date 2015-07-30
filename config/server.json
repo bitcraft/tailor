@@ -3,7 +3,6 @@
     "host": "",
     "port": 5000
   },
-
   "zeroconf-servers": [
     {
       "name": "File Server",

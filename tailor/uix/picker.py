@@ -17,8 +17,6 @@ from natsort import natsorted
 from .effects import TailorScrollEffect
 from .sharing import SharingControls
 from .utils import search
-from .utils import ArduinoHandler
-from ..config import pkConfig as pkConfig
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.picker')

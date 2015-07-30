@@ -8,11 +8,9 @@ from tailor.config import pkConfig
 
 app = Flask(__name__)
 
-
 monitor_folder = 'C:\\Users\\Leif\\events\\carrie-jon\\composites\\'
 #  monitor_folder = '/Users/leif/events/heather-matt/composites/'
 glob_string = '*png'
-
 
 config = dict()
 
