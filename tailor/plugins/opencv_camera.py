@@ -1,7 +1,7 @@
 """
 needs asyncio audit
 """
-
+import asyncio
 import time
 import logging
 
@@ -36,6 +36,7 @@ class OpenCVCamera:
 
     def __init__(self):
         self.device_context = None
+        self.lock = asyncio.Lock()
 
     def __enter__(self):
         self.open()
@@ -44,6 +45,7 @@ class OpenCVCamera:
         self.close()
 
     def open(self):
+        # TODO: make async
         dc = cv2.VideoCapture(0)
 
         # give time for webcam to init.
@@ -63,12 +65,15 @@ class OpenCVCamera:
         self.close()
         self.open()
 
+    @asyncio.coroutine
     def capture_frame(self):
         """ Capture a single frame
 
         :return:
         """
-        ret, frame = self.device_context.read()
+        with (yield from self.lock):
+            ret, frame = self.device_context.read()
+
         if ret:
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
         else:
@@ -80,20 +85,23 @@ class OpenCVCamera:
     def convert_frame_to_image(frame):
         return Image.fromarray(frame)
 
+    @asyncio.coroutine
     def capture_image(self):
         """ get frame, decode, and return pil image
 
         :return:
         """
-        frame = self.capture_frame()
+        frame = yield from self.capture_frame()
         image = self.convert_frame_to_image(frame)
         return image
 
+    @asyncio.coroutine
     def save_preview(self):
         """ Capture a preview image and save to a file
         """
         logger.debug('capture_preview, not implemented')
 
+    @asyncio.coroutine
     def save_capture(self, filename=None):
         """ Capture a full image and save to a file
         """
@@ -102,15 +110,18 @@ class OpenCVCamera:
         # return 'capture.jpg'
         logger.debug('capture_image, not implemented')
 
+    @asyncio.coroutine
     def download_capture(self):
         """ Capture a full image and return data
         """
         logger.debug('download_capture')
-        image = self.capture_image()
+        image = yield from self.capture_image()
         return image
 
+    @asyncio.coroutine
     def download_preview(self):
         """ Capture preview image and return data
         """
         logger.debug('download_preview')
-        return self.capture_image()
+        image = yield from self.capture_image()
+        return image

@@ -71,7 +71,8 @@ class PickerScreen(Screen):
         self.scrollview = search(self, 'scrollview')
         self.grid = search(self, 'grid')
 
-        self.focus_widget = None
+        # TODO: eventually make this related to the screen width, maybe
+        self.grid.spacing = (64, 64)
 
         # the grid will expand horizontally as items are added
         def f(widget, value):
@@ -80,17 +81,13 @@ class PickerScreen(Screen):
 
         self.grid.bind(minimum_width=f)
 
-        # TODO: eventually make this related to the screen width, maybe
-        self.grid.spacing = (64, 64)
-
-        self.slider.max = 1
-
         # slider => scrollview binding
         def f(scrollview, widget, value):
             # not sure why value has to be negated here
             scrollview.effect_x.value = -value * self.grid.minimum_width
 
         self.slider.bind(value=partial(f, self.scrollview))
+        self.slider.max = 1
 
         # scrollview => slider binding
         def f(slider, widget, value):
@@ -110,13 +107,11 @@ class PickerScreen(Screen):
         # kivy's scroll effect doesn't seem to work with a huge scrollview
         # so set the effect to my homebrew scrolling effect
         self.scrollview.effect_cls = TailorScrollEffect
-
-        # tweak the loading so it is quick
-        Loader.loading_image = CoreImage(image_path('loading.gif'))
-
         self.scrollview_hidden = False
 
-        # P R E V I E W   L A B E L
+        # set loading image to an ugly spinning gif
+        Loader.loading_image = CoreImage(image_path('loading.gif'))
+
         # the preview label is used with the focus widget is open
         self.preview_label = Factory.PreviewLabel(pos=(-1000, -1000))
         self.view.add_widget(self.preview_label)
@@ -129,6 +124,7 @@ class PickerScreen(Screen):
         self.loaded = set()
         self.animated_widgets = list()
         self.remote_server = None
+        self.focus_widget = None
 
         install_zc_listener(self.on_new_zc_info)
 
@@ -200,7 +196,7 @@ class PickerScreen(Screen):
         if self.scrollview.effect_x is not None:
             Animation(
                 value_normalized=1,
-                t='in_out_quad',
+                t='out_quad',
                 duration=1
             ).start(self.slider)
 
@@ -243,7 +239,7 @@ class PickerScreen(Screen):
             self.stop_running_animations()
             self.transition_normal_focus(**kwargs)
         else:
-            print('invalid state:', state)
+            print('invalid state transition:', state)
             raise RuntimeError
 
     def start_and_log(self, ani, target):
@@ -268,7 +264,7 @@ class PickerScreen(Screen):
             opacity=0.0,
             duration=.3)
         # ani.bind(on_complete=self._remove_widget_after_ani)
-        ani.start(self.preview_label)
+        self.start_and_log(ani, self.preview_label)
         if self.controls:
             self.start_and_log(ani, self.controls)
 
@@ -294,11 +290,9 @@ class PickerScreen(Screen):
             height=screen_height * .25,
             t='in_out_quad',
             duration=.5)
-
         ani &= Animation(
             opacity=0.0,
             duration=.5)
-
         self.start_and_log(ani, self.focus_widget)
 
         # schedule a unlock

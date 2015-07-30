@@ -1,10 +1,14 @@
 import socket
 import json
+import logging
 from contextlib import contextmanager
 
 from zeroconf import ServiceInfo, Zeroconf
 
 from . import net
+
+logger = logging.getLogger('tailor.zc')
+
 
 __all__ = [
     'zc_service_context',
@@ -15,8 +19,9 @@ config = dict()
 
 @contextmanager
 def zc_service_context(service_info):
+    logger.debug('Attempting to start zc service: "%s"', service_info.name)
     zeroconf = Zeroconf()
-    zeroconf.register_service(service_info, ttl=1)
+    zeroconf.register_service(service_info, ttl=60)
     try:
         yield
     except:
@@ -46,7 +51,6 @@ def load_services_from_config():
         json_data = json.load(fp)
 
     interface_config = json_data['interface']
-    # config['host'] = interface_config['host']
     config['port'] = interface_config['port']
     config['addr'] = net.guess_local_ip_addresses()
 
