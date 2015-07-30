@@ -9,6 +9,9 @@ __all__ = [
     'load_services_from_json']
 
 
+config = dict()
+
+
 @contextmanager
 def zc_service_context(service_info):
     zeroconf = Zeroconf()
@@ -23,14 +26,16 @@ def zc_service_context(service_info):
 
 
 def new_service_from_json(service_data):
-        config = service_data['config']
-        type_name = config['type']
-        desc_label = config['description'] + '.' + type_name
-        addr = socket.inet_aton(config['addr'])
-        port = int(config['port'])
-        properties = config['properties']
+    service_config = service_data['config']
+    type_name = service_config['type']
+    desc_label = service_config['description'] + '.' + type_name
 
-        yield ServiceInfo(type_name, desc_label, addr, port, 0, 0, properties)
+    addr = socket.inet_aton(config['host'])
+    port = int(config['port'])
+
+    properties = service_config['properties']
+
+    return ServiceInfo(type_name, desc_label, addr, port, 0, 0, properties)
 
 
 def load_services_from_config():
@@ -38,6 +43,10 @@ def load_services_from_config():
     filename = 'config/server.json'
     with open(filename) as fp:
         json_data = json.load(fp)
+
+    interface_config = json_data['interface']
+    config['host'] = interface_config['host']
+    config['port'] = interface_config['port']
 
     for service_data in json_data['zeroconf-servers']:
         yield new_service_from_json(service_data)

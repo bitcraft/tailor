@@ -73,13 +73,6 @@ class Session:
         Each photo has 3 attempts to take a photo
         If we get 4 photos, or 3 failed attempts, then exit
         """
-        # firmata
-        from tailor.hardware.arduino import wait_for_trigger
-
-        # wait for input from booth
-        print('waiting....')
-        yield from wait_for_trigger()
-
         logger.debug('starting new session')
 
         # needed_captures = template_graph.needed_captures()
@@ -95,7 +88,8 @@ class Session:
                 # wait time_interval seconds
                 # yield from self.countdown(3)
 
-                yield from asyncio.sleep(.5)
+                #yield from asyncio.sleep(.5)
+                yield from asyncio.sleep(500000)
 
                 try:
                     image = camera.download_capture()

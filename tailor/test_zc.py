@@ -1,37 +1,51 @@
-#!/usr/bin/env python
-
-""" Example of announcing a service (in this case, a fake HTTP server) """
-
-import logging
 import socket
-import sys
+import json
 from time import sleep
 
-from zeroconf import ServiceInfo, Zeroconf
+from zeroconf import ServiceBrowser, ServiceStateChange, Zeroconf
+
+
+def on_service_state_change(zeroconf, service_type, name, state_change):
+    print("Service %s of type %s state changed: %s" % (name, service_type, state_change))
+
+    if state_change is ServiceStateChange.Added:
+        info = zeroconf.get_service_info(service_type, name)
+        if info:
+            print("  Address: %s:%d" % (socket.inet_ntoa(info.address), info.port))
+            print("  Weight: %d, priority: %d" % (info.weight, info.priority))
+            print("  Server: %s" % (info.server,))
+            if info.properties:
+                print("  Properties are:")
+                for key, value in info.properties.items():
+                    print("    %s: %s" % (key, value))
+            else:
+                print("  No properties")
+        else:
+            print("  No info")
+        print('\n')
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    if len(sys.argv) > 1:
-        assert sys.argv[1:] == ['--debug']
-        logging.getLogger('zeroconf').setLevel(logging.DEBUG)
+    # TODO: move to more generic loader
+    filename = 'config/kiosk.json'
+    with open(filename) as fp:
+        json_data = json.load(fp)
 
-    desc = {'path': '/~paulsm/'}
-    desc = dict()
+    listeners = json_data['zeroconf-listeners']
+    listener = listeners.pop()
 
-    info = ServiceInfo("_http._tcp.local.",
-                       "Paul's Test Web Site._http._tcp.local.",
-                       socket.inet_aton("127.0.0.1"), 80, 0, 0,
-                       desc)
+    config = listener['config']
+    service_type = config['type']
+    print(service_type)
+
+    print("\nBrowsing services, press Ctrl-C to exit...\n")
 
     zeroconf = Zeroconf()
-    print("Registration of a service, press Ctrl-C to exit...")
-    zeroconf.register_service(info)
+    browser = ServiceBrowser(zeroconf, service_type, handlers=[on_service_state_change])
+
     try:
         while True:
             sleep(0.1)
     except KeyboardInterrupt:
         pass
     finally:
-        print("Unregistering...")
-        zeroconf.unregister_service(info)
         zeroconf.close()

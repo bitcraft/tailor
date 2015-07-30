@@ -1,0 +1,10 @@
+{
+  "zeroconf-listeners": [
+    {
+      "name": "File Server",
+      "config": {
+        "type": "_tailor._tcp.local."
+      }
+    }
+  ]
+}
