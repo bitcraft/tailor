@@ -18,7 +18,6 @@ from .effects import TailorScrollEffect
 from .sharing import SharingControls
 from .utils import search
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.picker')
 
 OFFSET = 172
@@ -28,26 +27,25 @@ image_path = partial(jpath, resource_path, 'images')
 
 polling_interval = 5
 
-
-# TODO: move to more generic loader
-def install_zc_listener(callback):
-    from zeroconf import ServiceBrowser, Zeroconf
-    import json
-
-    filename = 'config/kiosk.json'
-    with open(filename) as fp:
-        json_data = json.load(fp)
-
-    listeners = json_data['zeroconf-listeners']
-    listener = listeners.pop()
-
-    config = listener['config']
-    service_type = config['type']
-
-    zeroconf = Zeroconf()
-    browser = ServiceBrowser(zeroconf, service_type, handlers=[callback])
-
-    return zeroconf
+# # TODO: move to more generic loader
+# def install_zc_listener(callback):
+#     from zeroconf import ServiceBrowser, Zeroconf
+#     import json
+#
+#     filename = 'config/kiosk.json'
+#     with open(filename) as fp:
+#         json_data = json.load(fp)
+#
+#     listeners = json_data['zeroconf-listeners']
+#     listener = listeners.pop()
+#
+#     config = listener['config']
+#     service_type = config['type']
+#
+#     zeroconf = Zeroconf()
+#     browser = ServiceBrowser(zeroconf, service_type, handlers=[callback])
+#
+#     return zeroconf
 
 
 class PickerScreen(Screen):
@@ -110,7 +108,7 @@ class PickerScreen(Screen):
         self.scrollview_hidden = False
 
         # set loading image to an ugly spinning gif
-        Loader.loading_image = CoreImage(image_path('loading.gif'))
+        # Loader.loading_image = CoreImage(image_path('loading.gif'))
 
         # the preview label is used with the focus widget is open
         self.preview_label = Factory.PreviewLabel(pos=(-1000, -1000))
@@ -126,21 +124,29 @@ class PickerScreen(Screen):
         self.remote_server = None
         self.focus_widget = None
 
-        install_zc_listener(self.on_new_zc_info)
+        # TODO: remote listener is hardcoded to locahost for now
+        # in future, this will be zeroconf, when i get a good binding
+        self.remote_server = {
+            'protocol': 'http',
+            'host': '127.0.0.1',
+            'port': 5000
+        }
+
+        # install_zc_listener(self.on_new_zc_info)
 
         self.check_new_photos()
         Clock.schedule_interval(self.check_new_photos, polling_interval)
 
-    def on_new_zc_info(self, zeroconf, service_type, name, state_change):
-        from zeroconf import ServiceStateChange
-        import socket
-
-        if state_change is ServiceStateChange.Added:
-            info = zeroconf.get_service_info(service_type, name)
-            if info:
-                self.remote_server = {'protocol': 'http',
-                                      'host': socket.inet_ntoa(info.address),
-                                      'port': info.port}
+    # def on_new_zc_info(self, zeroconf, service_type, name, state_change):
+    #     from zeroconf import ServiceStateChange
+    #     import socket
+    #
+    #     if state_change is ServiceStateChange.Added:
+    #         info = zeroconf.get_service_info(service_type, name)
+    #         if info:
+    #             self.remote_server = {'protocol': 'http',
+    #                                   'host': socket.inet_ntoa(info.address),
+    #                                   'port': info.port}
 
     def on_image_touch(self, widget, touch):
         """ called when any image is touched
@@ -242,7 +248,7 @@ class PickerScreen(Screen):
             print('invalid state transition:', state)
             raise RuntimeError
 
-    def start_and_log(self, ani, target):
+    def start_and_log_widget(self, ani, target):
         self.animated_widgets.append(target)
         ani.start(target)
 
@@ -264,16 +270,16 @@ class PickerScreen(Screen):
             opacity=0.0,
             duration=.3)
         # ani.bind(on_complete=self._remove_widget_after_ani)
-        self.start_and_log(ani, self.preview_label)
+        self.start_and_log_widget(ani, self.preview_label)
         if self.controls:
-            self.start_and_log(ani, self.controls)
+            self.start_and_log_widget(ani, self.controls)
 
         # set the background to normal
         ani = Animation(
             size_hint=(3, 1.5),
             t='in_out_quad',
             duration=.5)
-        self.start_and_log(ani, self.background)
+        self.start_and_log_widget(ani, self.background)
 
         # show the scrollview and drawer
         ani = Animation(
@@ -281,8 +287,8 @@ class PickerScreen(Screen):
             t='in_out_quad',
             opacity=1.0,
             duration=.5)
-        self.start_and_log(ani, search(self, 'scrollview_area'))
-        self.start_and_log(ani, self.drawer)
+        self.start_and_log_widget(ani, search(self, 'scrollview_area'))
+        self.start_and_log_widget(ani, self.drawer)
 
         # hide the focus widget
         ani = Animation(
@@ -293,9 +299,9 @@ class PickerScreen(Screen):
         ani &= Animation(
             opacity=0.0,
             duration=.5)
-        self.start_and_log(ani, self.focus_widget)
+        self.start_and_log_widget(ani, self.focus_widget)
 
-        # schedule a unlock
+        # schedule an unlock
         self.locked = True
         Clock.schedule_once(self.unlock, .5)
 
@@ -323,8 +329,8 @@ class PickerScreen(Screen):
         ani = Animation(
             opacity=1.0,
             duration=.3)
-        self.start_and_log(ani, self.preview_label)
-        self.start_and_log(ani, self.controls)
+        self.start_and_log_widget(ani, self.preview_label)
+        self.start_and_log_widget(ani, self.controls)
 
         self.preview_label.pos_hint = {'x': .25, 'y': .47}
         self.add_widget(self.controls)
@@ -336,8 +342,8 @@ class PickerScreen(Screen):
             t='in_out_quad',
             opacity=0.0,
             duration=.7)
-        self.start_and_log(ani, search(self, 'scrollview_area'))
-        self.start_and_log(ani, self.drawer)
+        self.start_and_log_widget(ani, search(self, 'scrollview_area'))
+        self.start_and_log_widget(ani, self.drawer)
 
         # start a simple animation on the background
         x = self.background.pos_hint['x']
@@ -348,7 +354,7 @@ class PickerScreen(Screen):
         ani += Animation(
             pos_hint={'x': x + 1.5},
             duration=480)
-        self.start_and_log(ani, self.background)
+        self.start_and_log_widget(ani, self.background)
 
         # show the focus widget
         ani = Animation(
@@ -360,8 +366,8 @@ class PickerScreen(Screen):
         ani &= Animation(
             opacity=1.0,
             duration=.5)
-        self.start_and_log(ani, self.focus_widget)
+        self.start_and_log_widget(ani, self.focus_widget)
 
-        # schedule a unlock
+        # schedule an unlock
         self.locked = True
         Clock.schedule_once(self.unlock, .5)

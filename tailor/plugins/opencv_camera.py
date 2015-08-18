@@ -23,7 +23,6 @@ from PIL import Image
 # - brew tap homebrew/science
 # - brew install opencv
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.opencvcamera')
 
 

@@ -3,7 +3,6 @@ import random
 
 from PIL import Image
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.shuttercamera')
 
 

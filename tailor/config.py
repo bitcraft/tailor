@@ -4,7 +4,6 @@ import logging
 
 __all__ = ('Config',)
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.config')
 
 pkConfig = configparser.ConfigParser()

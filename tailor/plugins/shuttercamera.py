@@ -5,7 +5,6 @@ import logging
 
 import shutter
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.shuttercamera")
 
 

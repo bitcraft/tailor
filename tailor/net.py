@@ -4,17 +4,30 @@ import re
 local_addr = re.compile('^(169\.254|127)')
 
 
-def guess_local_ip_addresses():
+def ip_interfaces():
     for iface in netifaces.interfaces():
-        addrs = netifaces.ifaddresses(iface)
+        ifadresses = netifaces.ifaddresses(iface)
         try:
-            info = addrs[netifaces.AF_INET]
+            ip4 = ifadresses[netifaces.AF_INET]
         except KeyError:
             continue
+        for addr_info in ip4:
+            yield addr_info
 
-        for iface in info:
-            m = local_addr.match(iface['addr'])
-            if m:
-                continue
 
-            return iface['addr']
+def guess_routable(addr):
+    return bool(local_addr.match(addr))
+
+
+def guess_local_ip_addresses():
+    for iface in ip_interfaces():
+        addr = iface['addr']
+        if guess_routable(addr):
+            return addr
+
+
+def guess_unroutable_addresses():
+    for iface in ip_interfaces():
+        addr = iface['addr']
+        if not guess_routable(addr):
+            return addr
