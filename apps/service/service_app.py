@@ -13,8 +13,6 @@ from contextlib import ExitStack
 from functools import partial
 import pickle
 
-import pygame
-
 from apps.service.session import Session
 from tailor import plugins
 from tailor.zc import zc_service_context, load_services_from_config
@@ -71,10 +69,6 @@ class ServiceApp:
                 task = loop.create_task(
                     self.wait_for_trigger(board.wait_for_packet(), camera))
                 self.running_tasks.append(task)
-
-            # debug.  must be started after the session is started
-            # task = loop.create_task(self.update_camera_preview_pygame(camera))
-            # self.running_tasks.append(task)
 
             task = loop.create_task(asyncio.sleep(3000))
             self.running_tasks.append(task)
@@ -175,57 +169,3 @@ class ServiceApp:
         yield from writer.drain()
         writer.close()
 
-    @asyncio.coroutine
-    def update_camera_preview_pygame(self, camera):
-        # run in thread because we don't want it to block the asyncio event loop
-
-        def update_preview():
-            global countdown_image
-
-            screen_rect = screen.get_rect()
-            image = pygame.image.fromstring(frame.tobytes(), frame.size,
-                                            frame.mode).convert()
-            image_rect = image.get_rect(center=screen_rect.center).fit(
-                screen_rect)
-            image = pygame.transform.scale(image, image_rect.size)
-            # pygame.event.pump()
-
-            if self.session.countdown_value_changed.is_set():
-                if self.session.countdown_value:
-                    countdown_image = font.render(
-                        str(self.session.countdown_value), 1, (255, 255, 255))
-                    countdown_image = countdown_image.convert_alpha()
-                    self.session.countdown_value_changed.clear()
-
-                screen.fill(0)
-                screen.blit(countdown_image, image_rect.topright)
-
-            # HACK TO SHOW LAST CAPTURE
-            screen.blit(image, (0, 0))
-            pygame.display.flip()
-
-        pygame.init()
-
-        # DEBUG!  Move to some kind of gui later (kivy?)
-        filename = 'tailor/resources/fonts/Market_Deco.ttf'
-        font = pygame.font.Font(filename, 300)
-        countdown_image = None
-
-        screen = pygame.display.set_mode((1280, 720))  # , pygame.FULLSCREEN)
-        pygame.display.set_caption('camera display')
-        loop = asyncio.get_event_loop()
-        while self.running:
-            # debug!  move to something else later
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    self.running = False
-                    for task in self.running_tasks:
-                        print('closing running task:', task)
-                        task.cancel()
-
-            if self.session is None:
-                yield from asyncio.sleep(.5)
-                continue
-
-            frame = yield from camera.download_preview()
-            yield from loop.run_in_executor(None, update_preview)
