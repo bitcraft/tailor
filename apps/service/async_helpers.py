@@ -14,6 +14,17 @@ __all__ = [
 
 
 def timing_generator(interval, amount, initial=None):
+    """ Generator to make generic repeating timer
+
+    Returns (bool, value) tuples, where:
+            bool: if true, then this is last iteration of sequence
+            value: ether interval or initial value
+
+    :param interval: number to be returned each iteration
+    :param amount:  number of iterations
+    :param initial: if specified, this value will be used on 1st iteration
+    :return: (bool, int)
+    """
     assert (amount > 0)
 
     if initial is not None:

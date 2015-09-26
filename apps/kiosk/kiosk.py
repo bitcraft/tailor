@@ -18,26 +18,20 @@ logger = logging.getLogger("tailor.kiosk-loader")
 
 # make kiosk work without installing tailor into python
 app_root_path = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
-# sys.path.append(app_root_path)
-# sys.path.append(os.path.join(app_root_path, 'tailor'))
-
 
 DEFAULT_VKEYBOARD_LAYOUT = 'email'
-
-# because i hate typing
-jpath = os.path.join
 
 # set keyboard behaviour to be a little like ios
 Config.set('kivy', 'keyboard_mode', 'dock')
 Config.set('kivy', 'keyboard_layout', DEFAULT_VKEYBOARD_LAYOUT)
 
 # set the display up
+Config.set('graphics', 'width', 1280)
+Config.set('graphics', 'height', 1024)
 
 # Config.set('graphics', 'fullscreen', 'auto')
 # Config.set('graphics', 'fullscreen',
 #            pkConfig.get('display', 'fullscreen'))
-Config.set('graphics', 'width', 1280)
-Config.set('graphics', 'height', 1024)
 # Config.set('graphics', 'width',
 #            pkConfig.getint('display', 'width'))
 # Config.set('graphics', 'height',
@@ -49,6 +43,7 @@ Config.set('postproc', 'retain_time',
 Config.set('postproc', 'retain_distance',
            pkConfig.getint('kiosk', 'touch-retain-distance'))
 
+jpath = os.path.join
 styles_path = jpath(app_root_path, 'tailor', 'resources', 'styles')
 app_images_path = jpath(app_root_path, 'resources', 'images')
 
@@ -74,22 +69,13 @@ class KioskApp(App):
 
 
 def new():
-    # pygame is not default installed on windows kivy portable pkg
-    # import pygame
-    #
-    # if pkConfig.getboolean('display', 'hide-mouse'):
-    #     cursor = pygame.cursors.load_xbm(
-    #         os.path.join(app_images_path, 'blank-cursor.xbm'),
-    #         os.path.join(app_images_path, 'blank-cursor-mask.xbm'))
-    #     pygame.mouse.set_cursor(*cursor)
-
-    app = KioskApp()
-    app.manager.add_widget(PickerScreen(name='compositepicker'))
-
     # TODO: move to configuration (where it belongs!)
     # workaround to some defeciency in the sdl2 window backend
     # Window.fullscreen = 1
     # Window.fullscreen = 'fake'
     # Window.borderless = True
+
+    app = KioskApp()
+    app.manager.add_widget(PickerScreen(name='compositepicker'))
 
     return app

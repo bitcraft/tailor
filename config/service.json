@@ -1,0 +1,13 @@
+{
+  "camera": {
+    "name": "canon",
+    "capture-interval": 5,
+    "preview-interval": "0.0167"
+  },
+  "sounds": {
+    "countdown": "bell.wav",
+    "finish-capture": "whistle.wav",
+    "finish-session": "long_bell.wav",
+    "error": "error.wav"
+  }
+}

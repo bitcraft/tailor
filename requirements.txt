@@ -2,7 +2,10 @@ kivy
 pillow
 zeroconf
 git+http://github.com/bitcraft/shutter.git
-pysdl2
 flask
 natsort
 netifaces
+
+# pygame is required for sounds until i figure out kivy
+# one day may use pysdl2
+pygame

@@ -27,6 +27,24 @@ regex = re.compile('^(.*?)-(\d+)$')
 
 
 def incremental_naming(path):
+    """ Utility method to find non-conflicting filenames
+
+    Given a 'path' (ie: /user/boo/bar.baz) add numbers to the end
+    of the file name, but before the extension, so that file names
+    are unique.
+
+    The containing folder, as determined by basename() will be
+    searched for existing files that conflist with the name,
+    and starting from 0, new numbers will be checked until
+    the name is unique.
+
+    Probably subject to race conditions, this needs review and locks.
+
+    Do not use in situations where speed is needed!
+
+    :param path: folder path + filename
+    :return:
+    """
     basename = os.path.basename(path)
     root, ext = os.path.splitext(path)
 
@@ -114,10 +132,6 @@ class Session:
         timing = timing_generator(self.countdown_time, needed_captures,
                                   self.countdown_time + self.extra_wait_time)
 
-        # eventually, defer task mgmt to something else...
-        # perhaps a built-in i'm unaware of?...probably
-        save_tasks = []
-
         for final, wait_time in timing:
             logger.debug('waiting %s seconds', wait_time)
 
@@ -131,48 +145,38 @@ class Session:
                 logger.debug('failed capture %s/3', errors)
                 continue
 
+            # indicate that the session has all required photos
             self.finished = final
 
             errors = 0
 
-            # sound to indicate that session is closed
             if final:
+                # sound to indicate that session is closed
                 bell1.play()
             else:
+                # sound to indicate that photo was taken
                 finished.play()
 
             # indicate that picture is taken, getting ready for next
             self.idle = True
 
-            # add images to stack that will be used to create template
+            # add images to stack that will be used to create the template
             image_stack.append(image)
 
-            # async save the image
-            # TODO: handle exceptions here somehow (usually when file cannot be saved)
             original_path = incremental_naming(
                 join(originals_folder, 'original', original_filename))
 
             logger.debug('saving camera output to %s', original_path)
+
+            # TODO: handle exceptions here: usually when file cannot be saved
+            # TODO: async so long saves do not delay camera between shots
             yield from async_save(image, original_path)
-            # save_tasks.append(task)
 
             # give camera some time to process exposure (may not be needed)
             yield from asyncio.sleep(self.time_to_wait_after_capture)
 
+            # indicate that the camera is now busy
             self.idle = False
-
-        # # prevent asyncio from complaining that exceptions are not caught
-        # # not sure this is the best way to handle it
-        # for task in save_tasks:
-        #     try:
-        #         exp = task.exception()
-        #         if exp is not None:
-        #             print(exp)
-        #     except asyncio.futures.InvalidStateError:
-        #         pass
-        #
-        # # make sure all files have saved to disk before continuing
-        # yield from asyncio.wait(save_tasks)
 
         # add images to the template for rendering
         for image in image_stack:
@@ -183,13 +187,14 @@ class Session:
         composite = yield from renderer.render_all(root)
 
         # tasks will be run concurrently via threads
-        # yield from asyncio.wait([
-        yield from async_save(composite, composite_path)
-        yield from async_thumbnail(composite, small_size, composite_small_path)
-        yield from async_double(composite, print_path)
-        # ])
+        yield from asyncio.wait([
+            async_save(composite, composite_path),
+            async_thumbnail(composite, small_size, composite_small_path),
+            async_double(composite, print_path)
+        ])
 
         # print the double
+        # TODO: implement template-based doubler
         fc = plugins.filesystem.FileCopy(shared_folder)
         yield from fc.process(print_path)
 

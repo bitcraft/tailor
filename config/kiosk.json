@@ -1,4 +1,21 @@
 {
+  "event": {
+    "name": "ben-casey",
+    "template": "2x6.template"
+  },
+  "graphics": {
+    "display": {
+      "width": 1024,
+      "height": 768,
+      "fullscreen": 0
+    }
+  },
+  "input": {
+    "touch": {
+      "touch-retain-time": 150,
+      "touch-retain-distance": 30
+    }
+  },
   "zeroconf-listeners": [
     {
       "name": "File Server",
@@ -6,5 +23,14 @@
         "type": "_tailor._tcp.local."
       }
     }
-  ]
+  ],
+  "social": {
+    "twitter": {
+      "account": "@kilbuckcreekphoto"
+    },
+    "email": {
+      "sender": "leif@kilbuckcreek.com",
+      "subject": "Your photo from Kilbuck Creek Photo Booth"
+    }
+  }
 }

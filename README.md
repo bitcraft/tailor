@@ -1,29 +1,31 @@
 Tailor
 ======
 
-Tailor is a set of hardware plans and software for a wedding/event photo booth
-and includes image processing, camera control, live slideshow, and touch based
-image browser for kiosk operation.  It is a project in development and is
-currently in a broken state as I add better template support.
+Tailor is a set of hardware plans and software for a wedding/event photo
+booth and includes image processing, camera control, live slideshow, and
+touch based image browser for kiosk operation.  It is a project in
+development and is sometimes broken.
 
 This project aims for Windows, OS X, and Linux compatibility, but not all
 features are supported on each platform now.  Currently, full features are
 available on OS X and Linux;  camera capture is currently unavailable on
 Windows, but it is being worked on.
 
-I use Tailor for my professional photobooth service.
-
 The name "tailor" is currently just a stand-in and may change at any time.
+
+I use Tailor for my professional photobooth service.
 
 
 Cameras
 -------
 
 Any camera supported by libgphoto2 is supported by this software.  An up-to-date
-list is available on their website.  Live-view is functional, and can be used
-to preview photos before they are taken.
+list is available on their website.  Live-view is functional, with supported
+cameras and can be used to preview photos before they are taken.
 
 Webcams are supported but not recommended as they produce poor quality images.
+
+Please check the following link for camera models:
 
 http://www.gphoto.org/proj/libgphoto2/support.php
 
@@ -35,15 +37,21 @@ Tailor supports the arduino for interfacing with physical buttons over USB
 and also has a smartphone-inspired touch interface.  For computer systems
 without a touch screen monitor, the mouse can be used.
 
-The kiosk interface offers print/reprint controls, camera tilt, email,
-camera live view, and twitter.
+There is basic support for servos and relay controls with an arduino connected
+to the host PC.
+
+The kiosk interface offers:
+- print/reprint controls
+- camera tilt
+- social: email & twitter
+- camera live view
 
 
 Running the touch interface
 ---------------------------
 
-service.py runs the camera capture service.
-kiosk.py runs the touch interface.
+From OS X or linux, run 'python3 run_local.py'
+From windows, launch kivy.bat, then 'python run_local.py'
 
 Operation under windows will be documented in the future.  Stay tuned.
 
@@ -79,35 +87,41 @@ software may require additional dependencies.
 -  Debian Linux, OS X 10.x, or Windows 7+
 -  Python 3.4+
 -  Kivy 1.9+
--  Arduino with firmata firmware
+-  Pygame
 
 
 Windows OS Support
 ------------------
 
-I'm working towards support of Windows OS.
-
-Kivy and pygame can be downloaded from here:
-http://www.lfd.uci.edu/~gohlke/pythonlibs/
+Tailor works on Windows, but only supports webcams right now, and requires
+kivy and pygame.  I will be investigating a stand-alone distribution Q1 2016.
 
 
 Remote Operation
 ----------------
 
-Currently, this project requires a dedicated PC, touch screen monitor, and an arduino.  In 
-the near future, it will be possible to run the the booth with a dedicated embedded system
-and a tablet touch screen PC for control (no apple or android...yet).
+Currently, this project requires a dedicated PC, touch screen monitor, and an
+arduino.  In the near future, it will be possible to run the the booth with
+a dedicated embedded system and a tablet touch screen PC for control (no ios or
+android...yet).
 
-The vision is using a low cost system like the Raspberry Pi to operate the camera and printer,
-while a PC tablet (like the microsoft surface x86 only, or yoga) can be used to monitor the
-camera, request additional prints, change template, set up events, or do social ops like
-upload to twitter or facebook.
+The vision is using a low cost system like the Raspberry Pi to operate the
+camera and printer, while a PC tablet (like the microsoft surface x86 only,
+or yoga) can be used to monitor the camera, request additional prints, change
+template, set up events, or do social ops like upload to twitter or facebook.
 
-The result will be a compact and easy-to-transport booth with a portable tablet interface.
-
-Of course, it will still be possible to operate everything on one pc.
+The result will be a compact and easy-to-transport booth with a portable tablet
+interface.  Of course, it will still be possible to operate everything on a pc.
 
 Gods willing, an iOS and android app will be available.
+
+
+Arduino Support
+---------------
+
+The arduino platform is supported to trigger the camera, control servo motor
+for camera tilt and relays for turning on lights.  Please use the included
+sketch.  I cannot support firmata at this time, but it is being considered.
 
 
 Legal

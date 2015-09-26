@@ -65,13 +65,11 @@ class ServiceApp:
                 context = zc_service_context(service_info)
                 stack.enter_context(context)
 
+            # TODO: unify this board trigger and the packet trigger
             if board:
                 task = loop.create_task(
                     self.wait_for_trigger(board.wait_for_packet(), camera))
                 self.running_tasks.append(task)
-
-            task = loop.create_task(asyncio.sleep(3000))
-            self.running_tasks.append(task)
 
             # serve previews in highly inefficient manner
             func = partial(self.camera_preview_threaded_queue, camera)
@@ -79,6 +77,7 @@ class ServiceApp:
             task = loop.create_task(coro)
             self.running_tasks.append(task)
 
+            # wait for a camera trigger in highly inefficient manner
             func = partial(self.wait_for_socket_open_trigger, camera)
             coro = asyncio.start_server(func, '127.0.0.1', 22223, loop=loop)
             task = loop.create_task(coro)

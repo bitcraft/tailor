@@ -4,12 +4,14 @@
 from setuptools import setup
 
 setup(name="tailor",
-      version='0.0.1',
+      version='0.0.2',
       description='cross platform photo booth',
       author='Leif Theden',
       author_email='leif.theden@gmail.com',
       packages=['tailor'],
-      install_requires=['kivy', 'zeroconf', 'shutter', 'pysdl2'],
+      install_requires=['kivy',
+                        'shutter',
+                        'pygame'],
       license="LGPLv3",
       long_description='https://github.com/bitcraft/tailor',
       classifiers=[

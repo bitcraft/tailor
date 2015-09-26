@@ -84,6 +84,6 @@ def print_file(filename):
 def ServerApp():
     from tailor.net import guess_local_ip_addresses
     config.update(pkConfig['remote_server'])
-    config['host'] = guess_local_ip_addresses()
+    # config['host'] = guess_local_ip_addresses()
     config['host'] = '127.0.0.1'
     return app
