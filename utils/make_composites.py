@@ -109,5 +109,3 @@ if __name__ == "__main__":
     files = glob.glob('{0}/*.jpg'.format(folder))
 
     loop.run_until_complete(render_all_files(template_master, files))
-
-    print(time.time() - start)

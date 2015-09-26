@@ -1,14 +1,22 @@
+# -*- coding: utf-8 -*-
+"""
+zeroconf support is on a haitus until i find/make a better solution
+currently, the zeronconf, pure-python lib is best lib without
+deps and works cross platform, but doesn't correctly
+
+advertise services (seems to announce just once.)
+"""
+
 import socket
 import json
 import logging
 from contextlib import contextmanager
 
-from zeroconf import ServiceInfo, Zeroconf
+# from zeroconf import ServiceInfo, Zeroconf
 
 from . import net
 
 logger = logging.getLogger('tailor.zc')
-
 
 __all__ = [
     'zc_service_context',
@@ -16,19 +24,28 @@ __all__ = [
 
 config = dict()
 
+# fake service info
+from collections import namedtuple
+
+ServiceInfo = namedtuple('ServiceInfo',
+                         'name desc, addr, port, null0, null1, properties')
+
 
 @contextmanager
 def zc_service_context(service_info):
-    logger.debug('Attempting to start zc service: "%s"', service_info.name)
-    zeroconf = Zeroconf()
-    zeroconf.register_service(service_info, ttl=60)
-    try:
-        yield
-    except:
-        raise
-    finally:
-        zeroconf.unregister_service(service_info)
-        zeroconf.close()
+    logger.debug('fake start zc service: "%s"', service_info.name)
+    yield
+    logger.debug('fake close zc service: "%s"', service_info.name)
+    # logger.debug('Attempting to start zc service: "%s"', service_info.name)
+    # zeroconf = Zeroconf()
+    # zeroconf.register_service(service_info, ttl=60)
+    # try:
+    #     yield
+    # except:
+    #     raise
+    # finally:
+    #     zeroconf.unregister_service(service_info)
+    #     zeroconf.close()
 
 
 def new_service_from_json(service_data):

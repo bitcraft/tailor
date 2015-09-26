@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 needs asyncio audit
 """
@@ -6,6 +7,11 @@ import time
 import logging
 
 import cv2
+
+
+
+
+
 
 
 # import asyncio
@@ -33,9 +39,10 @@ class OpenCVCamera:
     Emits auto generated PIL images.
     """
 
-    def __init__(self):
-        self.device_context = None
-        self.lock = asyncio.Lock()
+    def __init__(self, index=0):
+        self._device_index = index
+        self._device_context = None
+        self._lock = asyncio.Lock()
 
     def __enter__(self):
         self.open()
@@ -45,7 +52,7 @@ class OpenCVCamera:
 
     def open(self):
         # TODO: make async
-        dc = cv2.VideoCapture(0)
+        dc = cv2.VideoCapture(self._device_index)
 
         # give time for webcam to init.
         time.sleep(2)
@@ -55,10 +62,10 @@ class OpenCVCamera:
         # is done.  so we do a capture here to force device to be ready
         dc.read()
 
-        self.device_context = dc
+        self._device_context = dc
 
     def close(self):
-        self.device_context.release()
+        self._device_context.release()
 
     def reset(self):
         self.close()
@@ -70,11 +77,11 @@ class OpenCVCamera:
 
         :return:
         """
-        with (yield from self.lock):
-            ret, frame = self.device_context.read()
+        with (yield from self._lock):
+            ret, frame = self._device_context.read()
 
         if ret:
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         else:
             rgb = None
 

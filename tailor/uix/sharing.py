@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from functools import partial
 
 from kivy.config import Config
@@ -14,6 +15,21 @@ from ..smtp import SenderThread
 from ..config import pkConfig as pkConfig
 
 MAXIMUM_PRINTS = pkConfig.getint('kiosk', 'max-prints')
+
+
+def double(filename, fn2):
+    from PIL import Image
+
+    image = Image.open(filename)
+    base = Image.new('RGBA', (1200, 1800))
+    areas = ((0, 0), (600, 0))
+    for area in areas:
+        base.paste(image, area, mask=image)
+
+    new = 'double-%s' % fn2
+    new = os.path.join(pkConfig['paths']['app_root_path'], new)
+    base.save(new)
+    return new
 
 
 def handle_print_number_error(value):
@@ -51,7 +67,8 @@ class SharingControls(FloatLayout):
             widget.on_touch_motion = derp
 
     def do_print(self):
-        url = 'http://127.0.0.1:5000/print/' + self.filename
+        filename = self.filename[self.filename.rindex('/') + 1:]
+        url = 'http://127.0.0.1:5000/print/' + filename
         for i in range(self.prints):
             req = UrlRequest(url)
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 template widgets are used when user taps and opens a finished photo
 from the picker.  the image is shown in detail, and this widget overlays

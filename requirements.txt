@@ -1,7 +1,7 @@
 kivy
 pillow
 zeroconf
-shutter
+git+http://github.com/bitcraft/shutter.git
 pysdl2
 flask
 natsort

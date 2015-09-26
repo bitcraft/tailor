@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import socket
 import json
 from time import sleep
@@ -6,12 +7,14 @@ from zeroconf import ServiceBrowser, ServiceStateChange, Zeroconf
 
 
 def on_service_state_change(zeroconf, service_type, name, state_change):
-    print("Service %s of type %s state changed: %s" % (name, service_type, state_change))
+    print("Service %s of type %s state changed: %s" % (
+        name, service_type, state_change))
 
     if state_change is ServiceStateChange.Added:
         info = zeroconf.get_service_info(service_type, name)
         if info:
-            print("  Address: %s:%d" % (socket.inet_ntoa(info.address), info.port))
+            print("  Address: %s:%d" % (
+                socket.inet_ntoa(info.address), info.port))
             print("  Weight: %d, priority: %d" % (info.weight, info.priority))
             print("  Server: %s" % (info.server,))
             if info.properties:
@@ -41,7 +44,8 @@ if __name__ == '__main__':
     print("\nBrowsing services, press Ctrl-C to exit...\n")
 
     zeroconf = Zeroconf()
-    browser = ServiceBrowser(zeroconf, service_type, handlers=[on_service_state_change])
+    browser = ServiceBrowser(zeroconf, service_type,
+                             handlers=[on_service_state_change])
 
     try:
         while True:

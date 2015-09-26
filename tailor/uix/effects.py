@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 
 from kivy.effects.dampedscroll import DampedScrollEffect
@@ -10,7 +11,7 @@ __all__ = ('TailorScrollEffect',)
 class TailorScrollEffect(DampedScrollEffect):
     """ on my system, the large scrollview doesn't work well.
     this is a more computationally involved method of scrolling, but is more
-    accurate...and works.
+    accurate...and works, mostly.
     """
     friction = NumericProperty(0.005)
     min_velocity = NumericProperty(.1)

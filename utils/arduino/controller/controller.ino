@@ -60,7 +60,7 @@ long debounceDelay = 100;
 
 void setup() {
   // start communication with pc
-  Serial.begin(9600);
+  Serial.begin(56700);
 
   // switches
   pinMode(2, INPUT_PULLUP);
@@ -99,10 +99,8 @@ void readPin(int pin) {
   if (triggerState[index] == LOW) {
     if (triggerHeld[index] == 0) {
       triggerHeld[index] = 1;
-      Serial.print(pSwitchTrigger);
-      Serial.print(" ");
-      Serial.print(pin);
-      Serial.println();
+      Serial.write(pSwitchTrigger);
+      Serial.write(pin);
       Serial.flush();
     }
   }

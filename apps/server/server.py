@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
 from glob import glob
 from os.path import join
 import os
+import shutil
+import re
 
 from flask import Flask, request, jsonify, send_from_directory
 
@@ -8,9 +11,10 @@ from tailor.config import pkConfig
 
 app = Flask(__name__)
 
-# monitor_folder = 'C:\\Users\\Leif\\events\\carrie-jon\\composites\\'
-monitor_folder = '/Users/leif/events/heather-matt/composites/'
+monitor_folder = pkConfig['paths']['event_composites']
+prints_folder = pkConfig['paths']['event_prints']
 glob_string = '*png'
+regex = re.compile('^(.*?)-(\d+)$')
 
 config = dict()
 
@@ -49,14 +53,37 @@ def retrieve_file(filename):
         pass
 
 
+def smart_copy(src, dest):
+    path = os.path.join(dest, os.path.basename(src))
+
+    root, ext = os.path.splitext(path)
+    match = regex.match(root)
+    if match:
+        root, i = match.groups()
+        i = int(i)
+    else:
+        i = 0
+
+    if os.path.exists(path):
+        i += 1
+        path = "{0}-{1:04d}{2}".format(root, i, ext)
+        while os.path.exists(path):
+            i += 1
+            path = "{0}-{1:04d}{2}".format(root, i, ext)
+
+    shutil.copyfile(src, path)
+
+
 @app.route('/print/<filename>')
 def print_file(filename):
-    print(filename)
-    return 'ok'
+    src = os.path.join(prints_folder, filename)
+    smart_copy(src, pkConfig['paths']['print_hot_folder'])
+    return "ok"
 
 
 def ServerApp():
     from tailor.net import guess_local_ip_addresses
     config.update(pkConfig['remote_server'])
     config['host'] = guess_local_ip_addresses()
+    config['host'] = '127.0.0.1'
     return app

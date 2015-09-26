@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Operator's kiosk for managing the photobooth
 """
@@ -14,7 +14,6 @@ from kivy.uix.screenmanager import ScreenManager
 from tailor.config import pkConfig as pkConfig
 from tailor.uix.picker import PickerScreen
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("tailor.kiosk-loader")
 
 # make kiosk work without installing tailor into python
@@ -33,12 +32,16 @@ Config.set('kivy', 'keyboard_mode', 'dock')
 Config.set('kivy', 'keyboard_layout', DEFAULT_VKEYBOARD_LAYOUT)
 
 # set the display up
-Config.set('graphics', 'fullscreen',
-           pkConfig.get('display', 'fullscreen'))
-Config.set('graphics', 'width',
-           pkConfig.getint('display', 'width'))
-Config.set('graphics', 'height',
-           pkConfig.getint('display', 'height'))
+
+# Config.set('graphics', 'fullscreen', 'auto')
+# Config.set('graphics', 'fullscreen',
+#            pkConfig.get('display', 'fullscreen'))
+Config.set('graphics', 'width', 1280)
+Config.set('graphics', 'height', 1024)
+# Config.set('graphics', 'width',
+#            pkConfig.getint('display', 'width'))
+# Config.set('graphics', 'height',
+#            pkConfig.getint('display', 'height'))
 
 # the display/touch input i use needs some love
 Config.set('postproc', 'retain_time',
@@ -46,14 +49,8 @@ Config.set('postproc', 'retain_time',
 Config.set('postproc', 'retain_distance',
            pkConfig.getint('kiosk', 'touch-retain-distance'))
 
-# paths
-# all_images_path = os.path.abspath(pkConfig.get('paths', 'images'))
-# event_name = pkConfig.get('event', 'name')
-# event_images_path = jpath(all_images_path, event_name)
-# composites_path = jpath(event_images_path, 'composites')
 styles_path = jpath(app_root_path, 'tailor', 'resources', 'styles')
 app_images_path = jpath(app_root_path, 'resources', 'images')
-# paths = ('thumbnails', 'detail', 'originals', 'composites')
 
 kv_files = (
     ('default', ('kiosk.kv',),),
@@ -88,4 +85,11 @@ def new():
 
     app = KioskApp()
     app.manager.add_widget(PickerScreen(name='compositepicker'))
+
+    # TODO: move to configuration (where it belongs!)
+    # workaround to some defeciency in the sdl2 window backend
+    # Window.fullscreen = 1
+    # Window.fullscreen = 'fake'
+    # Window.borderless = True
+
     return app

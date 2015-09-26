@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 image processor/composer that manipulates images
 """

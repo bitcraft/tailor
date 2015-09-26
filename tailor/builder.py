@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Support loading template graphs from json formatted files
 """
 import json

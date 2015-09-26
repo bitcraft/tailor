@@ -1,8 +1,8 @@
 Tailor
 ======
 
-Tailor is a set of hardware plans and software for a wedding/event photo and
-includes image processing, camera control, live slideshow, and touch based
+Tailor is a set of hardware plans and software for a wedding/event photo booth
+and includes image processing, camera control, live slideshow, and touch based
 image browser for kiosk operation.  It is a project in development and is
 currently in a broken state as I add better template support.
 

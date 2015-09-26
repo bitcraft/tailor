@@ -1,22 +1,27 @@
+# -*- coding: utf-8 -*-
 from functools import partial
 import os
 import logging
+import queue
 from urllib.parse import urlparse
 
 from kivy.animation import Animation
 from kivy.clock import Clock
-from kivy.core.image import Image as CoreImage
+from kivy.core.image import Image as CoreImage, ImageData
 from kivy.core.window import Window
 from kivy.factory import Factory
+from kivy.graphics.texture import Texture
 from kivy.loader import Loader
 from kivy.network.urlrequest import UrlRequest
 from kivy.properties import *
+from kivy.uix.label import Label
+from kivy.uix.image import Image
 from kivy.uix.screenmanager import Screen
 from natsort import natsorted
 
 from .effects import TailorScrollEffect
 from .sharing import SharingControls
-from .utils import search
+from .utils import search, trigger_session_via_socket
 
 logger = logging.getLogger('tailor.picker')
 
@@ -26,26 +31,6 @@ resource_path = os.path.realpath(jpath(__file__, '..', '..', 'resources'))
 image_path = partial(jpath, resource_path, 'images')
 
 polling_interval = 5
-
-# # TODO: move to more generic loader
-# def install_zc_listener(callback):
-#     from zeroconf import ServiceBrowser, Zeroconf
-#     import json
-#
-#     filename = 'config/kiosk.json'
-#     with open(filename) as fp:
-#         json_data = json.load(fp)
-#
-#     listeners = json_data['zeroconf-listeners']
-#     listener = listeners.pop()
-#
-#     config = listener['config']
-#     service_type = config['type']
-#
-#     zeroconf = Zeroconf()
-#     browser = ServiceBrowser(zeroconf, service_type, handlers=[callback])
-#
-#     return zeroconf
 
 
 class PickerScreen(Screen):
@@ -63,7 +48,6 @@ class PickerScreen(Screen):
         # these are pulled from the .kv format file
         self.view = search(self, 'view')
         self.top_parent = search(self, 'top_parent')
-        self.slider = search(self, 'slider')
         self.drawer = search(self, 'drawer')
         self.background = search(self, 'background')
         self.scrollview = search(self, 'scrollview')
@@ -75,25 +59,8 @@ class PickerScreen(Screen):
         # the grid will expand horizontally as items are added
         def f(widget, value):
             self.grid.width = value
-            # self.slider.max = value
 
         self.grid.bind(minimum_width=f)
-
-        # slider => scrollview binding
-        def f(scrollview, widget, value):
-            # not sure why value has to be negated here
-            scrollview.effect_x.value = -value * self.grid.minimum_width
-
-        self.slider.bind(value=partial(f, self.scrollview))
-        self.slider.max = 1
-
-        # scrollview => slider binding
-        def f(slider, widget, value):
-            # avoid 'maximum recursion depth exceeded' error
-            if value >= 0:
-                slider.value = value
-
-        self.scrollview.effect_x.bind(value=partial(f, self.slider))
 
         # background parallax effect
         def f(widget, value):
@@ -108,11 +75,33 @@ class PickerScreen(Screen):
         self.scrollview_hidden = False
 
         # set loading image to an ugly spinning gif
-        # Loader.loading_image = CoreImage(image_path('loading.gif'))
+        Loader.loading_image = CoreImage(image_path('loading.gif'))
 
         # the preview label is used with the focus widget is open
+        self.preview_texture = None
         self.preview_label = Factory.PreviewLabel(pos=(-1000, -1000))
         self.view.add_widget(self.preview_label)
+
+        #   E X I T   B U T T O N
+        # this button is used to exit the large camera preview window
+        # def exit_preview(widget, touch):
+        #     if widget.collide_point(touch.x, touch.y):
+        #         self.change_state('normal')
+        # self.preview_exit = Factory.ExitButton(
+        #     source=image_path('chevron-right.gif'))
+        # self.preview_exit.bind(on_touch_down=exit_preview)
+        # self.preview_exit.size_hint = None, None
+        # self.preview_exit.width = 64
+        # self.preview_exit.height = 175
+        # # self.preview_exit.x = 1280
+        # # self.preview_exit.y = (1024 / 2) - (self.preview_exit.height / 2)
+        # self.preview_exit.pos_hint = {'x': 1, 'center_y': .5}
+        # self.view.add_widget(self.preview_exit)
+
+        #  P R E V I E W   B U T T O N
+        button = search(self, 'previewbutton')
+        button.bind(on_press=self.toggle_preview)
+        self.preview_button = button
 
         # the background has a parallax effect
         self.background.source = image_path('galaxy.jpg')
@@ -121,36 +110,150 @@ class PickerScreen(Screen):
         self.locked = False
         self.loaded = set()
         self.animated_widgets = list()
-        self.remote_server = None
-        self.focus_widget = None
 
-        # TODO: remote listener is hardcoded to locahost for now
-        # in future, this will be zeroconf, when i get a good binding
+        # TODO: do not hardcode
         self.remote_server = {
             'protocol': 'http',
             'host': '127.0.0.1',
-            'port': 5000
-        }
+            'port': 5000}
 
-        # install_zc_listener(self.on_new_zc_info)
+        self.focus_widget = None
 
         self.check_new_photos()
         Clock.schedule_interval(self.check_new_photos, polling_interval)
 
-    # def on_new_zc_info(self, zeroconf, service_type, name, state_change):
-    #     from zeroconf import ServiceStateChange
-    #     import socket
-    #
-    #     if state_change is ServiceStateChange.Added:
-    #         info = zeroconf.get_service_info(service_type, name)
-    #         if info:
-    #             self.remote_server = {'protocol': 'http',
-    #                                   'host': socket.inet_ntoa(info.address),
-    #                                   'port': info.port}
+        #  C O U N T D O W N   L A B E L
+        font_name = 'tailor/resources/fonts/Market_Deco.ttf'
+        self.countdown_label = Label(font_size=400, font_name=font_name)
+        self.countdown_label.text_size = None, None
+        self.countdown_label.size_hint = (1, 1)
+        self.countdown_label.pos_hint = {'x': 0, 'y': 0}
+        self.countdown_label.opacity = .85
+        self.overlay_text = None
+
+        # TODO: fix this
+        self.overlay_text = None
+        self.scheduled_return_to_normal = False
+
+        # TODO: needs to be phased out
+        # queueing them and updating the widget's texture
+        from .utils import PreviewHandler
+        self.preview_handler = PreviewHandler()
+        self.preview_handler.start()
+        self.preview_widget = None
+        self.update_preview()
+
+        self.add_widget(self.countdown_label)
+
+    def toggle_preview(self, *args, **kwargs):
+        if self.state == 'normal':
+            # self.scheduled_return_to_normal = False
+            trigger_session_via_socket()
+            self.change_state('preview')
+        elif self.state == 'preview':
+            self.change_state('normal')
+
+    def clear_preview_queue(self):
+        while 1:
+            try:
+                yield from self.preview_handler.queue.get_nowait()
+            except queue.Empty:
+                return
+
+    @staticmethod
+    def update_texture(texture, image_data):
+        # needed when opengl context is lost...not worried about that now
+        texture.blit_buffer(image_data.data)
+        texture.flip_vertical()
+        texture.flip_horizontal()
+
+    def create_preview_texture(self, initial_data):
+        texture = Texture.create_from_data(initial_data)
+        # add_reload_observer is required for loading texture info
+        # after the openGL context is lost and images need to be reloaded
+        # currently, losing opengl context is not tested
+        texture.add_reload_observer(self.update_texture)
+        texture.flip_vertical()
+        texture.flip_horizontal()
+        return texture
+
+    # P R E V I E W   W I D G E T
+    def update_preview(self, *args, **kwargs):
+
+        # TODO: refactor this mess into cleaner parts
+        try:
+            # stuff = yield from self.preview_handler.queue.get_nowait()
+            stuff = self.preview_handler.queue.get()
+            session, imdata = stuff
+        except queue.Empty:
+            # TODO: generate an image indicating camera is offline
+            imdata = ImageData(2, 2, 'RGB', [0, 0, 0, 0])
+            session = None
+            # return
+
+        # textures must be created in the main thread;
+        # this is a limitation in pygame
+        if self.preview_texture is None:
+            self.preview_texture = self.create_preview_texture(imdata)
+        else:
+            self.update_texture(self.preview_texture, imdata)
+
+        if self.preview_widget is None:
+            self.preview_widget = Image(texture=self.preview_texture,
+                                        nocache=True)
+            self.preview_widget.allow_stretch = True
+            self.preview_widget.size_hint = .95, 1
+            self.preview_widget.pos_hint = {'center_x': .5, 'y': 1}
+            # self.preview_widget.bind(on_touch_down=self.on_touch_down)
+            self.add_widget(self.preview_widget)
+
+        def end_state(dt):
+            self.countdown_label.text = ''
+            self.change_state('normal')
+
+        if session:
+            overlay_text = ''
+
+            if session['finished']:
+                overlay_text = 'Thank You!'
+
+                if not self.scheduled_return_to_normal and \
+                                self.state == 'preview':
+                    self.scheduled_return_to_normal = True
+                    Clock.schedule_once(end_state, 5)
+
+            elif session['started']:
+                if not self.state == 'preview':
+                    self.scheduled_return_to_normal = False
+                    self.change_state('preview')
+
+                if session['idle']:
+                    overlay_text = 'get ready!'
+                else:
+                    timer_value = session['timer_value']
+                    if timer_value <= 1:
+                        overlay_text = 'look at camera!'
+                    else:
+                        overlay_text = str(timer_value)
+
+            if not self.overlay_text == overlay_text:
+                self.overlay_text = overlay_text
+                if len(overlay_text) > 3:
+                    if not self.countdown_label.font_size == 150:
+                        self.countdown_label.font_size = 150
+                else:
+                    if not self.countdown_label.font_size == 370:
+                        self.countdown_label.font_size = 370
+
+                self.countdown_label.text = overlay_text
 
     def on_image_touch(self, widget, touch):
         """ called when any image is touched
         """
+        # ignore all touches during preview!
+        if self.state == 'preview':
+            return True
+
         if widget.collide_point(touch.x, touch.y):
             # hide the focus widget
             if self.scrollview_hidden:
@@ -172,6 +275,8 @@ class PickerScreen(Screen):
             for url in new:
                 new_url = url + '?size=small'
                 to_get.append(new_url)
+
+            # to_get.reverse()
 
             self.fetch_images(to_get)
 
@@ -201,10 +306,10 @@ class PickerScreen(Screen):
         # scroll to edge
         if self.scrollview.effect_x is not None:
             Animation(
-                value_normalized=1,
+                scroll_x=1,
                 t='out_quad',
                 duration=1
-            ).start(self.slider)
+            ).start(self.scrollview)
 
     def unlock(self, dt=None):
         self.locked = False
@@ -231,24 +336,29 @@ class PickerScreen(Screen):
         if self.locked:
             return
 
-        new_state = state
-        old_state = self.state
-        self.state = new_state
-        transition = (old_state, self.state)
+        transition = (self.state, state)
 
         logger.debug('transitioning state %s', transition)
 
-        if transition == ('focus', 'normal'):
-            self.stop_running_animations()
-            self.transition_focus_normal(**kwargs)
-        elif transition == ('normal', 'focus'):
-            self.stop_running_animations()
-            self.transition_normal_focus(**kwargs)
-        else:
-            print('invalid state transition:', state)
-            raise RuntimeError
+        # TODO: make programable? save somewhere? idk.
+        transitions = {
+            ('normal', 'focus'): self.transition_normal_focus,
+            ('normal', 'preview'): self.transition_normal_preview,
+            ('focus', 'normal'): self.transition_focus_normal,
+            ('preview', 'normal'): self.transition_preview_normal,
+        }
 
-    def start_and_log_widget(self, ani, target):
+        try:
+            next_state = transitions[transition]
+        except KeyError:
+            print('invalid state transitioning to:', state)
+            raise RuntimeError
+        else:
+            self.state = state
+            self.stop_running_animations()
+            next_state(**kwargs)
+
+    def start_and_log(self, ani, target):
         self.animated_widgets.append(target)
         ani.start(target)
 
@@ -270,16 +380,16 @@ class PickerScreen(Screen):
             opacity=0.0,
             duration=.3)
         # ani.bind(on_complete=self._remove_widget_after_ani)
-        self.start_and_log_widget(ani, self.preview_label)
+        self.start_and_log(ani, self.preview_label)
         if self.controls:
-            self.start_and_log_widget(ani, self.controls)
+            self.start_and_log(ani, self.controls)
 
         # set the background to normal
         ani = Animation(
             size_hint=(3, 1.5),
             t='in_out_quad',
             duration=.5)
-        self.start_and_log_widget(ani, self.background)
+        self.start_and_log(ani, self.background)
 
         # show the scrollview and drawer
         ani = Animation(
@@ -287,8 +397,8 @@ class PickerScreen(Screen):
             t='in_out_quad',
             opacity=1.0,
             duration=.5)
-        self.start_and_log_widget(ani, search(self, 'scrollview_area'))
-        self.start_and_log_widget(ani, self.drawer)
+        self.start_and_log(ani, search(self, 'scrollview_area'))
+        self.start_and_log(ani, self.drawer)
 
         # hide the focus widget
         ani = Animation(
@@ -299,9 +409,9 @@ class PickerScreen(Screen):
         ani &= Animation(
             opacity=0.0,
             duration=.5)
-        self.start_and_log_widget(ani, self.focus_widget)
+        self.start_and_log(ani, self.focus_widget)
 
-        # schedule an unlock
+        # schedule a unlock
         self.locked = True
         Clock.schedule_once(self.unlock, .5)
 
@@ -329,8 +439,8 @@ class PickerScreen(Screen):
         ani = Animation(
             opacity=1.0,
             duration=.3)
-        self.start_and_log_widget(ani, self.preview_label)
-        self.start_and_log_widget(ani, self.controls)
+        self.start_and_log(ani, self.preview_label)
+        self.start_and_log(ani, self.controls)
 
         self.preview_label.pos_hint = {'x': .25, 'y': .47}
         self.add_widget(self.controls)
@@ -342,8 +452,8 @@ class PickerScreen(Screen):
             t='in_out_quad',
             opacity=0.0,
             duration=.7)
-        self.start_and_log_widget(ani, search(self, 'scrollview_area'))
-        self.start_and_log_widget(ani, self.drawer)
+        self.start_and_log(ani, search(self, 'scrollview_area'))
+        self.start_and_log(ani, self.drawer)
 
         # start a simple animation on the background
         x = self.background.pos_hint['x']
@@ -354,7 +464,7 @@ class PickerScreen(Screen):
         ani += Animation(
             pos_hint={'x': x + 1.5},
             duration=480)
-        self.start_and_log_widget(ani, self.background)
+        self.start_and_log(ani, self.background)
 
         # show the focus widget
         ani = Animation(
@@ -366,8 +476,132 @@ class PickerScreen(Screen):
         ani &= Animation(
             opacity=1.0,
             duration=.5)
-        self.start_and_log_widget(ani, self.focus_widget)
+        self.start_and_log(ani, self.focus_widget)
 
-        # schedule an unlock
+        # schedule a unlock
         self.locked = True
         Clock.schedule_once(self.unlock, .5)
+
+    def transition_normal_preview(self, *arkg, **kwargs):
+        # ====================================================================
+        #  N O R M A L  =>  P R E V I E W
+        self.clear_preview_queue()
+
+        self.scrollview_hidden = True
+
+        # show the preview exit button
+        # ani = Animation(
+        #     pos_hint={'x': .95},
+        #     t='in_out_quad',
+        #     duration=.5)
+        # ani &= Animation(
+        #     opacity=1.0,
+        #     duration=.5)
+        # self.start_and_log(ani, self.preview_exit)
+
+        # # show the camera preview
+        # ani = Animation(
+        #     pos_hint={'x': 0, 'center_y': .5},
+        #     t='in_out_quad',
+        #     duration=.5)
+        # ani &= Animation(
+        #     opacity=1.0,
+        #     duration=.5)
+        # self.start_and_log(ani, self.preview_widget)
+        self.preview_widget.pos_hint = {'center_x': .5, 'center_y': .5}
+
+        # hide the scrollview and drawer
+        ani = Animation(
+            x=0,
+            y=-1000,
+            t='in_out_quad',
+            opacity=0.0,
+            duration=.7)
+        self.start_and_log(ani, search(self, 'scrollview_area'))
+        self.start_and_log(ani, self.drawer)
+
+        # start a simple animation on the background
+        x = self.background.pos_hint['x']
+        ani = Animation(
+            t='in_out_quad',
+            size_hint=(4, 2),
+            duration=.5)
+        ani += Animation(
+            pos_hint={'x': x + 1.5},
+            duration=480)
+        self.start_and_log(ani, self.background)
+
+        # schedule a unlock
+        self.locked = True
+        Clock.schedule_once(self.unlock, .5)
+
+        # schedule an interval to update the preview widget
+        Clock.schedule_interval(self.update_preview, 1 / 40.)
+
+    def transition_preview_normal(self, *args, **kwargs):
+        # ====================================================================
+        #  P R E V I E W  =>  N O R M A L
+        self.scrollview_hidden = False
+
+        # hide the preview exit button
+        # ani = Animation(
+        #     pos_hint={'x': 1},
+        #     t='in_out_quad',
+        #     duration=.5)
+        # ani &= Animation(
+        #     opacity=0.0,
+        #     duration=.5)
+        # self.start_and_log(ani, self.preview_exit)
+
+        # # # hide the camera preview
+        # ani = Animation(
+        #     pos_hint={'y': 1},
+        #     t='in_out_quad',
+        #     duration=.5)
+        # # ani &= Animation(
+        # #     opacity=0.0,
+        # #     duration=.5)
+        # self.start_and_log(ani, self.preview_widget)
+        self.preview_widget.pos_hint = {'y': 1}
+
+        # # # set the background to normal
+        # x, y = self._calc_bg_pos()
+        # ani = Animation(
+        #     y=y + 100,
+        #     x=x,
+        #     t='in_out_quad',
+        #     duration=.5)
+        # self.start_and_log(ani, self.background)
+        #
+        # # show the scrollview
+        # x, y = self._scrollview_pos[0], self.scrollview.original_y
+        # ani = Animation(
+        #     x=x,
+        #     y=y,
+        #     t='in_out_quad',
+        #     opacity=1.0,
+        #     duration=.5)
+        # self.start_and_log(ani, self.scrollview)
+
+        # set the background to normal
+        ani = Animation(
+            size_hint=(3, 1.5),
+            t='in_out_quad',
+            duration=.5)
+        self.start_and_log(ani, self.background)
+
+        # show the scrollview and drawer
+        ani = Animation(
+            y=0,
+            t='in_out_quad',
+            opacity=1.0,
+            duration=.5)
+        self.start_and_log(ani, search(self, 'scrollview_area'))
+        self.start_and_log(ani, self.drawer)
+
+        # schedule a unlock
+        self.locked = True
+        Clock.schedule_once(self.unlock, .5)
+
+        # unschedule the preview updater
+        Clock.unschedule(self.update_preview)

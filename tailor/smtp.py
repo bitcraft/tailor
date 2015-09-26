@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import smtplib
 import pickle
 import email

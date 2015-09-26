@@ -1,12 +1,13 @@
+# -*- coding: utf-8 -*-
 import logging
 
-logger = logging.getLogger()
+logging.basicConfig(level=logging.DEBUG)
 
 from argparse import ArgumentParser
 
 
 def main():
-    from service import ServiceApp
+    from service_app import ServiceApp
 
     parser = ArgumentParser(prog="tailor", description="tailor camera service")
     args = parser.parse_args()

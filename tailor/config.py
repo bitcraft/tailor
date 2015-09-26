@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os.path
 import configparser
 import logging
@@ -9,8 +10,11 @@ logger = logging.getLogger('tailor.config')
 pkConfig = configparser.ConfigParser()
 
 
+def jpath(*args):
+    return os.path.normpath(os.path.join(*args))
+
+
 def reload(path):
-    jpath = os.path.join
     config_path = jpath(path, 'config.ini')
     logger.debug('loading configuration: %s', config_path)
     pkConfig.read(config_path)
@@ -19,11 +23,14 @@ def reload(path):
     app_resources_path = jpath(app_root_path, 'tailor', 'resources')
     all_templates_path = jpath(app_resources_path, 'templates')
     all_images_path = pkConfig.get('paths', 'images')
+    hot_print_folder = os.path.normpath(pkConfig['paths']['print-hot-folder'])
     event_name = pkConfig.get('event', 'name')
     event_images_path = jpath(all_images_path, event_name)
 
     # TODO: eventually incorperate zeroconf discovery
     paths = {
+        'print_hot_folder': hot_print_folder,
+        'app_root_path': app_root_path,
         'app_resources': app_resources_path,
         'app_sounds': jpath(app_resources_path, 'sounds'),
         'app_images': jpath(app_resources_path, 'images'),
@@ -31,10 +38,9 @@ def reload(path):
         'event_template': jpath(all_templates_path,
                                 pkConfig.get('event', 'template')),
         'event_images': event_images_path,
-        'event_thumbs': jpath(event_images_path, 'thumbnails'),
-        'event_details': jpath(event_images_path, 'detail'),
         'event_originals': jpath(event_images_path, 'originals'),
         'event_composites': jpath(event_images_path, 'composites'),
+        'event_prints': jpath(event_images_path, 'prints'),
     }
     pkConfig['paths'] = paths
 

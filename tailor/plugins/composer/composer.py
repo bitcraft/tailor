@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import asyncio
 
 from tailor.plugins.composer import TemplateRenderer
