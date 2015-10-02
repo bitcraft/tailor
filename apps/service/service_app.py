@@ -9,9 +9,10 @@ manages plugin workflow, basically
 import asyncio
 import os
 import logging
+import pickle
+from collections import namedtuple
 from contextlib import ExitStack
 from functools import partial
-import pickle
 
 from apps.service.session import Session
 from tailor import plugins
@@ -26,6 +27,9 @@ logger = logging.getLogger("tailor.service")
 if os.name == 'nt':
     asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
+# used to create a dummy session when app is first started
+mock_session = namedtuple('mock_session', 'countdown_value started finished idle')
+
 
 class ServiceApp:
     """
@@ -36,7 +40,7 @@ class ServiceApp:
         self.running = False
         self.running_tasks = list()
         self.template_filename = None
-        self.session = None
+        self.session = mock_session(0, False, False, False)
 
     def run(self):
         self.running = True
@@ -73,8 +77,14 @@ class ServiceApp:
                     self.wait_for_trigger(board.wait_for_packet(), camera))
                 self.running_tasks.append(task)
 
-            # required to give things time to start?  idk
-            task = loop.create_task(asyncio.sleep(5000))
+            # the servers defined below will not keep asyncio.wait from
+            # thinking they are done.  meaning, without this pause,
+            # aysncio will happily kill the server before any clients
+            # have connected.
+            # this delay task is added to prevent the app from closing before
+            # clients have connected.
+            # TODO: let servers wait indefinitely.
+            task = loop.create_task(asyncio.sleep(120))
             self.running_tasks.append(task)
 
             # serve previews in highly inefficient manner
@@ -141,28 +151,16 @@ class ServiceApp:
 
         yield from task
         self.running = False
-        self.session = None
 
     @asyncio.coroutine
     def camera_preview_threaded_queue(self, camera, reader, writer):
-        if self.session:
-            countdown_value = self.session.countdown_value
-            finished = self.session.finished
-            started = self.session.started
-            idle = self.session.idle
-        else:
-            started = False
-            finished = False
-            idle = False
-            countdown_value = 0
-
         image = yield from camera.download_preview()
         packet = {
             'session': {
-                'idle': idle,
-                'started': started,
-                'finished': finished,
-                'timer_value': countdown_value,
+                'idle': self.session.idle,
+                'started': self.session.started,
+                'finished': self.session.finished,
+                'timer_value': self.session.countdown_value,
             },
             'image_data': {
                 'size': image.size,
@@ -174,4 +172,3 @@ class ServiceApp:
         writer.write(data)
         yield from writer.drain()
         writer.close()
-

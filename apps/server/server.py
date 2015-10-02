@@ -4,6 +4,10 @@ from os.path import join
 import os
 import shutil
 import re
+import threading
+import queue
+import time
+import atexit
 
 from flask import Flask, request, jsonify, send_from_directory
 
@@ -13,10 +17,27 @@ app = Flask(__name__)
 
 monitor_folder = pkConfig['paths']['event_composites']
 prints_folder = pkConfig['paths']['event_prints']
+print_queue = queue.Queue()
 glob_string = '*png'
 regex = re.compile('^(.*?)-(\d+)$')
 
 config = dict()
+
+# used to delay queue because of my ****** printer
+TIME_TO_SLEEP_QUEUE = 60
+
+
+class PrintQueueManager(threading.Thread):
+    def run(self, *args, **kwargs):
+        self.running = True
+        while self.running:
+            filename = print_queue.get()
+            src = os.path.join(prints_folder, filename)
+            smart_copy(src, pkConfig['paths']['print_hot_folder'])
+            time.sleep(TIME_TO_SLEEP_QUEUE)
+
+    def stop(self):
+        self.running = False
 
 
 def get_filenames_to_serve():
@@ -53,6 +74,12 @@ def retrieve_file(filename):
         pass
 
 
+@app.route('/print/<filename>')
+def enqueue_filename_for_print(filename):
+    print_queue.put(filename)
+    return "ok"
+
+
 def smart_copy(src, dest):
     path = os.path.join(dest, os.path.basename(src))
 
@@ -74,16 +101,18 @@ def smart_copy(src, dest):
     shutil.copyfile(src, path)
 
 
-@app.route('/print/<filename>')
-def print_file(filename):
-    src = os.path.join(prints_folder, filename)
-    smart_copy(src, pkConfig['paths']['print_hot_folder'])
-    return "ok"
-
-
 def ServerApp():
     from tailor.net import guess_local_ip_addresses
+
     config.update(pkConfig['remote_server'])
     # config['host'] = guess_local_ip_addresses()
     config['host'] = '127.0.0.1'
+
+    print_queue_thread = PrintQueueManager()
+    print_queue_thread.daemon = True
+    print_queue_thread.start()
+
+    # close thread when app exits.  i think.  probably just placebo, idk.
+    atexit.register(print_queue_thread.stop)
+
     return app

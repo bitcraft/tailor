@@ -55,9 +55,9 @@ def reload(path):
     # TODO: move to more generic loader
     filename = 'config/server.json'
     with open(filename) as fp:
-        json_data = json.load(fp)
+        server_cfg = json.load(fp)
 
-    interface_config = json_data['interface']
+    interface_config = server_cfg['interface']
     pkConfig['remote_server'] = {'protocol': 'http',
                                  'host': '127.0.0.1',
                                  'port': interface_config['port']}

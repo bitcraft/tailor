@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os.path
 from functools import partial
 
 from kivy.config import Config
@@ -50,6 +51,7 @@ class SharingControls(FloatLayout):
 
     email_addressee = StringProperty('')
     twitter_acct = StringProperty(
+        # TODO: load from cfg
         # pkConfig.get('twitter', 'account')
         "@klbuckcreek"
     )
