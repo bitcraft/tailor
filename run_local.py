@@ -8,7 +8,7 @@ from subprocess import Popen, call
 import time
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.launcher')
 
 processes = (
@@ -54,8 +54,10 @@ if __name__ == '__main__':
             for proc in running_processes:
                 value = proc.poll()
                 if value is not None:
+                    logger.debug('one process has quit')
                     running = False
-            time.sleep(.1)
+                    break
+                time.sleep(.1)
 
     except:
         # TODO: more useful info
@@ -67,7 +69,7 @@ if __name__ == '__main__':
             try:
                 start = time.time()
                 while proc.poll() is None:
-                    if time.time() - start > 5:
+                    if time.time() - start > 10:
                         break
                     try:
                         proc.terminate()

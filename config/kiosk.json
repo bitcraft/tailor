@@ -1,6 +1,6 @@
 {
   "event": {
-    "name": "ben-casey",
+    "name": "test",
     "template": "2x6.template"
   },
   "graphics": {
@@ -31,6 +31,9 @@
     "email": {
       "sender": "leif@kilbuckcreek.com",
       "subject": "Your photo from Kilbuck Creek Photo Booth"
+    },
+    "print": {
+      "maximum_prints": 3
     }
   }
 }

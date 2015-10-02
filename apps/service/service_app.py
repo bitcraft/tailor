@@ -44,7 +44,8 @@ class ServiceApp:
         loop = asyncio.get_event_loop()
 
         # build folder strucutre to store photos
-        task = loop.run_in_executor(None, self.make_folders)
+        #  task = loop.run_in_executor(None, self.make_folders)
+        self.make_folders()
 
         # camera
         # camera = plugins.dummy_camera.DummyCamera()
@@ -61,6 +62,7 @@ class ServiceApp:
 
         with ExitStack() as stack:
             stack.enter_context(camera)
+
             for service_info in load_services_from_config():
                 context = zc_service_context(service_info)
                 stack.enter_context(context)
@@ -70,6 +72,10 @@ class ServiceApp:
                 task = loop.create_task(
                     self.wait_for_trigger(board.wait_for_packet(), camera))
                 self.running_tasks.append(task)
+
+            # required to give things time to start?  idk
+            task = loop.create_task(asyncio.sleep(5000))
+            self.running_tasks.append(task)
 
             # serve previews in highly inefficient manner
             func = partial(self.camera_preview_threaded_queue, camera)
@@ -85,6 +91,7 @@ class ServiceApp:
 
             # this try/except will need to be addressed as i learn about
             # futures and how they respond to being canceled.
+            loop.run_until_complete(task)
             try:
                 loop.run_until_complete(asyncio.wait(self.running_tasks))
             except asyncio.CancelledError:

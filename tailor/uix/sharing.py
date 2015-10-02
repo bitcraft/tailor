@@ -14,7 +14,7 @@ from kivy.properties import *
 from ..smtp import SenderThread
 from ..config import pkConfig as pkConfig
 
-MAXIMUM_PRINTS = pkConfig.getint('kiosk', 'max-prints')
+MAXIMUM_PRINTS = 3
 
 
 def double(filename, fn2):
@@ -50,7 +50,8 @@ class SharingControls(FloatLayout):
 
     email_addressee = StringProperty('')
     twitter_acct = StringProperty(
-        pkConfig.get('twitter', 'account')
+        # pkConfig.get('twitter', 'account')
+        "@klbuckcreek"
     )
     filename = StringProperty()
 

@@ -38,10 +38,8 @@ Config.set('graphics', 'height', 1024)
 #            pkConfig.getint('display', 'height'))
 
 # the display/touch input i use needs some love
-Config.set('postproc', 'retain_time',
-           pkConfig.getint('kiosk', 'touch-retain-time'))
-Config.set('postproc', 'retain_distance',
-           pkConfig.getint('kiosk', 'touch-retain-distance'))
+Config.set('postproc', 'retain_time', 150)
+Config.set('postproc', 'retain_distance', 30)
 
 jpath = os.path.join
 styles_path = jpath(app_root_path, 'tailor', 'resources', 'styles')

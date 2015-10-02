@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
 from argparse import ArgumentParser
 
 

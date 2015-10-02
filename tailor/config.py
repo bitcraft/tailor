@@ -2,6 +2,7 @@
 import os.path
 import configparser
 import logging
+import json
 
 __all__ = ('Config',)
 
@@ -24,7 +25,15 @@ def reload(path):
     all_templates_path = jpath(app_resources_path, 'templates')
     all_images_path = pkConfig.get('paths', 'images')
     hot_print_folder = os.path.normpath(pkConfig['paths']['print-hot-folder'])
-    event_name = pkConfig.get('event', 'name')
+
+    # TODO: make sense of all the distributed config files
+    import json
+    with open(jpath(app_root_path, 'config', 'kiosk.json')) as fp:
+        kiosk_cfg = json.loads(fp.read())
+        pkConfig['kiosk'] = kiosk_cfg
+
+    event_name = kiosk_cfg['event']['name']
+    event_template = kiosk_cfg['event']['template']
     event_images_path = jpath(all_images_path, event_name)
 
     # TODO: eventually incorperate zeroconf discovery
@@ -35,8 +44,7 @@ def reload(path):
         'app_sounds': jpath(app_resources_path, 'sounds'),
         'app_images': jpath(app_resources_path, 'images'),
         'app_templates': all_templates_path,
-        'event_template': jpath(all_templates_path,
-                                pkConfig.get('event', 'template')),
+        'event_template': jpath(all_templates_path, event_template),
         'event_images': event_images_path,
         'event_originals': jpath(event_images_path, 'originals'),
         'event_composites': jpath(event_images_path, 'composites'),
@@ -45,7 +53,6 @@ def reload(path):
     pkConfig['paths'] = paths
 
     # TODO: move to more generic loader
-    import json
     filename = 'config/server.json'
     with open(filename) as fp:
         json_data = json.load(fp)
