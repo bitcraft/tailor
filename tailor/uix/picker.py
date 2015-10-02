@@ -177,20 +177,7 @@ class PickerScreen(Screen):
         texture.flip_horizontal()
         return texture
 
-    # P R E V I E W   W I D G E T
-    def update_preview(self, *args, **kwargs):
-
-        # TODO: refactor this mess into cleaner parts
-        try:
-            # stuff = yield from self.preview_handler.queue.get_nowait()
-            stuff = self.preview_handler.queue.get()
-            session, imdata = stuff
-        except queue.Empty:
-            # TODO: generate an image indicating camera is offline
-            imdata = ImageData(2, 2, 'RGB', [0, 0, 0, 0])
-            session = None
-            # return
-
+    def set_preview_texture(self, imdata):
         # textures must be created in the main thread;
         # this is a limitation in pygame
         if self.preview_texture is None:
@@ -198,54 +185,81 @@ class PickerScreen(Screen):
         else:
             self.update_texture(self.preview_texture, imdata)
 
-        if self.preview_widget is None:
-            self.preview_widget = Image(texture=self.preview_texture,
-                                        nocache=True)
-            self.preview_widget.allow_stretch = True
-            self.preview_widget.size_hint = .95, 1
-            self.preview_widget.pos_hint = {'center_x': .5, 'y': 1}
-            # self.preview_widget.bind(on_touch_down=self.on_touch_down)
-            self.add_widget(self.preview_widget)
+        return self.preview_texture
 
+    def set_preview_widget(self):
+        self.preview_widget = Image(texture=self.preview_texture, nocache=True)
+        self.preview_widget.allow_stretch = True
+        self.preview_widget.size_hint = .95, 1
+        self.preview_widget.pos_hint = {'center_x': .5, 'y': 1}
+        # self.preview_widget.bind(on_touch_down=self.on_touch_down)
+        self.add_widget(self.preview_widget)
+
+    def get_raw_image_from_queue(self):
+        # TODO: refactor this mess into cleaner parts
+        try:
+            # stuff = yield from self.preview_handler.queue.get_nowait()
+            stuff = self.preview_handler.queue.get()
+            session, imdata = stuff
+
+        except queue.Empty:
+            # TODO: generate an image indicating camera is offline
+            raise RuntimeError
+
+        return session, imdata
+
+    # P R E V I E W   W I D G E T
+    def update_preview(self, *args, **kwargs):
+        session, imdata = self.get_raw_image_from_queue()
+
+        self.set_preview_texture(imdata)
+        if self.preview_widget is None:
+            self.set_preview_widget()
+
+        self.set_preview_overlay_text(session)
+
+    def set_preview_overlay_text(self, session):
+        # TODO: 'session', needs some documentation
         def end_state(dt):
             self.countdown_label.text = ''
             self.change_state('normal')
+            self.scheduled_return_to_normal = False
 
-        if session:
-            overlay_text = ''
+        overlay_text = ''
 
-            if session['finished']:
+        if session['finished']:
+            if self.state == 'preview':
                 overlay_text = 'Thank You!'
 
-                if not self.scheduled_return_to_normal and \
-                                self.state == 'preview':
+                if not self.scheduled_return_to_normal:
                     self.scheduled_return_to_normal = True
                     Clock.schedule_once(end_state, 5)
 
-            elif session['started']:
-                if not self.state == 'preview':
-                    self.scheduled_return_to_normal = False
-                    self.change_state('preview')
+        elif session['started']:
+            if not self.state == 'preview':
+                self.change_state('preview')
 
-                if session['idle']:
-                    overlay_text = 'get ready!'
+            if session['idle']:
+                overlay_text = 'get ready!'
+            else:
+                timer_value = session['timer_value']
+
+                if timer_value <= 1:
+                    overlay_text = 'look at camera!'
                 else:
-                    timer_value = session['timer_value']
-                    if timer_value <= 1:
-                        overlay_text = 'look at camera!'
-                    else:
-                        overlay_text = str(timer_value)
+                    overlay_text = str(timer_value)
 
-            if not self.overlay_text == overlay_text:
-                self.overlay_text = overlay_text
-                if len(overlay_text) > 3:
-                    if not self.countdown_label.font_size == 150:
-                        self.countdown_label.font_size = 150
-                else:
-                    if not self.countdown_label.font_size == 370:
-                        self.countdown_label.font_size = 370
+        if not self.overlay_text == overlay_text:
+            self.overlay_text = overlay_text
 
-                self.countdown_label.text = overlay_text
+            if len(overlay_text) > 3:
+                if not self.countdown_label.font_size == 150:
+                    self.countdown_label.font_size = 150
+            else:
+                if not self.countdown_label.font_size == 370:
+                    self.countdown_label.font_size = 370
+
+            self.countdown_label.text = overlay_text
 
     def on_image_touch(self, widget, touch):
         """ called when any image is touched
@@ -340,7 +354,7 @@ class PickerScreen(Screen):
 
         logger.debug('transitioning state %s', transition)
 
-        # TODO: make programable? save somewhere? idk.
+        # TODO: make programmable? save somewhere? idk.
         transitions = {
             ('normal', 'focus'): self.transition_normal_focus,
             ('normal', 'preview'): self.transition_normal_preview,

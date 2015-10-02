@@ -28,6 +28,7 @@ def reload(path):
     import json
     with open(jpath(app_root_path, 'config', 'kiosk.json')) as fp:
         kiosk_cfg = json.loads(fp.read())
+        pkConfig['kiosk'] = kiosk_cfg
 
     event_name = kiosk_cfg['event']['name']
     event_template = kiosk_cfg['event']['template']

@@ -128,6 +128,5 @@ class OpenCVCamera:
     def download_preview(self):
         """ Capture preview image and return data
         """
-        logger.debug('download_preview')
         image = yield from self.capture_image()
         return image

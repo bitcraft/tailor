@@ -24,6 +24,9 @@
       }
     }
   ],
+  "print": {
+    "maximum_prints": 3
+  },
   "social": {
     "twitter": {
       "account": "@kilbuckcreekphoto"
