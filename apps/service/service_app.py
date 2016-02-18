@@ -84,7 +84,7 @@ class ServiceApp:
             # this delay task is added to prevent the app from closing before
             # clients have connected.
             # TODO: let servers wait indefinitely.
-            task = loop.create_task(asyncio.sleep(120))
+            task = loop.create_task(asyncio.sleep(3600))
             self.running_tasks.append(task)
 
             # serve previews in highly inefficient manner

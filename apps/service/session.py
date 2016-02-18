@@ -66,8 +66,8 @@ def incremental_naming(path):
 
 
 class Session:
-    countdown_time = 1
-    extra_wait_time = 1
+    countdown_time = 10
+    extra_wait_time = 5
     time_to_wait_after_capture = 3
 
     def __init__(self):

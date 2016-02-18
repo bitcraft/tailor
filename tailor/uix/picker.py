@@ -137,13 +137,7 @@ class PickerScreen(Screen):
 
         # TODO: needs to be phased out
         # queueing them and updating the widget's texture
-        from .utils import PreviewHandler
-        self.preview_handler = PreviewHandler()
-        self.preview_handler.start()
         self.preview_widget = None
-        self.update_preview()
-
-        self.add_widget(self.countdown_label)
 
     def toggle_preview(self, *args, **kwargs):
         if self.state == 'normal':
@@ -152,13 +146,6 @@ class PickerScreen(Screen):
             self.change_state('preview')
         elif self.state == 'preview':
             self.change_state('normal')
-
-    def clear_preview_queue(self):
-        while 1:
-            try:
-                yield from self.preview_handler.queue.get_nowait()
-            except queue.Empty:
-                return
 
     @staticmethod
     def update_texture(texture, image_data):
@@ -499,9 +486,19 @@ class PickerScreen(Screen):
     def transition_normal_preview(self, *arkg, **kwargs):
         # ====================================================================
         #  N O R M A L  =>  P R E V I E W
-        self.clear_preview_queue()
-
         self.scrollview_hidden = True
+
+        from .utils import PreviewHandler
+        self.preview_handler = PreviewHandler()
+        self.preview_handler.start()
+
+        # schedule an interval to update the preview widget
+        Clock.schedule_interval(self.update_preview, 1 / 40.)
+
+        self.update_preview()
+
+        self.remove_widget(self.countdown_label)
+        self.add_widget(self.countdown_label)
 
         # show the preview exit button
         # ani = Animation(
@@ -548,9 +545,6 @@ class PickerScreen(Screen):
         # schedule a unlock
         self.locked = True
         Clock.schedule_once(self.unlock, .5)
-
-        # schedule an interval to update the preview widget
-        Clock.schedule_interval(self.update_preview, 1 / 40.)
 
     def transition_preview_normal(self, *args, **kwargs):
         # ====================================================================
@@ -619,3 +613,7 @@ class PickerScreen(Screen):
 
         # unschedule the preview updater
         Clock.unschedule(self.update_preview)
+
+        self.preview_handler.stop()
+        self.preview_handler = None
+

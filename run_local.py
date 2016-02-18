@@ -33,7 +33,7 @@ def release_gvfs_from_camera():
 
 def run_processes():
     for name, cmd in processes:
-        logger.debug('staring process %s', name)
+        logger.debug('starting process %s', name)
         args = [python_cmd, cmd]
         proc = Popen(args)
         time.sleep(5)
