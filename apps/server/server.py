@@ -8,36 +8,49 @@ import threading
 import queue
 import time
 import atexit
+from celery import Celery
+from multiprocessing import Queue
 
 from flask import Flask, request, jsonify, send_from_directory
 
-from tailor.config import pkConfig
-
 app = Flask(__name__)
+
+from tailor.config import pkConfig
 
 monitor_folder = pkConfig['paths']['event_composites']
 prints_folder = pkConfig['paths']['event_prints']
-print_queue = queue.Queue()
+print_queue = Queue()
 glob_string = '*png'
 regex = re.compile('^(.*?)-(\d+)$')
 
 config = dict()
 
 # used to delay queue because of my ****** printer
-TIME_TO_SLEEP_QUEUE = 60
-
+TIME_TO_SLEEP_QUEUE = 120
 
 class PrintQueueManager(threading.Thread):
     def run(self, *args, **kwargs):
         self.running = True
         while self.running:
             filename = print_queue.get()
-            src = os.path.join(prints_folder, filename)
+            src = os.path.join(prints_folder, filename) 
             smart_copy(src, pkConfig['paths']['print_hot_folder'])
             time.sleep(TIME_TO_SLEEP_QUEUE)
 
     def stop(self):
         self.running = False
+
+def make_celery(app):
+    celery = Celery(app.import_name, broker=app.config['CELERY_BROKER_URL'])
+    celery.conf.update(app.config)
+    TaskBase = celery.Task
+    class ContextTask(TaskBase):
+        abstract = True
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+             return TaskBase.__call__(self, *args, **kwargs)
+    celery.Taks = ContextTask
+    return celery
 
 
 def get_filenames_to_serve():
@@ -114,5 +127,10 @@ def ServerApp():
 
     # close thread when app exits.  i think.  probably just placebo, idk.
     atexit.register(print_queue_thread.stop)
+
+    app.config.update(
+        CELERY_BROKER_URL='redis://localhost:6379',
+        CeLERY_RESULT_BACKEND='redis://localhost:6379'
+    )
 
     return app

@@ -9,9 +9,9 @@ def main():
 
     # addr = guess_local_ip_addresses()
     addr = '127.0.0.1'
-
+    print ('running', addr)
     app = ServerApp()
-    app.run(host=addr, debug=True)
+    app.run(host=addr, debug=True, use_reloader=False)
 
 
 if __name__ == "__main__":

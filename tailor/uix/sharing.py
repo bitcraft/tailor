@@ -73,7 +73,7 @@ class SharingControls(FloatLayout):
         filename = self.filename[self.filename.rindex('/') + 1:]
         url = 'http://127.0.0.1:5000/print/' + filename
         for i in range(self.prints):
-            req = UrlRequest(url)
+            req = UrlRequest(url, print)
 
     def handle_print_touch(self, popup, widget):
         popup.dismiss()
