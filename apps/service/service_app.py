@@ -47,8 +47,7 @@ class ServiceApp:
         self.template_filename = 'tailor/resources/templates/test_template.json'
         loop = asyncio.get_event_loop()
 
-        # build folder strucutre to store photos
-        #  task = loop.run_in_executor(None, self.make_folders)
+        # build folder structure to store photos
         self.make_folders()
 
         # camera

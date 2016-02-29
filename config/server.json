@@ -1,4 +1,7 @@
 {
+  "print-queue": {
+    "interval": 0
+  },
   "interface": {
     "host": "",
     "port": 5000
