@@ -6,6 +6,7 @@ import sys
 import re
 import traceback
 import threading
+import requests
 
 import pygame
 
@@ -195,7 +196,12 @@ class Session:
 
         # print the double
         # TODO: implement template-based doubler
-        fc = plugins.filesystem.FileCopy(shared_folder)
-        yield from fc.process(print_path)
+        filename =  os.path.basename(print_path)
+        url = 'http://localhost:5000/print/' + filename
+        print(url)
+        requests.get(url)
+	
+        # fc = plugins.filesystem.FileCopy(shared_folder)
+        # yield from fc.process(print_path)
 
         return root
