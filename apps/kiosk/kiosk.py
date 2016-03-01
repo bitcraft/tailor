@@ -2,12 +2,12 @@
 """
 Operator's kiosk for managing the photobooth
 """
-import os
 import logging
+import os
 from functools import partial
 
-from kivy.config import Config
 from kivy.app import App
+from kivy.config import Config
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager
 
@@ -15,8 +15,8 @@ from tailor.uix.picker import PickerScreen
 
 logger = logging.getLogger("tailor.kiosk-loader")
 
-
 DEFAULT_VKEYBOARD_LAYOUT = 'email'
+
 
 class Manager(ScreenManager):
     pass

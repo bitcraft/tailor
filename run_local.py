@@ -4,9 +4,9 @@ script to run a local, self contained server
 
 currently is a candidate to use asyncio
 """
-from subprocess import Popen, call
-import time
 import logging
+import time
+from subprocess import Popen, call
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.launcher')
@@ -15,7 +15,6 @@ processes = (
     ('service_cmd', 'apps/service/__main__.py'),
     ('kiosk_server_cmd', 'apps/server/__main__.py'),
     ('kiosk_cmd', 'apps/kiosk/__main__.py'))
-
 
 # TODO: find python cmd name on whatever platform
 python_cmd = '/usr/bin/python3'

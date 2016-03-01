@@ -7,8 +7,8 @@ prints
 manages plugin workflow, basically
 """
 import asyncio
-import os
 import logging
+import os
 import pickle
 from collections import namedtuple
 from contextlib import ExitStack
@@ -16,12 +16,11 @@ from functools import partial
 
 from apps.service.session import Session
 from tailor import plugins
-from tailor.zc import zc_service_context, load_services_from_config
 from tailor.builder import JSONTemplateBuilder
 from tailor.config import pkConfig
+from tailor.zc import zc_service_context, load_services_from_config
 
 logger = logging.getLogger("tailor.service")
-
 
 # set ProactorEventLoop, to support subprocess on Windows OS
 if os.name == 'nt':

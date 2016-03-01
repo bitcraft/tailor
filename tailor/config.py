@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import os.path
 import configparser
 import logging
-import json
+import os.path
 
 __all__ = ('Config',)
 

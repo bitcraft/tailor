@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
-from glob import glob
-from os.path import join
-import os
-import shutil
-import re
-import threading
-import queue
-import time
 import atexit
-from celery import Celery
+import os
+import re
+import shutil
+import threading
+import time
+from glob import glob
 from multiprocessing import Queue
+from os.path import join
 
+from celery import Celery
 from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__)
@@ -28,27 +27,32 @@ config = dict()
 # used to delay queue because of my ****** printer
 TIME_TO_SLEEP_QUEUE = 120
 
+
 class PrintQueueManager(threading.Thread):
     def run(self, *args, **kwargs):
         self.running = True
         while self.running:
             filename = print_queue.get()
-            src = os.path.join(prints_folder, filename) 
+            src = os.path.join(prints_folder, filename)
             smart_copy(src, pkConfig['paths']['print_hot_folder'])
             time.sleep(TIME_TO_SLEEP_QUEUE)
 
     def stop(self):
         self.running = False
 
+
 def make_celery(app):
     celery = Celery(app.import_name, broker=app.config['CELERY_BROKER_URL'])
     celery.conf.update(app.config)
     TaskBase = celery.Task
+
     class ContextTask(TaskBase):
         abstract = True
+
         def __call__(self, *args, **kwargs):
             with app.app_context():
-             return TaskBase.__call__(self, *args, **kwargs)
+                return TaskBase.__call__(self, *args, **kwargs)
+
     celery.Taks = ContextTask
     return celery
 
@@ -115,8 +119,6 @@ def smart_copy(src, dest):
 
 
 def ServerApp():
-    from tailor.net import guess_local_ip_addresses
-
     config.update(pkConfig['remote_server'])
     # config['host'] = guess_local_ip_addresses()
     config['host'] = '127.0.0.1'

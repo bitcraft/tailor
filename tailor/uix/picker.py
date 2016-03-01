@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
-from functools import partial
-import os
 import logging
+import os
 import queue
+from functools import partial
 from urllib.parse import urlparse
 
 from kivy.animation import Animation
 from kivy.clock import Clock
-from kivy.core.image import Image as CoreImage, ImageData
+from kivy.core.image import Image as CoreImage
 from kivy.core.window import Window
 from kivy.factory import Factory
 from kivy.graphics.texture import Texture
 from kivy.loader import Loader
 from kivy.network.urlrequest import UrlRequest
 from kivy.properties import *
-from kivy.uix.label import Label
 from kivy.uix.image import Image
+from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from natsort import natsorted
 
@@ -616,4 +616,3 @@ class PickerScreen(Screen):
 
         self.preview_handler.stop()
         self.preview_handler = None
-

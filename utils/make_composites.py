@@ -1,10 +1,10 @@
 """
 given a template and folder, make a bunch of composites
 """
-import glob
-import os.path
 import asyncio
 import copy
+import glob
+import os.path
 
 from PIL import Image
 

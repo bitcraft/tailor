@@ -2,16 +2,15 @@
 import asyncio
 import logging
 import os
-import sys
 import re
-import traceback
+import sys
 import threading
-import requests
+import traceback
 
 import pygame
+import requests
 
 from apps.service.async_helpers import *
-from tailor import plugins
 from tailor.config import pkConfig
 from tailor.plugins.composer import TemplateRenderer
 
@@ -196,11 +195,11 @@ class Session:
 
         # print the double
         # TODO: implement template-based doubler
-        filename =  os.path.basename(print_path)
+        filename = os.path.basename(print_path)
         url = 'http://localhost:5000/print/' + filename
         print(url)
         requests.get(url)
-	
+
         # fc = plugins.filesystem.FileCopy(shared_folder)
         # yield from fc.process(print_path)
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
+import pickle
+import queue
 import socket
 import threading
-import logging
-import queue
-import pickle
 
 from kivy.core.image import ImageData
 

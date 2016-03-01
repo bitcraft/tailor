@@ -4,16 +4,16 @@ from functools import partial
 
 from kivy.config import Config
 from kivy.network.urlrequest import UrlRequest
+from kivy.properties import *
 from kivy.uix.accordion import AccordionItem
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.properties import *
 
-from ..smtp import SenderThread
 from ..config import pkConfig as pkConfig
+from ..smtp import SenderThread
 
 MAXIMUM_PRINTS = 3
 

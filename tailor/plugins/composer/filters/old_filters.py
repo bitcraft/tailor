@@ -3,8 +3,8 @@ UNUSED
 
 just kept around for reference
 """
-import subprocess
 import os
+import subprocess
 
 from tailor.config import pkConfig
 

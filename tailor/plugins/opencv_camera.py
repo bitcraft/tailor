@@ -3,17 +3,10 @@
 needs asyncio audit
 """
 import asyncio
-import time
 import logging
+import time
 
 import cv2
-
-
-
-
-
-
-
 # import asyncio
 from PIL import Image
 

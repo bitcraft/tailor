@@ -7,9 +7,9 @@ deps and works cross platform, but doesn't correctly
 advertise services (seems to announce just once.)
 """
 
-import socket
 import json
 import logging
+import socket
 from contextlib import contextmanager
 
 # from zeroconf import ServiceInfo, Zeroconf
