@@ -6,6 +6,7 @@ flask
 natsort
 netifaces
 aiohttp
+celery
 
 # pygame is required for sounds until i figure out kivy
 # one day may use pysdl2
