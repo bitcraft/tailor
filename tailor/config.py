@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import configparser
+import json
 import logging
 import os.path
 
@@ -7,7 +7,7 @@ __all__ = ('Config',)
 
 logger = logging.getLogger('tailor.config')
 
-pkConfig = configparser.ConfigParser()
+pkConfig = dict()
 
 
 def jpath(*args):
@@ -15,27 +15,28 @@ def jpath(*args):
 
 
 def reload(path):
-    config_path = jpath(path, 'config.ini')
-    logger.debug('loading configuration: %s', config_path)
-    pkConfig.read(config_path)
-
     app_root_path = os.path.realpath(os.path.join(__file__, '..', '..'))
-    app_resources_path = jpath(app_root_path, 'tailor', 'resources')
-    all_templates_path = jpath(app_resources_path, 'templates')
-    all_images_path = pkConfig.get('paths', 'images')
-    hot_print_folder = os.path.normpath(pkConfig['paths']['print-hot-folder'])
 
     # TODO: make sense of all the distributed config files
-    import json
+    with open(jpath(app_root_path, 'config', 'service.json')) as fp:
+        service_cfg = json.load(fp)
+        pkConfig = service_cfg
+
+    # TODO: make sense of all the distributed config files
     with open(jpath(app_root_path, 'config', 'kiosk.json')) as fp:
-        kiosk_cfg = json.loads(fp.read())
+        kiosk_cfg = json.load(fp)
         pkConfig['kiosk'] = kiosk_cfg
+
+    app_resources_path = jpath(app_root_path, 'tailor', 'resources')
+    all_templates_path = jpath(app_resources_path, 'templates')
+    all_images_path = pkConfig['paths']['images']
+    hot_print_folder = os.path.normpath(pkConfig['paths']['print-hot-folder'])
 
     event_name = kiosk_cfg['event']['name']
     event_template = kiosk_cfg['event']['template']
     event_images_path = jpath(all_images_path, event_name)
 
-    # TODO: eventually incorperate zeroconf discovery
+    # TODO: eventually incorporate zeroconf discovery
     paths = {
         'print_hot_folder': hot_print_folder,
         'app_root_path': app_root_path,
@@ -43,8 +44,8 @@ def reload(path):
         'app_sounds': jpath(app_resources_path, 'sounds'),
         'app_images': jpath(app_resources_path, 'images'),
         'app_templates': all_templates_path,
-        'event_template': jpath(all_templates_path, event_template),
         'event_images': event_images_path,
+        'event_template': jpath(all_templates_path, event_template),
         'event_originals': jpath(event_images_path, 'originals'),
         'event_composites': jpath(event_images_path, 'composites'),
         'event_prints': jpath(event_images_path, 'prints'),
@@ -52,11 +53,11 @@ def reload(path):
     pkConfig['paths'] = paths
 
     # TODO: move to more generic loader
-    filename = 'config/server.json'
-    with open(filename) as fp:
+    with open(jpath(app_root_path, 'config', 'server.json')) as fp:
         server_cfg = json.load(fp)
 
     interface_config = server_cfg['interface']
+    pkConfig['server'] = server_cfg
     pkConfig['remote_server'] = {'protocol': 'http',
                                  'host': '127.0.0.1',
                                  'port': interface_config['port']}

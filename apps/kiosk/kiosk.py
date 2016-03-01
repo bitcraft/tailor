@@ -36,7 +36,6 @@ def load_custom_kv_styles():
     app_root_path = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
 
     styles_path = jpath(app_root_path, 'tailor', 'resources', 'styles')
-    # app_images_path = jpath(app_root_path, 'resources', 'images')
 
     kv_files = (
         ('default', ('kiosk.kv',),),
@@ -49,12 +48,6 @@ def load_custom_kv_styles():
 
 
 def new():
-    # TODO: move to configuration (where it belongs!)
-    # workaround to some deficiency in the sdl2 window backend
-    # Window.fullscreen = 1
-    # Window.fullscreen = 'fake'
-    # Window.borderless = True
-
     # set keyboard behaviour to be a little like IOS
     Config.set('kivy', 'keyboard_mode', 'dock')
     Config.set('kivy', 'keyboard_layout', DEFAULT_VKEYBOARD_LAYOUT)

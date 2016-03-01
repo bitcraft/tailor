@@ -12,7 +12,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 
-from ..config import pkConfig as pkConfig
+from ..config import pkConfig
 from ..smtp import SenderThread
 
 MAXIMUM_PRINTS = 3
@@ -52,7 +52,7 @@ class SharingControls(FloatLayout):
     email_addressee = StringProperty('')
     twitter_acct = StringProperty(
         # TODO: load from cfg
-        # pkConfig.get('twitter', 'account')
+        # pkConfig['twitter']['account']
         "@klbuckcreek"
     )
     filename = StringProperty()

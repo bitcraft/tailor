@@ -3,7 +3,7 @@ import email
 import pickle
 import smtplib
 
-from .config import pkConfig as pkConfig
+from .config import pkConfig
 
 
 class SenderThread:
@@ -12,8 +12,8 @@ class SenderThread:
         self.filename = filename
 
     def run(self):
-        sender = pkConfig.get('email', 'sender')
-        subject = pkConfig.get('email', 'subject')
+        sender = pkConfig['email']['sender']
+        subject = pkConfig['email']['subject']
         auth_file = '/home/mjolnir/git/tailor/secrets'
 
         msg = email.MIMEMultipart.MIMEMultipart('mixed')

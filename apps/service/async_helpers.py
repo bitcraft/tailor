@@ -5,6 +5,9 @@ from itertools import repeat
 from PIL import Image
 from PIL.Image import ANTIALIAS
 
+from tailor.config import pkConfig
+
+
 __all__ = [
     'timing_generator',
     'async_thumbnail',
@@ -45,7 +48,6 @@ def async_save(image, path):
     loop = asyncio.get_event_loop()
     coro = loop.run_in_executor(None, image.save, path)
     return coro
-    # return loop.create_task(coro)
 
 
 def async_thumbnail(image, size, path):
@@ -60,12 +62,12 @@ def async_thumbnail(image, size, path):
     def func():
         _im = image.copy()
         _im.thumbnail(size, ANTIALIAS)
-        _im.save(path)
+        _im.save(path,
+                 compression=pkConfig['service']['compositor']['compression'])
 
     loop = asyncio.get_event_loop()
     coro = loop.run_in_executor(None, func)
     return coro
-    # return loop.create_task(coro)
 
 
 def async_double(image, path):
@@ -81,9 +83,9 @@ def async_double(image, path):
         areas = ((0, 0), (600, 0))
         for area in areas:
             base.paste(image, area, mask=image)
-        base.save(path)
+        base.save(path,
+                  compression=pkConfig['service']['compositor']['compression'])
 
     loop = asyncio.get_event_loop()
     coro = loop.run_in_executor(None, func)
     return coro
-    # return loop.create_task(coro)

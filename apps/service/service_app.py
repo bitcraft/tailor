@@ -43,11 +43,9 @@ class ServiceApp:
 
     def run(self):
         self.running = True
-        self.template_filename = 'tailor/resources/templates/test_template.json'
+        self.template_filename = pkConfig['paths']['event_template']
+        self.make_folders()            # build folder structure to store photos
         loop = asyncio.get_event_loop()
-
-        # build folder structure to store photos
-        self.make_folders()
 
         # camera
         # camera = plugins.dummy_camera.DummyCamera()
@@ -62,6 +60,7 @@ class ServiceApp:
         # board = Board(serial_device)
         board = None
 
+        # ExitStack is used to gracefully close the camera and other services we open
         with ExitStack() as stack:
             stack.enter_context(camera)
 
@@ -82,7 +81,7 @@ class ServiceApp:
             # this delay task is added to prevent the app from closing before
             # clients have connected.
             # TODO: let servers wait indefinitely.
-            task = loop.create_task(asyncio.sleep(3600))
+            task = loop.create_task(asyncio.sleep(18000))
             self.running_tasks.append(task)
 
             # serve previews in highly inefficient manner
@@ -97,9 +96,7 @@ class ServiceApp:
             task = loop.create_task(coro)
             self.running_tasks.append(task)
 
-            # this try/except will need to be addressed as i learn about
-            # futures and how they respond to being canceled.
-            loop.run_until_complete(task)
+            # loop.run_until_complete(task)
             try:
                 loop.run_until_complete(asyncio.wait(self.running_tasks))
             except asyncio.CancelledError:

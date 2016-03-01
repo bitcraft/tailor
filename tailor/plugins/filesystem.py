@@ -1,74 +1,49 @@
 # -*- coding: utf-8 -*-
-import asyncio
 import logging
 import os
 import re
-import shutil
 
-# from watchdog.observers import Observer
-# from watchdog.events import PatternMatchingEventHandler, FileSystemEventHandler
+from apps.service.session import regex
+
 logger = logging.getLogger('tailor.filesystem')
 
 regex = re.compile('^(.*?)-(\d+)$')
 
 
-class FileCopy:
-    def __init__(self, dest, **kwargs):
-        self.dest = dest
-        self.overwrite = kwargs.get('overwrite', False)
+def incremental_naming(path):
+    """ Utility method to find non-conflicting filenames
 
-    @asyncio.coroutine
-    def process(self, filename):
-        path = os.path.join(self.dest, os.path.basename(filename))
+    Given a 'path' (ie: /user/boo/bar.baz) add numbers to the end
+    of the file name, but before the extension, so that file names
+    are unique.
 
-        root, ext = os.path.splitext(path)
-        match = regex.match(root)
-        if match:
-            root, i = match.groups()
-            i = int(i)
-        else:
-            i = 0
+    The containing folder, as determined by basename() will be
+    searched for existing files that conflict with the name,
+    and starting from 0, new numbers will be checked until
+    the name is unique.
 
-        if not self.overwrite and os.path.exists(path):
-            i += 1
-            path = "{0}-{1:04d}{2}".format(root, i, ext)
-            while os.path.exists(path):
-                i += 1
-                path = "{0}-{1:04d}{2}".format(root, i, ext)
+    Probably subject to race conditions, this needs review and locks.
 
-        loop = asyncio.get_event_loop()
-        task = loop.run_in_executor(None, shutil.copyfile, filename, path)
-        yield from task
-        return path
+    Do not use in situations where speed is needed!
 
+    :param path: folder path + filename
+    :return:
+    """
+    basename = os.path.basename(path)
+    root, ext = os.path.splitext(path)
 
-class FileDelete:
-    def process(self, msg):
-        os.unlink(msg)
+    match = regex.match(root)
+    if match:
+        root, i = match.groups()
+        i = int(i)
+    else:
+        i = 0
 
-# class FileWatcher:
-#     """
-#     Simple watcher that uses a glob to track new files
-#     This class will publish paths to new images
-#     """
-#
-#     def __init__(self, path, regex=None, recursive=False):
-#         self._path = path
-#         self._regex = regex
-#         self._recursive = recursive
-#         self._queue = asyncio.Queue()
-#         self._observer = None
-#         self.handler = None
-#
-#     def reset(self):
-#         if self._observer is not None:
-#             self._observer.stop()
-#
-#         if self._regex is None:
-#             self.handler = FileSystemEventHandler()
-#         else:
-#             self.handler = PatternMatchingEventHandler(self._regex)
-#         self._observer = Observer()
-#         self._observer.schedule(self.handler, self._path, self._recursive)
-#         self._observer.start()
-#         return self.handler
+    while os.path.exists(path):
+        i += 1
+        filename = "{0}-{1:04d}{2}".format(root, i, ext)
+        path = os.path.join(basename, filename)
+        if i > 9999:
+            raise RuntimeError
+
+    return path

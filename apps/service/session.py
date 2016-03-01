@@ -13,6 +13,7 @@ import requests
 from apps.service.async_helpers import *
 from tailor.config import pkConfig
 from tailor.plugins.composer import TemplateRenderer
+from tailor.plugins.filesystem import incremental_naming
 
 logger = logging.getLogger("tailor.service")
 
@@ -24,45 +25,6 @@ bell1 = pygame.mixer.Sound('tailor/resources/sounds/long_bell.wav')
 finished = pygame.mixer.Sound('tailor/resources/sounds/whistle.wav')
 
 regex = re.compile('^(.*?)-(\d+)$')
-
-
-def incremental_naming(path):
-    """ Utility method to find non-conflicting filenames
-
-    Given a 'path' (ie: /user/boo/bar.baz) add numbers to the end
-    of the file name, but before the extension, so that file names
-    are unique.
-
-    The containing folder, as determined by basename() will be
-    searched for existing files that conflist with the name,
-    and starting from 0, new numbers will be checked until
-    the name is unique.
-
-    Probably subject to race conditions, this needs review and locks.
-
-    Do not use in situations where speed is needed!
-
-    :param path: folder path + filename
-    :return:
-    """
-    basename = os.path.basename(path)
-    root, ext = os.path.splitext(path)
-
-    match = regex.match(root)
-    if match:
-        root, i = match.groups()
-        i = int(i)
-    else:
-        i = 0
-
-    while os.path.exists(path):
-        i += 1
-        filename = "{0}-{1:04d}{2}".format(root, i, ext)
-        path = os.path.join(basename, filename)
-        if i > 9999:
-            raise RuntimeError
-
-    return path
 
 
 class Session:
@@ -110,14 +72,13 @@ class Session:
         image_stack = list()
         small_size = 200, 500
 
-        original_filename = 'original-0000.png'
-        composite_filename = 'composite-0000.png'
+        original_filename = 'original-0000.' + pkConfig['compositor']['filetype']
+        composite_filename = 'composite-0000.' + pkConfig['compositor']['filetype']
 
         paths = pkConfig['paths']
         originals_folder = paths['event_originals']
         composites_folder = paths['event_composites']
         prints_folder = paths['event_prints']
-        shared_folder = paths['print_hot_folder']
 
         join = os.path.join
         composite_path = incremental_naming(
@@ -137,6 +98,8 @@ class Session:
 
             yield from self.countdown(wait_time)
 
+            # begin_time = time.time()
+
             try:
                 image = yield from camera.download_capture()
             except:
@@ -145,46 +108,45 @@ class Session:
                 logger.debug('failed capture %s/3', errors)
                 continue
 
-            # indicate that the session has all required photos
-            self.finished = final
+            self.finished = final      # indicate that the session has all required photos
 
             errors = 0
 
             if final:
-                # sound to indicate that session is closed
-                bell1.play()
+                bell1.play()           # sound to indicate that session is closed
             else:
-                # sound to indicate that photo was taken
-                finished.play()
+                finished.play()        # sound to indicate that photo was taken
 
-            # indicate that picture is taken, getting ready for next
-            self.idle = True
+            self.idle = True           # indicate that picture is taken, getting ready for next
 
-            # add images to stack that will be used to create the template
-            image_stack.append(image)
-
-            original_path = incremental_naming(
-                join(originals_folder, 'original', original_filename))
-
-            logger.debug('saving camera output to %s', original_path)
-
-            # TODO: handle exceptions here: usually when file cannot be saved
-            # TODO: async so long saves do not delay camera between shots
-            yield from async_save(image, original_path)
+            image_stack.append(image)  # add images to stack used to create the template
 
             # give camera some time to process exposure (may not be needed)
             yield from asyncio.sleep(self.time_to_wait_after_capture)
 
-            # indicate that the camera is now busy
-            self.idle = False
+            # process_time = time.time() - begin_time
 
-        # add images to the template for rendering
+            self.idle = False          # indicate that the camera is now busy
+
+        # TODO: handle exceptions here: usually when file cannot be saved
+        futures = list()
         for image in image_stack:
+            # build a future that can be waited on to save files in threads
+            original_path = incremental_naming(
+                join(originals_folder, 'original', original_filename))
+            logger.debug('saving camera output to %s', original_path)
+            coro = async_save(image, original_path)
+            futures.append(coro)
+
+            # add images to the template for rendering
             root.push_image(image)
 
-        # render the template
+        # add future for the composite image rendering
         renderer = TemplateRenderer()
-        composite = yield from renderer.render_all(root)
+        composite = renderer.render_all(root)
+        futures.append(composite)
+
+        yield from asyncio.wait(futures)
 
         # tasks will be run concurrently via threads
         yield from asyncio.wait([
@@ -197,10 +159,6 @@ class Session:
         # TODO: implement template-based doubler
         filename = os.path.basename(print_path)
         url = 'http://localhost:5000/print/' + filename
-        print(url)
         requests.get(url)
-
-        # fc = plugins.filesystem.FileCopy(shared_folder)
-        # yield from fc.process(print_path)
 
         return root

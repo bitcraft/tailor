@@ -8,8 +8,8 @@ development and is sometimes broken.
 
 This project aims for Windows, OS X, and Linux compatibility, but not all
 features are supported on each platform now.  Currently, full features are
-available on OS X and Linux;  camera capture is currently unavailable on
-Windows, but it is being worked on.
+available on OS X and Linux; certain camera features are not stable on
+Windows, but webcams work well.
 
 The name "tailor" is currently just a stand-in and may change at any time.
 
@@ -127,7 +127,7 @@ sketch.  I cannot support firmata at this time, but it is being considered.
 Legal
 -----
 
-All files under the 'tailor' directory are copyright Leif Theden, 2012-2015
-and licensed under the GPLv3.
+All files under the 'tailor' and 'apps' directories are copyright
+Leif Theden, 2012-2016 and licensed under the GPLv3.
 
-All other code may or not be GPLv3, please check the source of each file.
+All other code may or not be the same; please check the source of each file.
