@@ -48,11 +48,13 @@ class ServiceApp:
         loop = asyncio.get_event_loop()
 
         # camera
-        # camera = plugins.dummy_camera.DummyCamera()
-        try:
-            camera = plugins.shutter_camera.ShutterCamera()
-        except AttributeError:
-            camera = plugins.opencv_camera.OpenCVCamera(0)
+
+        # try:
+        #     camera = plugins.shutter_camera.ShutterCamera()
+        # except AttributeError:
+        #     camera = plugins.opencv_camera.OpenCVCamera(0)
+        
+        camera = plugins.dummy_camera.DummyCamera()
 
         # arduino
         # serial_device = AsyncSerial()

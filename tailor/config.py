@@ -20,7 +20,7 @@ def reload(path):
     # TODO: make sense of all the distributed config files
     with open(jpath(app_root_path, 'config', 'service.json')) as fp:
         service_cfg = json.load(fp)
-        pkConfig = service_cfg
+        pkConfig.update(service_cfg)
 
     # TODO: make sense of all the distributed config files
     with open(jpath(app_root_path, 'config', 'kiosk.json')) as fp:

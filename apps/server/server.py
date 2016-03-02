@@ -18,7 +18,7 @@ print_queue = Queue()
 prints_folder = pkConfig['paths']['event_prints']
 monitor_folder = pkConfig['paths']['event_composites']
 glob_string = '*' + pkConfig['compositor']['filetype']
-
+regex = re.compile('^(.*?)-(\d+)$')
 config = dict()
 
 
@@ -77,7 +77,6 @@ def enqueue_filename_for_print(filename):
     return "ok"
 
 
-regex = re.compile('^(.*?)-(\d+)$')
 def smart_copy(src, dest):
     path = os.path.join(dest, os.path.basename(src))
 

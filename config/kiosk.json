@@ -1,7 +1,7 @@
 {
   "event": {
-    "name": "vankrik",
-    "template": "2x6.template"
+    "name": "test",
+    "template": "test_template.json"
   },
   "graphics": {
     "display": {

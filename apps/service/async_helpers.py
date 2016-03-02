@@ -45,8 +45,11 @@ def async_save(image, path):
     :param path:
     :return:
     """
+    def func():
+        image.save(path, compression=pkConfig['compositor']['compression'])
+
     loop = asyncio.get_event_loop()
-    coro = loop.run_in_executor(None, image.save, path)
+    coro = loop.run_in_executor(None, func)
     return coro
 
 
@@ -63,7 +66,7 @@ def async_thumbnail(image, size, path):
         _im = image.copy()
         _im.thumbnail(size, ANTIALIAS)
         _im.save(path,
-                 compression=pkConfig['service']['compositor']['compression'])
+                 compression=pkConfig['compositor']['compression'])
 
     loop = asyncio.get_event_loop()
     coro = loop.run_in_executor(None, func)
@@ -84,7 +87,7 @@ def async_double(image, path):
         for area in areas:
             base.paste(image, area, mask=image)
         base.save(path,
-                  compression=pkConfig['service']['compositor']['compression'])
+                  compression=pkConfig['compositor']['compression'])
 
     loop = asyncio.get_event_loop()
     coro = loop.run_in_executor(None, func)

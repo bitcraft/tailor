@@ -3,8 +3,6 @@ import logging
 import os
 import re
 
-from apps.service.session import regex
-
 logger = logging.getLogger('tailor.filesystem')
 
 regex = re.compile('^(.*?)-(\d+)$')

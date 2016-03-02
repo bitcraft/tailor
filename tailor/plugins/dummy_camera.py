@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import random
+import asyncio
 
 from PIL import Image
 
@@ -48,6 +49,7 @@ class DummyCamera:
         """
         logger.debug('capture_image, not implemented')
 
+    @asyncio.coroutine
     def download_capture(self):
         """ Capture a full image and return data
         """
@@ -58,6 +60,7 @@ class DummyCamera:
         im = Image.new('RGB', self.image_size, (r, g, b))
         return im
 
+    @asyncio.coroutine	
     def download_preview(self):
         """ Capture preview image and return data
         """

@@ -28,8 +28,8 @@ regex = re.compile('^(.*?)-(\d+)$')
 
 
 class Session:
-    countdown_time = 10
-    extra_wait_time = 5
+    countdown_time = 1
+    extra_wait_time = 1
     time_to_wait_after_capture = 3
 
     def __init__(self):
@@ -66,6 +66,7 @@ class Session:
         logger.debug('starting new session')
 
         # needed_captures = template_graph.needed_captures()
+        # print(needed_captures)
         self.started = True
         errors = 0
         needed_captures = 4
@@ -141,14 +142,17 @@ class Session:
             # add images to the template for rendering
             root.push_image(image)
 
+        loop = asyncio.get_event_loop()
+
         # add future for the composite image rendering
         renderer = TemplateRenderer()
-        composite = renderer.render_all(root)
-        futures.append(composite)
+        composite_future = asyncio.async(renderer.render_all(root))
+        futures.append(composite_future)
 
         yield from asyncio.wait(futures)
 
         # tasks will be run concurrently via threads
+        composite = composite_future.result()
         yield from asyncio.wait([
             async_save(composite, composite_path),
             async_thumbnail(composite, small_size, composite_small_path),

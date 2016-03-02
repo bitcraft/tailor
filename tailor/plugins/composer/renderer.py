@@ -44,11 +44,10 @@ class TemplateRenderer:
         :param root: Root node
         :return: PIL Image
         """
-
         def func():
             base_image = self.create_blank_image(root)
 
-            for i, node in enumerate(root.bfs_children()):
+            for node in root.bfs_children():
                 self.render_and_paste(node, base_image)
 
             return base_image
