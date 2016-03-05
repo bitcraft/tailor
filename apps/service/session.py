@@ -38,7 +38,7 @@ class Session:
         # TODO: load from config
         self.countdown_time = 10
         self.extra_wait_time = 5
-        self.time_to_wait_after_capture = 1
+        self.time_to_wait_after_capture = 3
 
     @asyncio.coroutine
     def countdown(self, duration):
