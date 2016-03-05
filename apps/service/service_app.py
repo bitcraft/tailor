@@ -46,7 +46,7 @@ class ServiceApp:
         # camera
         camera_cfg = pkConfig['camera']
         camera_plugin = camera_cfg['plugin']
-        camera_name = camera_cfg['name']
+        # camera_name = camera_cfg['name']
 
         # TODO: Error handling
         if camera_plugin == "dummy":

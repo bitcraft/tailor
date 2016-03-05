@@ -1,0 +1,19 @@
+arduino.json
+============
+
+
+
+kiosk.json
+==========
+
+
+server.json
+===========
+
+print-queue => interval :  time to wait between print jobs.  useful for finicky printers.
+
+
+service.json
+============
+
+camera => plugin :  shutter, opencv, or dummy
