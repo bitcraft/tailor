@@ -10,8 +10,8 @@ def make_image(data):
 
 
 def save_image(image, filename):
-    image.save(filename,
-               compression=pkConfig['compositor']['compression'])
+    kwargs = dict(pkConfig['compositor']['pil_options'])
+    image.save(filename, **kwargs)
 
 
 def save(data, args):

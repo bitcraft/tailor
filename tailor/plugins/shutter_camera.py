@@ -13,9 +13,10 @@ pil_open = Image.open
 
 
 class ShutterCamera:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, regex=None):
         self._device_context = None
         self._lock = asyncio.Lock()
+        self._device_name_regex = regex
 
     def __enter__(self):
         # the following isn't going to work with async yet
@@ -24,7 +25,7 @@ class ShutterCamera:
         # the following needs to be changed into some
         # kind of context manager aware delay to allow
         # the camera to get ready in a context manager
-        self._device_context = shutter.Camera()
+        self._device_context = shutter.Camera(self._device_name_regex)
         import time
         time.sleep(1)
 

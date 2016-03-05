@@ -191,7 +191,7 @@ class Session:
             self.idle = True           # indicate that picture is taken, getting ready for next
             root.push_image(image)     # add images to the template for rendering
 
-            path = join(paths['event_originals'], self.name_image('original', capture_id))
+            path = join(paths['event_originals'], 'original', self.name_image('original', capture_id))
             self.queue_image_save(image, path)  # add this image to the worker queue
 
             # give camera some fixed time to process exposure (may not be needed)

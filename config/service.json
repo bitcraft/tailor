@@ -1,13 +1,14 @@
 {
   "camera": {
     "name": "canon",
-    "capture-interval": 5,
-    "preview-interval": "0.0167"
+    "plugin": "dummy"
   },
   "compositor": {
     "template": "test_template.json",
     "filetype": "png",
-    "compression": 0
+    "pil_options": {
+      "compress_level": 1
+    }
   },
   "paths": {
     "print-hot-folder": "/home/retrobooth/smb-printsrv/",
