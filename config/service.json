@@ -7,7 +7,7 @@
     "template": "test_template.json",
     "filetype": "png",
     "pil_options": {
-      "compress_level": 0
+      "compress_level": 1
     }
   },
   "paths": {

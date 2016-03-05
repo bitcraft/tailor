@@ -17,3 +17,4 @@ service.json
 ============
 
 camera => plugin :  shutter, opencv, or dummy
+compositor => pil_options:  options to pass to pillow when saving
