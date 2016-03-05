@@ -1,8 +1,7 @@
 {
   "camera": {
     "name": "canon",
-    "capture-interval": 5,
-    "preview-interval": "0.0167"
+    "plugin": "dummy"
   },
   "compositor": {
     "template": "test_template.json",

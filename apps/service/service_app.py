@@ -41,20 +41,32 @@ class ServiceApp:
         self.template_filename = None
         self.session = mock_session(0, False, False, False)
 
+    @staticmethod
+    def get_camera():
+        # camera
+        camera_cfg = pkConfig['camera']
+        camera_plugin = camera_cfg['plugin']
+        camera_name = camera_cfg['name']
+
+        # TODO: Error handling
+        if camera_plugin == "dummy":
+            camera = plugins.dummy_camera.DummyCamera()
+        elif camera_plugin == "shutter":
+            camera = plugins.shutter_camera.ShutterCamera(camera_name)
+        elif camera_plugin == "opencv":
+            camera = plugins.opencv_camera.OpenCVCamera(0)
+        else:
+            print("cannot find camera plugin")
+            raise RuntimeError
+
+        return camera
+
     def run(self):
         self.running = True
         self.template_filename = pkConfig['paths']['event_template']
         self.make_folders()            # build folder structure to store photos
         loop = asyncio.get_event_loop()
-
-        # camera
-
-        # try:
-        #     camera = plugins.shutter_camera.ShutterCamera()
-        # except AttributeError:
-        #     camera = plugins.opencv_camera.OpenCVCamera(0)
-
-        camera = plugins.dummy_camera.DummyCamera()
+        camera = self.get_camera()
 
         # arduino
         # serial_device = AsyncSerial()
@@ -83,7 +95,8 @@ class ServiceApp:
             # this delay task is added to prevent the app from closing before
             # clients have connected.
             # TODO: let servers wait indefinitely.
-            task = loop.create_task(asyncio.sleep(18000))
+            # WARNING: this line will cause the program to eventually close
+            task = loop.create_task(asyncio.sleep(26000))
             self.running_tasks.append(task)
 
             # serve previews in highly inefficient manner
