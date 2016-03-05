@@ -44,7 +44,7 @@ def search(root, uniqueid):
 class PreviewHandler:
     # TODO: allow thread to signal to parent that it cannot get data
     def __init__(self):
-        self.queue = queue.Queue(maxsize=10)
+        self.queue = queue.Queue(maxsize=2)
         self.thread = None
         self.running = False
 

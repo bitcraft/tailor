@@ -30,7 +30,7 @@ jpath = os.path.join
 resource_path = os.path.realpath(jpath(__file__, '..', '..', 'resources'))
 image_path = partial(jpath, resource_path, 'images')
 
-polling_interval = 10
+polling_interval = 1
 
 
 class PickerScreen(Screen):
@@ -494,7 +494,7 @@ class PickerScreen(Screen):
         self.preview_handler.start()
 
         # schedule an interval to update the preview widget
-        Clock.schedule_interval(self.update_preview, 1 / 40.)
+        Clock.schedule_interval(self.update_preview, 1 / 60.)
 
         self.update_preview()
 
