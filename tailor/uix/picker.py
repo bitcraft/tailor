@@ -231,7 +231,7 @@ class PickerScreen(Screen):
             else:
                 timer_value = session['timer_value']
 
-                if timer_value <= 1:
+                if timer_value <= 2:
                     overlay_text = 'look at camera!'
                 else:
                     overlay_text = str(timer_value)
