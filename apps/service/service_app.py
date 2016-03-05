@@ -52,11 +52,13 @@ class ServiceApp:
         if camera_plugin == "dummy":
             camera = plugins.dummy_camera.DummyCamera()
         elif camera_plugin == "shutter":
-            if camera_name:
-                import re
-                regex = re.compile(camera_name)
-            else:
-                regex = None
+            # if camera_name:
+            #     import re
+            #     regex = re.compile(camera_name)
+            # else:
+            #     regex = None
+            # TODO: regex is broken because of a py3 bug w/shutter
+            regex = None
             camera = plugins.shutter_camera.ShutterCamera(regex)
         elif camera_plugin == "opencv":
             camera = plugins.opencv_camera.OpenCVCamera(0)
