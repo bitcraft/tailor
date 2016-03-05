@@ -53,7 +53,7 @@ class ServiceApp:
         #     camera = plugins.shutter_camera.ShutterCamera()
         # except AttributeError:
         #     camera = plugins.opencv_camera.OpenCVCamera(0)
-        
+
         camera = plugins.dummy_camera.DummyCamera()
 
         # arduino

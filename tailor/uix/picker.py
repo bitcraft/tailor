@@ -30,7 +30,7 @@ jpath = os.path.join
 resource_path = os.path.realpath(jpath(__file__, '..', '..', 'resources'))
 image_path = partial(jpath, resource_path, 'images')
 
-polling_interval = 5
+polling_interval = 10
 
 
 class PickerScreen(Screen):
@@ -296,6 +296,7 @@ class PickerScreen(Screen):
                 allow_stretch=True)
             widget.bind(on_touch_down=self.on_image_touch)
             self.grid.add_widget(widget)
+            print('new kivy image!')
         self.scroll_to_end()
 
     def check_new_photos(self, dt=None):

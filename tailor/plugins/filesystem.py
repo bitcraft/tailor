@@ -8,25 +8,7 @@ logger = logging.getLogger('tailor.filesystem')
 regex = re.compile('^(.*?)-(\d+)$')
 
 
-def incremental_naming(path):
-    """ Utility method to find non-conflicting filenames
-
-    Given a 'path' (ie: /user/boo/bar.baz) add numbers to the end
-    of the file name, but before the extension, so that file names
-    are unique.
-
-    The containing folder, as determined by basename() will be
-    searched for existing files that conflict with the name,
-    and starting from 0, new numbers will be checked until
-    the name is unique.
-
-    Probably subject to race conditions, this needs review and locks.
-
-    Do not use in situations where speed is needed!
-
-    :param path: folder path + filename
-    :return:
-    """
+def _incremental_naming(path):
     basename = os.path.basename(path)
     root, ext = os.path.splitext(path)
 
@@ -44,4 +26,48 @@ def incremental_naming(path):
         if i > 9999:
             raise RuntimeError
 
-    return path
+    return i, path
+
+
+def highest_numbered_file_with_prefix(path):
+    """ Utility method to find non-conflicting filenames
+
+    Given a 'path' (ie: /user/boo/bar.baz) add numbers to the end
+    of the file name, but before the extension, so that file names
+    are unique.
+
+    if the filename passed does not exist, then it will be returned,
+    if the filename is found, then the next id will be checked
+
+    This function returns the numeral of the highest filename + 1,
+    so it is safe to assume that there are no conflicts.
+
+    Probably subject to race conditions, this needs review and locks.
+    Do not use in situations where speed is needed!
+
+    :type path: basestring
+    :rtype: int
+    """
+    return _incremental_naming(path)[0]
+
+
+def incremental_naming(path):
+    """ Utility method to find non-conflicting filenames
+
+    Given a 'path' (ie: /user/boo/bar.baz) add numbers to the end
+    of the file name, but before the extension, so that file names
+    are unique.
+
+    if the filename passed does not exist, then it will be returned,
+    if the filename is found, then the next id will be checked
+
+    This function returns the numeral of the highest filename + 1,
+    so it is safe to assume that there are no conflicts.
+
+    Probably subject to race conditions, this needs review and locks.
+    Do not use in situations where speed is needed!
+
+    :type path: basestring
+    :rtype: basestring
+    """
+    return _incremental_naming(path)[1]

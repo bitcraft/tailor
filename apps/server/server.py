@@ -5,7 +5,6 @@ import re
 import shutil
 import threading
 import time
-from glob import glob
 from multiprocessing import Queue
 from os.path import join
 
@@ -38,9 +37,11 @@ class PrintQueueManager(threading.Thread):
 
 
 def get_filenames_to_serve():
-    folder = join(monitor_folder, 'original')
-    return [build_url(os.path.basename(i))
-            for i in glob(get_glob_string(folder))]
+    try:
+        with open(pkConfig['paths']['event_log']) as fp:
+            return [build_url(i) for i in fp.read().strip().split('\n')]
+    except IOError:
+        return list()
 
 
 def get_glob_string(path):

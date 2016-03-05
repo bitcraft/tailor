@@ -45,6 +45,7 @@ def reload(path):
         'app_images': jpath(app_resources_path, 'images'),
         'app_templates': all_templates_path,
         'event_images': event_images_path,
+        'event_log': jpath(event_images_path, 'sessions.log'),
         'event_template': jpath(all_templates_path, event_template),
         'event_originals': jpath(event_images_path, 'originals'),
         'event_composites': jpath(event_images_path, 'composites'),
