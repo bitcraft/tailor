@@ -100,12 +100,16 @@ class Session:
         self.mp_queue.join()
 
     @staticmethod
-    def format_id(id):
+    def format_number(id):
         return '{:05d}'.format(id)
 
-    def name_image(self, prefix, id):
-        return '{}-{}.{}'.format(prefix, self.format_id(id),
+    def name_image(self, prefix, session, capture):
+        return '{}-{}-{}.{}'.format(prefix, self.format_number(session), self.format_number(capture),
                                  pkConfig['compositor']['filetype'])
+
+    def name_composite(self, prefix, session):
+        return '{}-{}.{}'.format(prefix, self.format_number(session),
+                                    pkConfig['compositor']['filetype'])
 
     def determine_initial_capture_id(self):
         # here be dragons
@@ -159,7 +163,7 @@ class Session:
         paths = pkConfig['paths']
         needed_captures = root.needed_captures()
         session_id = self.determine_initial_capture_id()
-        capture_id = session_id
+        capture_id = 0
 
         # TODO: handle camera errors
         errors = 0
@@ -191,7 +195,7 @@ class Session:
             self.idle = True           # indicate that picture is taken, getting ready for next
             root.push_image(image)     # add images to the template for rendering
 
-            path = join(paths['event_originals'], 'original', self.name_image('original', capture_id))
+            path = join(paths['event_originals'], 'original', self.name_image('original', session_id, capture_id))
             self.queue_image_save(image, path)  # add this image to the worker queue
 
             # give camera some fixed time to process exposure (may not be needed)
@@ -202,8 +206,7 @@ class Session:
         composite = yield from self.render_template(root)
 
         composites_folder = paths['event_composites']
-        composite_filename = self.name_image('composite', session_id)
-
+        composite_filename = self.name_composite('composite', session_id)
         composite_path = join(composites_folder, 'original', composite_filename)
         composite_small_path = join(composites_folder, 'small', composite_filename)
         print_path = join(paths['event_prints'], composite_filename)

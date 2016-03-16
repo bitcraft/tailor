@@ -11,8 +11,8 @@
     }
   },
   "paths": {
-    "print-hot-folder": "/home/retrobooth/smb-printsrv/",
-    "images": "/home/retrobooth/events/",
+    "print-hot-folder": "/home/leif/smb-printsrv/",
+    "images": "/home/leif/events/",
     "make-images-path": true
   },
   "sounds": {

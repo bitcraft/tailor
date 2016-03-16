@@ -150,7 +150,7 @@ making it easier for others.  Right now, here are a few step to get going:
 Camera Settings
 ---------------
 
-Found in config/service.json.  Change "camera" "name" to one of the following:
+Found in config/service.json.  Change "camera" "plugin" to one of the following:
 
 * "shutter" for tethered dslr cameras
 * "opencv" for webcams
