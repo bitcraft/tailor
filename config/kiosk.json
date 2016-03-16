@@ -12,6 +12,7 @@
   },
   "input": {
     "touch": {
+      "hide-cursor": false,
       "touch-retain-time": 150,
       "touch-retain-distance": 30
     }

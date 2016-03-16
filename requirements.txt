@@ -5,7 +5,7 @@ git+http://github.com/bitcraft/shutter.git
 flask
 natsort
 netifaces
-aiohttp
+# aiohttp
 requests
 
 # pygame is required for sounds until i figure out kivy

@@ -124,6 +124,53 @@ for camera tilt and relays for turning on lights.  Please use the included
 sketch.  I cannot support firmata at this time, but it is being considered.
 
 
+Linux
+-----
+
+Tailor is a python3 only project, so please make sure you are using the correct
+python version.  On some systems, you will need to install cython before the rest
+the the dependancies.  If you have problems installing kivy from pip, then install
+cython first, then the kivy and the rest.
+
+
+Getting Started
+---------------
+
+Tailor is really used by just me, and I keep this repo open for others, so there
+are quirks that are specific to getting it going on other computers.  I'm slowly
+making it easier for others.  Right now, here are a few step to get going:
+
+* Make sure your camera settings are correct
+* Change the working folders to match your system
+* Make sure the printer settings are correct
+
+
+Camera Settings
+---------------
+
+Found in config/service.json.  Change "camera" "name" to one of the following:
+
+* "shutter" for tethered dslr cameras
+* "opencv" for webcams
+* "dummy" for a color generator, no camera needed
+
+
+Working Folders
+---------------
+
+Found in config/service.json.  Change the enteries under "paths":
+
+* The printer-ready output goes to "print-hot-folder"
+* The camera output and other images all go under "images"
+
+
+Printer Settings
+----------------
+
+WIP
+
+
+
 Legal
 -----
 
