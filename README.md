@@ -140,9 +140,11 @@ Tailor is really used by just me, and I keep this repo open for others, so there
 are quirks that are specific to getting it going on other computers.  I'm slowly
 making it easier for others.  Right now, here are a few step to get going:
 
+* Check run_local.py and verify the python version is correct
 * Make sure your camera settings are correct
 * Change the working folders to match your system
 * Make sure the printer settings are correct
+* Use run_local.py to start
 
 
 Camera Settings
@@ -168,6 +170,13 @@ Printer Settings
 ----------------
 
 WIP
+
+
+Advanced Use
+------------
+
+Tailor exposes a webserver on port 5000.  The api can be found in:
+apps/server/server.py
 
 
 
