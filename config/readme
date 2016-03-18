@@ -16,5 +16,5 @@ print-queue => interval :  time to wait between print jobs.  useful for finicky 
 service.json
 ============
 
-camera => plugin :  shutter, opencv, or dummy
+camera => plugin :  shutter, pygame, opencv, or dummy
 compositor => pil_options:  options to pass to pillow when saving
