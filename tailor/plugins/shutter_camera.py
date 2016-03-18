@@ -13,6 +13,9 @@ pil_open = Image.open
 
 
 class ShutterCamera:
+    """ Shutter is a wrapper for glibphoto2 to capture frames from dSLR cameras
+    """
+
     def __init__(self, regex=None):
         self._device_context = None
         self._lock = asyncio.Lock()

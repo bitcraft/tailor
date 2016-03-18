@@ -6,33 +6,33 @@ import asyncio
 import logging
 import time
 
-import cv2
-# import asyncio
 from PIL import Image
 
 # Windows dependencies
 # - Python 2.7.6: http://www.python.org/download/
-# - OpenCV: http://opencv.org/
-# - Numpy -- get numpy from here because the official builds don't support x64:
-#   http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
+#   http://www.lfd.uci.edu/~gohlke/pythonlibs/#pygame
 
-# Mac Dependencies
-# - brew install python
-# - pip install numpy
-# - brew tap homebrew/science
-# - brew install opencv
-
-logger = logging.getLogger('tailor.opencvcamera')
+logger = logging.getLogger('tailor.pygame_camera')
+from pygame.image import tostring
 
 
-class OpenCVCamera:
-    """ Use opencv's camera interface for capturing frames
+class PygameCamera:
+    """ Use pygame's webcam module for capturing frames
     """
+
+    # pygame doesn't expose a way to query for available resolutions
+    # the included default is just a common value.  if the webcam
+    # doesn't support this value, it will default to the highest
+    # available that is lower than the default.  This class will handle
+    # this, and will adjust accordingly.
+    default_resolution = 1920, 1080
 
     def __init__(self, index=0):
         self._device_index = index
         self._device_context = None
+        self._frame_size = None
         self._lock = asyncio.Lock()
+        self._temp_surface = None
 
     def __enter__(self):
         self.open()
@@ -42,20 +42,24 @@ class OpenCVCamera:
 
     def open(self):
         # TODO: make async
-        dc = cv2.VideoCapture(self._device_index)
+        from pygame import camera
 
-        # give time for webcam to init.
-        time.sleep(2)
+        camera.init()
+        cameras = camera.list_cameras()
+        dc = camera.Camera(cameras[self._device_index], self.default_resolution, 'RGB')
+        dc.start()
+
+        time.sleep(1)  # give time for webcam to init.
 
         # 'prime' the capture context...
         # some webcams might not init fully until a capture
         # is done.  so we do a capture here to force device to be ready
-        dc.read()
-
+        # and query the maximum supported size
+        self._temp_surface = dc.get_image()
         self._device_context = dc
 
     def close(self):
-        self._device_context.release()
+        self._device_context.close()
 
     def reset(self):
         self.close()
@@ -68,18 +72,11 @@ class OpenCVCamera:
         :return:
         """
         with (yield from self._lock):
-            ret, frame = self._device_context.read()
+            self._device_context.get_image(self._temp_surface)
 
-        if ret:
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        else:
-            rgb = None
-
-        return rgb
-
-    @staticmethod
-    def convert_frame_to_image(frame):
-        return Image.fromarray(frame)
+    def convert_frame_to_image(self, frame):
+        return Image.frombytes('RGB', self._temp_surface.get_size(),
+                               tostring(self._temp_surface, 'RGB'))
 
     @asyncio.coroutine
     def capture_image(self):

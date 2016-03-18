@@ -61,7 +61,9 @@ class ServiceApp:
             regex = None
             camera = plugins.shutter_camera.ShutterCamera(regex)
         elif camera_plugin == "opencv":
-            camera = plugins.opencv_camera.OpenCVCamera(0)
+            camera = plugins.opencv_camera.OpenCVCamera()
+        elif camera_plugin == "pygame":
+            camera = plugins.pygame_camera.PygameCamera()
         else:
             print("cannot find camera plugin")
             raise RuntimeError

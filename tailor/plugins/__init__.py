@@ -13,3 +13,8 @@ try:
     from . import shutter_camera
 except:
     pass
+
+try:
+    from . import pygame_camera
+except:
+    pass
