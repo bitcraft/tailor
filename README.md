@@ -179,6 +179,17 @@ Tailor exposes a webserver on port 5000.  The api can be found in:
 apps/server/server.py
 
 
+Using a Mouse
+-------------
+
+Under some conditions, you may not be able to see the mouse cursor after
+starting Tailor.  If this is the case, find your Kivy's config.ini and
+add the following to the [modules] section:
+```
+    touchring = show_cursor=true
+```
+https://kivy.org/docs/api-kivy.modules.touchring.html
+
 
 Legal
 -----
