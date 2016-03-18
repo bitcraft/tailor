@@ -153,7 +153,7 @@ Camera Settings
 Found in config/service.json.  Change "camera" "plugin" to one of the following:
 
 * "shutter" for tethered dslr cameras
-* "opencv" for webcams
+* "pygame" or "opencv" for webcams
 * "dummy" for a color generator, no camera needed
 
 
