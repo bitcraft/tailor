@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+""" Camera interface for debugging.  Generates random colored images.
+
+"""
+import asyncio
 import logging
 import random
-import asyncio
-
 from PIL import Image
 
 logger = logging.getLogger('tailor.shuttercamera')
@@ -60,7 +62,7 @@ class DummyCamera:
         im = Image.new('RGB', self.image_size, (r, g, b))
         return im
 
-    @asyncio.coroutine	
+    @asyncio.coroutine
     def download_preview(self):
         """ Capture preview image and return data
         """

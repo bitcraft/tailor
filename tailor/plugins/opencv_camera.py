@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-needs asyncio audit
+""" Camera interface using opencv.
 """
 import asyncio
 import logging
 import time
 
 import cv2
-# import asyncio
 from PIL import Image
 
 # Windows dependencies

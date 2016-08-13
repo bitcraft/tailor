@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-needs asyncio audit
+""" Camera interface for pygame.
 """
 import asyncio
 import logging
@@ -8,12 +7,9 @@ import time
 
 from PIL import Image
 
-# Windows dependencies
-# - Python 2.7.6: http://www.python.org/download/
-#   http://www.lfd.uci.edu/~gohlke/pythonlibs/#pygame
+from pygame.image import tostring
 
 logger = logging.getLogger('tailor.pygame_camera')
-from pygame.image import tostring
 
 
 class PygameCamera:

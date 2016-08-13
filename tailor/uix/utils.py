@@ -42,7 +42,9 @@ def search(root, uniqueid):
 
 
 class PreviewHandler:
-    # TODO: allow thread to signal to parent that it cannot get data
+    """ Very basic streaming of raw video frames
+
+    """
     def __init__(self):
         self.queue = queue.Queue(maxsize=2)
         self.thread = None
@@ -107,6 +109,10 @@ class PreviewHandler:
 
 
 class ArduinoHandler:
+    """ Custom protocol to collect button inputs and control stepper motors
+
+    """
+
     def __init__(self):
         self.in_queue = queue.Queue(maxsize=4)
         self.out_queue = queue.Queue(maxsize=100)

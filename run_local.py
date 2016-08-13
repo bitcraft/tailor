@@ -18,9 +18,7 @@ processes = (
 
 # TODO: find python cmd name on whatever platform
 python_cmd = '/usr/bin/python3'
-
-
-# python_cmd = 'C:/python34/python.exe'
+python_cmd = 'C:/python34/python.exe'
 
 
 # TODO: use subprocess.run
@@ -41,7 +39,7 @@ def run_processes():
 
 if __name__ == '__main__':
     # TODO: check for running in gnome environment
-    release_gvfs_from_camera()
+    # release_gvfs_from_camera()
     running_processes = list()
 
     try:

@@ -1,13 +1,29 @@
+# make sure pip is up to date first!
+# ==================================
+# python -m pip install --upgrade pip wheel setuptools
+
+# uncomment group below if installing kivy for first time
+# =======================================================
+# pypiwin32
+# kivy.deps.sdl2
+# kivy.deps.glew
+
+# pygame is required for sounds until i figure out kivy audio
+# ===========================================================
+pygame
+
+# camera providers
+# ================
+git+http://github.com/bitcraft/shutter.git
+# opencv
+
+# everything else
+# ===============
 kivy
 pillow
 zeroconf
-git+http://github.com/bitcraft/shutter.git
 flask
+flask-socketio
 natsort
 netifaces
-# aiohttp
 requests
-
-# pygame is required for sounds until i figure out kivy
-# one day may use pysdl2
-pygame

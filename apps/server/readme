@@ -1,1 +1,5 @@
 server app is a flask-based web service for serving photos
+
+As some may notice, this is highly unoptimised, relying on the built-in
+debug server.  This is mostly out of convenience, since this should run
+out-of-the-box on most operating systems.

@@ -7,6 +7,11 @@ from kivy.graphics.texture import Texture
 
 
 class TailorStreamingCamera(CameraBase):
+    """ Kivy Camera compatible widget using network-aware streaming
+
+    Sockets based streaming of raw video frames
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.queue = queue.Queue()

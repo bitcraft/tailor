@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+""" Camera interface for shutter, a libgphoto2 wrapper.
+"""
 import asyncio
 import logging
 from io import BytesIO
@@ -8,7 +10,7 @@ from PIL import Image
 
 logger = logging.getLogger("tailor.shutter_camera")
 
-# reduce lookups in to the PIL package
+# reduce lookups in to the PIL package namespace
 pil_open = Image.open
 
 
@@ -44,7 +46,6 @@ class ShutterCamera:
     #
     # @asyncio.coroutine
     # def close(self):
-    #     # TODO: verify this closes the libgphoto obj
     #     with (yield from self._lock):
     #         self._device_context = None
     #

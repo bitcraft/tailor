@@ -9,10 +9,13 @@ from multiprocessing import Queue
 from os.path import join
 
 from flask import Flask, request, jsonify, send_from_directory
+from flask.ext.socketio import SocketIO, emit
 
 from tailor.config import pkConfig
 
 app = Flask(__name__)
+socketio = SocketIO(app)
+
 print_queue = Queue()
 prints_folder = pkConfig['paths']['event_prints']
 monitor_folder = pkConfig['paths']['event_composites']
@@ -59,7 +62,6 @@ def get_files():
     return jsonify(files)
 
 
-# TODO: move to real server (lighthttpd?)
 @app.route('/files/<filename>')
 def retrieve_file(filename):
     # TODO: accept arbitrary sizes and cache
@@ -103,6 +105,7 @@ def ServerApp():
     config.update(pkConfig['remote_server'])
     # config['host'] = guess_local_ip_addresses()
     config['host'] = '127.0.0.1'
+    config['SECRET_KEY'] = 'secret!'
 
     print_queue_thread = PrintQueueManager()
     print_queue_thread.daemon = True
