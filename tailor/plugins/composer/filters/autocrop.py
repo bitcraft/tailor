@@ -22,7 +22,7 @@ class Autocrop:
         r1 = float(iw) / ih
 
         # wide images
-        if r0 < r1:
+        if r0 > r1:
             scale = float(h) / ih
             sw = int(iw * scale)
             cx = int((sw - w) / 2)
@@ -33,6 +33,8 @@ class Autocrop:
         # tall images
         # TODO: this.
         elif r0 > r1:
+            print('unhandled image size')
+
             pass
             # scale = float(w) / iw
             # sh = int(ih * scale)
@@ -43,6 +45,7 @@ class Autocrop:
 
         # square images
         else:
+            print('its hip to be square')
             image = image.resize((w, h), Image.ANTIALIAS)
 
         return image
