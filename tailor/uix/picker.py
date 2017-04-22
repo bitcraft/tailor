@@ -30,7 +30,7 @@ jpath = os.path.join
 resource_path = os.path.realpath(jpath(__file__, '..', '..', 'resources'))
 image_path = partial(jpath, resource_path, 'images')
 
-polling_interval = 1
+polling_interval = 5
 
 
 class PickerScreen(Screen):

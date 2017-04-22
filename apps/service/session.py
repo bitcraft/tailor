@@ -59,6 +59,7 @@ class Session:
         return image.mode, image.size, image.tobytes()
 
     def queue_image_save(self, image, filename):
+        print(filename)
         data = self.deconstruct_image(image)
         self.mp_queue.put(("save", data, (filename,)))
 
@@ -196,6 +197,7 @@ class Session:
             root.push_image(image)     # add images to the template for rendering
 
             path = join(paths['event_originals'], 'original', self.name_image('original', session_id, capture_id))
+            print(path)
             self.queue_image_save(image, path)  # add this image to the worker queue
 
             # give camera some fixed time to process exposure (may not be needed)

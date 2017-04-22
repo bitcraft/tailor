@@ -1,6 +1,6 @@
 {
   "print-queue": {
-    "interval": 0
+    "interval": 70
   },
   "interface": {
     "host": "",
