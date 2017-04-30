@@ -8,6 +8,8 @@ import logging
 import time
 from subprocess import Popen, call
 
+from platform.unix import release_gvfs_from_camera
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.launcher')
 
@@ -18,16 +20,10 @@ processes = (
 
 # TODO: find python cmd name on whatever platform
 python_cmd = '/usr/bin/python3'
-
-
-# python_cmd = 'C:/python34/python.exe'
+python_cmd = 'C:/python34/python.exe'
 
 
 # TODO: use subprocess.run
-def release_gvfs_from_camera():
-    # release the greedy fingers of gnome from the camera
-    logger.debug('releasing camera from gvfs...')
-    call(['gvfs-mount', '-s', 'gphoto2'], timeout=10)
 
 
 def run_processes():
@@ -41,7 +37,12 @@ def run_processes():
 
 if __name__ == '__main__':
     # TODO: check for running in gnome environment
-    release_gvfs_from_camera()
+    # TODO: release_gvfs_from_camera fails in windows.  provide better check in future
+    try:
+        release_gvfs_from_camera()
+    except FileNotFoundError:
+        pass
+
     running_processes = list()
 
     try:
@@ -83,4 +84,8 @@ if __name__ == '__main__':
     # werkzerg/flask refuses to close using subprocess
     # so here is my heavy handed hack until i get it
     # figured out
-    call(['killall', '-KILL', 'python3'], timeout=10)
+    # TODO: better process cleanup
+    try:
+        call(['killall', '-KILL', 'python3'], timeout=10)
+    except FileNotFoundError:
+        pass

@@ -8,17 +8,19 @@ manages plugin workflow, basically
 """
 import asyncio
 import logging
+import struct
 import os
-import pickle
 from collections import namedtuple
 from contextlib import ExitStack
 from functools import partial
+
+import cbor
 
 from apps.service.session import Session
 from tailor import plugins
 from tailor.builder import JSONTemplateBuilder
 from tailor.config import pkConfig
-from tailor.zc import zc_service_context, load_services_from_config
+from tailor.zc import load_services_from_config, zc_service_context
 
 logger = logging.getLogger("tailor.service")
 
@@ -109,6 +111,8 @@ class ServiceApp:
             self.running_tasks.append(task)
 
             # serve previews in highly inefficient manner
+            # asyncio streaming protocol
+            # https://docs.python.org/3/library/asyncio-stream.html
             func = partial(self.camera_preview_threaded_queue, camera)
             coro = asyncio.start_server(func, '127.0.0.1', 22222, loop=loop)
             task = loop.create_task(coro)
@@ -173,21 +177,29 @@ class ServiceApp:
 
     @asyncio.coroutine
     def camera_preview_threaded_queue(self, camera, reader, writer):
-        image = yield from camera.download_preview()
-        packet = {
-            'session': {
-                'idle': self.session.idle,
-                'started': self.session.started,
-                'finished': self.session.finished,
-                'timer_value': self.session.countdown_value,
-            },
-            'image_data': {
-                'size': image.size,
-                'mode': image.mode,
-                'data': image.tobytes()
+        while 1:
+            image = yield from camera.download_preview()
+            data = {
+                'session': {
+                    'idle': self.session.idle,
+                    'started': self.session.started,
+                    'finished': self.session.finished,
+                    'timer_value': self.session.countdown_value,
+                },
+                'image_data': {
+                    'size': image.size,
+                    'mode': image.mode,
+                    'data': image.tobytes()
+                }
             }
-        }
-        data = pickle.dumps(packet, -1)
-        writer.write(data)
-        yield from writer.drain()
-        writer.close()
+            payload = cbor.dumps(data)
+            writer.write(struct.pack('Q', len(payload)))
+            writer.write(payload)
+
+            # the client may close the socket if it gets data
+            # that cannot be parsed.
+            try:
+                yield from writer.drain()
+            except ConnectionResetError:
+                writer.close()
+                break

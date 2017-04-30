@@ -286,8 +286,7 @@ class PickerScreen(Screen):
             return
 
         url = '{protocol}://{host}:{port}/files'.format(**self.remote_server)
-        on_success = self.handle_new_images_response
-        req = UrlRequest(url, on_success)
+        UrlRequest(url, self.handle_new_images_response)
 
     def fetch_images(self, new):
         for filename in new:
@@ -489,12 +488,12 @@ class PickerScreen(Screen):
         #  N O R M A L  =>  P R E V I E W
         self.scrollview_hidden = True
 
-        from .utils import PreviewHandler
+        from uix.camera import PreviewHandler
         self.preview_handler = PreviewHandler()
         self.preview_handler.start()
 
         # schedule an interval to update the preview widget
-        Clock.schedule_interval(self.update_preview, 1 / 60.)
+        Clock.schedule_interval(self.update_preview, 1 / 40.)
 
         self.update_preview()
 

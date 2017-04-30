@@ -1,13 +1,14 @@
 kivy
-pillow
+pillow-simd
 zeroconf
-git+http://github.com/bitcraft/shutter.git
 flask
+cbor
 natsort
 netifaces
-# aiohttp
 requests
 
-# pygame is required for sounds until i figure out kivy
-# one day may use pysdl2
+# for dslr cameras
+git+http://github.com/bitcraft/shutter.git
+
+# for camera and sounds
 pygame

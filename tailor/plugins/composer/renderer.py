@@ -10,7 +10,7 @@ from PIL import Image
 
 from .filters.autocrop import Autocrop
 
-__all__ = ('TemplateRenderer',)
+__all__ = ('TemplateRenderer', )
 
 
 class TemplateRenderer:
@@ -28,6 +28,7 @@ class TemplateRenderer:
 
     def render_node(self, node):
         """ Render one node
+        
         :param node: TemplateNode
         :return: (PIL Image or None, Rect or None)
         """
@@ -42,7 +43,7 @@ class TemplateRenderer:
         """ Render a new image and all nodes.  Must pass in the root node.
 
         :param root: Root node
-        :return: PIL Image
+        :rtype: Image
         """
         def func():
             base_image = self.create_blank_image(root)
@@ -57,6 +58,16 @@ class TemplateRenderer:
 
     @asyncio.coroutine
     def render_all_and_save(self, root, filename):
+        """ Render the template, then save it to a file
+        
+        :param root: 
+        :param filename:
+         
+        :type root:
+        :type filename: str
+
+        :returns: None
+        """
         image = yield from self.render_all(root)
         loop = asyncio.get_event_loop()
         return loop.run_in_executor(None, image.save, filename)
@@ -66,6 +77,7 @@ class TemplateRenderer:
 
         :param node: TemplateNode
         :param base_image: PIL image
+
         :return: PIL Image of node, else None
         """
         image, rect = self.render_node(node)
