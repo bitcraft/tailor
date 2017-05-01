@@ -194,7 +194,7 @@ class ServiceApp:
 
             try:
                 yield from writer.drain()
-            except ConnectionResetError:
+            except (ConnectionResetError, ConnectionResetError):
                 writer.close()
                 break
 
