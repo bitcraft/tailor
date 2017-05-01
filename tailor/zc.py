@@ -4,7 +4,7 @@ zeroconf support is on a haitus until i find/make a better solution
 currently, the zeronconf, pure-python lib is best lib without
 deps and works cross platform, but doesn't correctly
 
-advertise services (seems to announce just once.)
+advertise services (seems to announce just get_packet.)
 """
 
 import json

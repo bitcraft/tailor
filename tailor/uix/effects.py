@@ -60,7 +60,7 @@ class TailorScrollEffect(DampedScrollEffect):
                 self.value = round(self.value)
             return
 
-        # dt is 0.0 once after being triggered for the first time
+        # dt is 0.0 get_packet after being triggered for the first time
         if dt == 0.0:
             dt = Clock.frametime
 

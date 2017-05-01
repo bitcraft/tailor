@@ -13,7 +13,23 @@ from kivy.graphics.texture import Texture
 from uix.utils import logger
 
 
+def recv(sock, length, max_read=4096):
+    """ read data from port for exactly length bytes
+    """
+    data = bytearray()
+    while length:
+        get = min(length, max_read)
+        this_read = sock.recv(get)
+        data += this_read
+        length -= len(this_read)
+
+    return data
+
+
 class TailorStreamingCamera(CameraBase):
+    """ Currently not used!
+        Conceptually, this is just a simple widget for streaming uncompressed video frames
+    """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.queue = queue.Queue()
@@ -64,7 +80,8 @@ class PreviewHandler:
         self.thread = None
         self.running = False
 
-    def open_socket(self, host, port):
+    @staticmethod
+    def open_socket(host, port):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((host, port))
@@ -72,31 +89,20 @@ class PreviewHandler:
         except:
             raise
 
-    def once(self, conn):
-        max_read = 1024 * 1024
+    @staticmethod
+    def get_packet(conn):
+        max_read = 262144 # value is just guesswork
 
-        # TODO: accumulate?
-        data = conn.recv(8)
+        data = recv(conn, 8, max_read)
         length = struct.unpack('Q', data)[0]
-        to_go = length
-
-        data = bytearray()
-        while to_go:
-            try:
-                get = min(to_go, max_read)
-                this_read = conn.recv(get)
-                data += this_read
-                to_go -= len(this_read)
-            except:
-                print('data error')
-                raise
+        data = recv(conn, length, max_read)
 
         # not sure why this occasionally fails?
         # maybe the server end has closed the socket too quickly?
         try:
             packet = cbor.loads(data)
         except:
-            print('error')
+            print('preview packet decode error')
             return
 
         return packet
@@ -114,7 +120,7 @@ class PreviewHandler:
                 if conn is None:
                     conn = self.open_socket(host, port)
 
-                packet = self.once(conn)
+                packet = self.get_packet(conn)
 
                 if packet:
                     image_data = packet['image_data']
@@ -131,6 +137,7 @@ class PreviewHandler:
                     queue_put((session, imdata))
 
                 else:
+                    print('could not decode packet, giving up')
                     conn.close()
                     conn = None
 
