@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PIL import Image
+from PIL import Image, ImageOps
 
 
 class Autocrop:
@@ -15,9 +15,13 @@ class Autocrop:
         #     x1 = int(x2 / 2 - area[0] * hRatio / 2)
         #     x2 = int(x2 / 2 + area[0] * hRatio / 2)
         # image = image.crop((x1, y1, x2, y2))
+        x, y, w, h = area
+        return ImageOps.fit(
+            image, (int(w), int(h)), Image.ANTIALIAS
+        )
 
         iw, ih = image.size
-        x, y, w, h = area
+
         r0 = float(w) / h
         r1 = float(iw) / ih
 

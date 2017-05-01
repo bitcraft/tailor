@@ -179,6 +179,8 @@ class ServiceApp:
     def camera_preview_threaded_queue(self, camera, reader, writer):
         while 1:
             image = yield from camera.download_preview()
+            from tailor.plugins.composer.filters.autocrop import Autocrop
+            image = Autocrop().process(image, (0, 0, 465 * 3, 435 * 3))
             data = {
                 'session': {
                     'idle': self.session.idle,
