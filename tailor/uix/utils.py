@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
-import pickle
 import queue
 import socket
 import threading
-
-from kivy.core.image import ImageData
 
 logger = logging.getLogger('tailor.utils')
 
@@ -39,73 +36,6 @@ def search(root, uniqueid):
                 return child
 
     return None
-
-
-class PreviewHandler:
-    """ Very basic streaming of raw video frames
-
-    """
-    def __init__(self):
-        self.queue = queue.Queue(maxsize=2)
-        self.thread = None
-        self.running = False
-
-    def start(self):
-        def func():
-            self.running = True
-            queue_put = self.queue.put
-
-            host = 'localhost'
-            port = 22222
-            buffer_size = 1024
-
-            while self.running:
-                try:
-                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    s.connect((host, port))
-                except:
-                    raise
-
-                data = bytearray()
-                try:
-                    chunk = s.recv(buffer_size)
-                    while len(chunk):
-                        data += chunk
-                        chunk = s.recv(buffer_size)
-                    s.close()
-                except:
-                    continue
-
-                try:
-                    packet = pickle.loads(data)
-                except:
-                    continue
-
-                image_data = packet['image_data']
-                session = packet['session']
-
-                size = image_data['size']
-                imdata = ImageData(size[0],
-                                   size[1],
-                                   image_data['mode'].lower(),
-                                   image_data['data'])
-
-                # this will block until the consumer has taken an image
-                # it's a good thing (tm)
-                queue_put((session, imdata))
-
-        if self.thread is None:
-            logger.debug('starting the preview handler')
-            self.thread = threading.Thread(target=func)
-            self.thread.daemon = True
-            self.thread.start()
-
-    def stop(self):
-        if self.thread is None:
-            logger.debug('want to stop preview thread, but is not running')
-        else:
-            logger.debug('stopping the preview handler')
-            self.running = False
 
 
 class ArduinoHandler:

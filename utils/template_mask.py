@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from unittest import TestCase
-
-import sys
-sys.path.extend(['..', '.'])
+"""
+Render a template so that is can be used as a mask layer
+or guid when using editors such as Gimp, Pixelmator, or
+Photoshop to create template images.
+"""
+import asyncio
 
 from tailor.builder import JSONTemplateBuilder
 from tailor.plugins.composer.renderer import TemplateRenderer
@@ -27,17 +29,10 @@ async def test_render():
     im = Image.new('RGB', (1024, 1024), (255, 255, 0))
     root.push_image(im)
 
-    await renderer.render_all_and_save(root, 'test_image.png')
+    image = renderer.render_all(root)
 
 
 if __name__ == '__main__':
-    import asyncio
-
     loop = asyncio.get_event_loop()
     loop.run_until_complete(test_render())
     print('done')
-
-
-class TestRenderer(TestCase):
-    def test_render(self):
-        test_render()

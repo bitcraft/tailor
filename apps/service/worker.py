@@ -15,6 +15,7 @@ def save_image(image, filename):
 
 
 def save(data, args):
+    print(args[0])
     save_image(make_image(data), args[0])
 
 

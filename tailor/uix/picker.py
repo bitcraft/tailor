@@ -30,7 +30,7 @@ jpath = os.path.join
 resource_path = os.path.realpath(jpath(__file__, '..', '..', 'resources'))
 image_path = partial(jpath, resource_path, 'images')
 
-polling_interval = 1
+polling_interval = 5
 
 
 class PickerScreen(Screen):
@@ -286,8 +286,7 @@ class PickerScreen(Screen):
             return
 
         url = '{protocol}://{host}:{port}/files'.format(**self.remote_server)
-        on_success = self.handle_new_images_response
-        req = UrlRequest(url, on_success)
+        UrlRequest(url, self.handle_new_images_response)
 
     def fetch_images(self, new):
         for filename in new:
@@ -489,7 +488,7 @@ class PickerScreen(Screen):
         #  N O R M A L  =>  P R E V I E W
         self.scrollview_hidden = True
 
-        from .utils import PreviewHandler
+        from uix.camera import PreviewHandler
         self.preview_handler = PreviewHandler()
         self.preview_handler.start()
 

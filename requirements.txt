@@ -20,10 +20,16 @@ git+http://github.com/bitcraft/shutter.git
 # everything else
 # ===============
 kivy
-pillow
+pillow-simd
 zeroconf
 flask
-flask-socketio
+cbor
 natsort
 netifaces
 requests
+
+# for dslr cameras
+git+http://github.com/bitcraft/shutter.git
+
+# for camera and sounds
+pygame
