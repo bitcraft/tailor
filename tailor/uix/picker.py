@@ -493,7 +493,7 @@ class PickerScreen(Screen):
         self.preview_handler.start()
 
         # schedule an interval to update the preview widget
-        Clock.schedule_interval(self.update_preview, 1 / 40.)
+        Clock.schedule_interval(self.update_preview, 1 / 60.)
 
         self.update_preview()
 

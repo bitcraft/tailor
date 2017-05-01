@@ -186,20 +186,16 @@ class ServiceApp:
                     'finished': self.session.finished,
                     'timer_value': self.session.countdown_value,
                 },
-                'image_data': {
-                    'size': image.size,
-                    'mode': image.mode,
-                    'data': image.tobytes()
-                }
+                'image_data': (image.size[0], image.size[1], image.mode.lower(), image.tobytes())
             }
             payload = cbor.dumps(data)
             writer.write(struct.pack('Q', len(payload)))
             writer.write(payload)
 
-            # the client may close the socket if it gets data
-            # that cannot be parsed.
             try:
                 yield from writer.drain()
             except ConnectionResetError:
                 writer.close()
                 break
+
+            yield from asyncio.sleep(1 / 60.)

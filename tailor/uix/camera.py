@@ -79,26 +79,35 @@ class PreviewHandler:
         self.queue = queue.Queue(maxsize=2)
         self.thread = None
         self.running = False
+        self.host = 'localhost'
+        self.port = 22222
+
+        # maximum amount of bytes to request each socket read
+        # value is just guesswork
+        self.max_read = 262144
 
     @staticmethod
     def open_socket(host, port):
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((host, port))
-            return s
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect((host, port))
+            return sock
         except:
             raise
 
-    @staticmethod
-    def get_packet(conn):
-        max_read = 262144 # value is just guesswork
-
-        data = recv(conn, 8, max_read)
+    def get_packet(self, sock):
+        """ Get one frame from a socket
+        
+        :param sock: 
+        :rtype: dict
+        """
+        # get the "header", just a 64-bit integer
+        data = recv(sock, 8, self.max_read)
         length = struct.unpack('Q', data)[0]
-        data = recv(conn, length, max_read)
 
-        # not sure why this occasionally fails?
-        # maybe the server end has closed the socket too quickly?
+        # get the rest of the data
+        data = recv(sock, length, self.max_read)
+
         try:
             packet = cbor.loads(data)
         except:
@@ -112,34 +121,26 @@ class PreviewHandler:
             self.running = True
             queue_put = self.queue.put
 
-            host = 'localhost'
-            port = 22222
-            conn = None
+            sock = None
 
             while self.running:
-                if conn is None:
-                    conn = self.open_socket(host, port)
+                if sock is None:
+                    sock = self.open_socket(self.host, self.port)
 
-                packet = self.get_packet(conn)
+                packet = self.get_packet(sock)
 
                 if packet:
-                    image_data = packet['image_data']
                     session = packet['session']
-                    size = image_data['size']
-
-                    imdata = ImageData(size[0],
-                                       size[1],
-                                       image_data['mode'].lower(),
-                                       image_data['data'])
-
-                    # this will block until the consumer has taken an image
-                    # it's a good thing (tm)
+                    imdata = ImageData(*packet['image_data'])
                     queue_put((session, imdata))
 
                 else:
                     print('could not decode packet, giving up')
-                    conn.close()
-                    conn = None
+                    sock.close()
+                    sock = None
+
+            if sock:
+                sock.close()
 
         if self.thread is None:
             logger.debug('starting the preview handler')
