@@ -12,6 +12,7 @@ except ImportError:
 try:
     from . import shutter_camera
 except:
+    print('cannot load shutter')
     pass
 
 try:

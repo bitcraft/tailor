@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-""" Support loading template graphs from json formatted files
+""" Support loading template graphs from specially formatted files
 """
-import json
 import os.path
 
 from tailor.config import pkConfig
@@ -9,7 +8,7 @@ from tailor.graph import Node
 
 __all__ = ['cast_list_float',
            'TemplateBuilder',
-           'JSONTemplateBuilder',
+           'YamlTemplateBuilder',
            'create_root_node',
            'create_area_node',
            'create_image_node']
@@ -28,8 +27,8 @@ def cast_list_float(values):
         raise TemplateBuilder.SyntaxError
 
 
-def create_area_node(json_graph):
-    data = json_graph['data']
+def create_area_node(raw_config):
+    data = raw_config['data']
     rect = cast_list_float(data['rect'])
     units = data.get('units', None)
     try:
@@ -39,25 +38,25 @@ def create_area_node(json_graph):
     return Node('area', {'rect': rect, 'units': units, 'dpi': dpi})
 
 
-def create_root_node(json_graph):
-    if not json_graph['name'] == 'root':
-        raise JSONTemplateBuilder.SyntaxError
+def create_root_node(raw_config):
+    if not raw_config['name'] == 'root':
+        raise YamlTemplateBuilder.SyntaxError
 
-    data = json_graph['data']
+    data = raw_config['data']
     rect = cast_list_float(data['rect'])
     units = data['units']
     dpi = float(data['dpi'])
     return Node('area', {'rect': rect, 'units': units, 'dpi': dpi})
 
 
-def create_image_node(json_graph):
-    filename = json_graph['data']['filename']
+def create_image_node(raw_config):
+    filename = raw_config['data']['filename']
     path = os.path.join(pkConfig['paths']['app_templates'], filename)
     return Node('image', {'filename': path})
 
 
-def create_placeholder_node(json_graph):
-    return Node('placeholder', json_graph['data'])
+def create_placeholder_node(raw_config):
+    return Node('placeholder', raw_config['data'])
 
 
 class TemplateBuilder:
@@ -117,9 +116,11 @@ class TemplateBuilder:
         return node
 
 
-class JSONTemplateBuilder(TemplateBuilder):
+class YamlTemplateBuilder(TemplateBuilder):
     def read(self, filename):
-        with open(filename) as fp:
-            json_graph = json.load(fp)
+        import yaml
 
-        return self.build_graph(json_graph)
+        with open(filename) as fp:
+            config = yaml.load(fp)
+
+        return self.build_graph(config)

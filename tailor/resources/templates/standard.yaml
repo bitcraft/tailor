@@ -1,0 +1,56 @@
+---
+type: root
+name: root
+data:
+  dpi: 300
+  units: inches
+  rect:
+  - 0
+  - 0
+  - 2
+  - 6
+children:
+- type: area
+  data:
+    rect:
+    - ".39"
+    - '0.04'
+    - '1.58'
+    - '1.45'
+  children:
+  - type: placeholder
+    data: {}
+- type: area
+  data:
+    rect:
+    - ".39"
+    - '1.53'
+    - '1.58'
+    - '1.45'
+  children:
+  - type: placeholder
+    data: {}
+- type: area
+  data:
+    rect:
+    - ".39"
+    - '3.02'
+    - '1.58'
+    - '1.45'
+  children:
+  - type: placeholder
+    data: {}
+- type: area
+  data:
+    rect:
+    - ".39"
+    - '4.51'
+    - '1.58'
+    - '1.45'
+  children:
+  - type: placeholder
+    data: {}
+- type: image
+  data:
+    filename: frame.png
+

@@ -8,7 +8,7 @@ import os.path
 
 from PIL import Image
 
-from tailor.builder import JSONTemplateBuilder
+from tailor.builder import YamlTemplateBuilder
 from tailor.plugins.composer.renderer import TemplateRenderer
 
 
@@ -103,8 +103,8 @@ if __name__ == "__main__":
     start = time.time()
     loop = asyncio.get_event_loop()
     template_filename = normpath(
-        'tailor/resources/templates/test_template.json')
-    template_master = JSONTemplateBuilder().read(template_filename)
+        'tailor/resources/templates/standard.yaml')
+    template_master = YamlTemplateBuilder().read(template_filename)
     folder = normpath('~/events/carrie-jon/originals/')
     files = glob.glob('{0}/*.jpg'.format(folder))
 

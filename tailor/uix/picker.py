@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.image import Image as CoreImage
+from kivy.core.image import ImageData
 from kivy.core.window import Window
 from kivy.factory import Factory
 from kivy.graphics.texture import Texture
@@ -19,6 +20,7 @@ from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from natsort import natsorted
 
+from .camera import PreviewHandler
 from .effects import TailorScrollEffect
 from .sharing import SharingControls
 from .utils import search, trigger_session_via_socket
@@ -150,12 +152,14 @@ class PickerScreen(Screen):
     @staticmethod
     def update_texture(texture, image_data):
         # needed when opengl context is lost...not worried about that now
-        texture.blit_buffer(image_data.data)
+        texture.blit_buffer(image_data[3])
         texture.flip_vertical()
         texture.flip_horizontal()
 
     def create_preview_texture(self, initial_data):
-        texture = Texture.create_from_data(initial_data)
+        w, h, mode, data = initial_data
+        im_data = ImageData(w, h, mode.lower(), data)
+        texture = Texture.create_from_data(im_data)
         # add_reload_observer is required for loading texture info
         # after the openGL context is lost and images need to be reloaded
         # currently, losing opengl context is not tested
@@ -183,15 +187,17 @@ class PickerScreen(Screen):
         self.add_widget(self.preview_widget)
 
     def get_raw_image_from_queue(self):
-        # TODO: refactor this mess into cleaner parts
+        """ Eventually move to a generic camera widget
+
+        :return:
+        """
+        block = self.preview_widget is None
         try:
-            # stuff = yield from self.preview_handler.queue.get_nowait()
-            stuff = self.preview_handler.queue.get()
+            stuff = self.preview_handler.queue.get(block)
             session, imdata = stuff
 
         except queue.Empty:
-            # TODO: generate an image indicating camera is offline
-            raise RuntimeError
+            return None, None
 
         return session, imdata
 
@@ -199,11 +205,12 @@ class PickerScreen(Screen):
     def update_preview(self, *args, **kwargs):
         session, imdata = self.get_raw_image_from_queue()
 
-        self.set_preview_texture(imdata)
-        if self.preview_widget is None:
-            self.set_preview_widget()
+        if session:
+            self.set_preview_texture(imdata)
+            if self.preview_widget is None:
+                self.set_preview_widget()
 
-        self.set_preview_overlay_text(session)
+            self.set_preview_overlay_text(session)
 
     def set_preview_overlay_text(self, session):
         # TODO: 'session', needs some documentation
@@ -488,12 +495,11 @@ class PickerScreen(Screen):
         #  N O R M A L  =>  P R E V I E W
         self.scrollview_hidden = True
 
-        from uix.camera import PreviewHandler
         self.preview_handler = PreviewHandler()
         self.preview_handler.start()
 
         # schedule an interval to update the preview widget
-        Clock.schedule_interval(self.update_preview, 1 / 60.)
+        Clock.schedule_interval(self.update_preview, 1 / 120.)
 
         self.update_preview()
 

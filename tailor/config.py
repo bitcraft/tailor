@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import json
+import yaml
 import logging
 import os.path
 
@@ -18,13 +18,13 @@ def reload(path):
     app_root_path = os.path.realpath(os.path.join(__file__, '..', '..'))
 
     # TODO: make sense of all the distributed config files
-    with open(jpath(app_root_path, 'config', 'service.json')) as fp:
-        service_cfg = json.load(fp)
+    with open(jpath(app_root_path, 'config', 'service.yaml')) as fp:
+        service_cfg = yaml.load(fp)
         pkConfig.update(service_cfg)
 
     # TODO: make sense of all the distributed config files
-    with open(jpath(app_root_path, 'config', 'kiosk.json')) as fp:
-        kiosk_cfg = json.load(fp)
+    with open(jpath(app_root_path, 'config', 'kiosk.yaml')) as fp:
+        kiosk_cfg = yaml.load(fp)
         pkConfig['kiosk'] = kiosk_cfg
 
     app_resources_path = jpath(app_root_path, 'tailor', 'resources')
@@ -54,8 +54,8 @@ def reload(path):
     pkConfig['paths'] = paths
 
     # TODO: move to more generic loader
-    with open(jpath(app_root_path, 'config', 'server.json')) as fp:
-        server_cfg = json.load(fp)
+    with open(jpath(app_root_path, 'config', 'server.yaml')) as fp:
+        server_cfg = yaml.load(fp)
 
     interface_config = server_cfg['interface']
     pkConfig['server'] = server_cfg

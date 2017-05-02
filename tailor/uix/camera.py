@@ -3,14 +3,14 @@ import queue
 import socket
 import threading
 import struct
+import logging
 
 import cbor
 from kivy.clock import Clock
 from kivy.core.camera import CameraBase
-from kivy.core.image import ImageData
 from kivy.graphics.texture import Texture
 
-from uix.utils import logger
+logger = logging.getLogger('tailor.camera')
 
 
 def recv(sock, length, max_read=4096):
@@ -30,6 +30,7 @@ class TailorStreamingCamera(CameraBase):
     """ Currently not used!
         Conceptually, this is just a simple widget for streaming uncompressed video frames
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.queue = queue.Queue()
@@ -85,6 +86,7 @@ class PreviewHandler:
         # maximum amount of bytes to request each socket read
         # value is just guesswork
         self.max_read = 262144
+        self.max_read = 4096
 
     @staticmethod
     def open_socket(host, port):
@@ -131,7 +133,8 @@ class PreviewHandler:
 
                 if packet:
                     session = packet['session']
-                    imdata = ImageData(*packet['image_data'])
+                    imdata = packet['image_data']
+
                     queue_put((session, imdata))
 
                 else:

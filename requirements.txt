@@ -10,16 +10,18 @@
 
 # pygame is required for sounds until i figure out kivy audio
 # ===========================================================
-pygame
+pygame==1.9.3
 
 # camera providers
 # ================
 git+http://github.com/bitcraft/shutter.git
 # opencv
+# pygame
 
 # everything else
 # ===============
-kivy
+uvloop
+kivy==1.9.1
 pillow-simd
 zeroconf
 flask
@@ -27,9 +29,4 @@ cbor
 natsort
 netifaces
 requests
-
-# for dslr cameras
-git+http://github.com/bitcraft/shutter.git
-
-# for camera and sounds
-pygame
+pyyaml

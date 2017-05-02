@@ -9,12 +9,10 @@ from multiprocessing import Queue
 from os.path import join
 
 from flask import Flask, request, jsonify, send_from_directory
-from flask.ext.socketio import SocketIO, emit
 
 from tailor.config import pkConfig
 
 app = Flask(__name__)
-socketio = SocketIO(app)
 
 print_queue = Queue()
 prints_folder = pkConfig['paths']['event_prints']

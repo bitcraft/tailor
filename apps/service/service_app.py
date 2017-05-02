@@ -15,14 +15,19 @@ from contextlib import ExitStack
 from functools import partial
 
 import cbor
+import uvloop
 
 from apps.service.session import Session
 from tailor import plugins
-from tailor.builder import JSONTemplateBuilder
+from tailor.builder import YamlTemplateBuilder
 from tailor.config import pkConfig
+from tailor.plugins.composer.filters.autocrop import Autocrop
 from tailor.zc import load_services_from_config, zc_service_context
 
 logger = logging.getLogger("tailor.service")
+
+# use uvloop
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # set ProactorEventLoop, to support subprocess on Windows OS
 if os.name == 'nt':
@@ -75,7 +80,7 @@ class ServiceApp:
     def run(self):
         self.running = True
         self.template_filename = pkConfig['paths']['event_template']
-        self.make_folders()            # build folder structure to store photos
+        self.make_folders()  # build folder structure to store photos
         loop = asyncio.get_event_loop()
         camera = self.get_camera()
 
@@ -156,7 +161,7 @@ class ServiceApp:
     def wait_for_trigger(self, future, camera):
         yield from future
 
-        template_graph_root = JSONTemplateBuilder().read(self.template_filename)
+        template_graph_root = YamlTemplateBuilder().read(self.template_filename)
         self.session = Session()
         task = self.session.start(camera, template_graph_root)
 
@@ -168,7 +173,7 @@ class ServiceApp:
         # drop the connection right away
         writer.close()
 
-        template_graph_root = JSONTemplateBuilder().read(self.template_filename)
+        template_graph_root = YamlTemplateBuilder().read(self.template_filename)
         self.session = Session()
         task = self.session.start(camera, template_graph_root)
 
@@ -177,10 +182,12 @@ class ServiceApp:
 
     @asyncio.coroutine
     def camera_preview_threaded_queue(self, camera, reader, writer):
+        crop = Autocrop()
+        import time
         while 1:
+            start = time.time()
             image = yield from camera.download_preview()
-            from tailor.plugins.composer.filters.autocrop import Autocrop
-            image = Autocrop().process(image, (0, 0, 465 * 3, 435 * 3))
+            image = crop.process(image, (0, 0, 465 * 2, 435 * 2))
             data = {
                 'session': {
                     'idle': self.session.idle,
@@ -188,7 +195,7 @@ class ServiceApp:
                     'finished': self.session.finished,
                     'timer_value': self.session.countdown_value,
                 },
-                'image_data': (image.size[0], image.size[1], image.mode.lower(), image.tobytes())
+                'image_data': (image.size[0], image.size[1], image.mode, image.tobytes())
             }
             payload = cbor.dumps(data)
             writer.write(struct.pack('Q', len(payload)))
@@ -196,8 +203,10 @@ class ServiceApp:
 
             try:
                 yield from writer.drain()
-            except (ConnectionResetError, ConnectionResetError):
+            except (ConnectionResetError, ConnectionResetError, BrokenPipeError):
                 writer.close()
                 break
+
+            print('finished frame drain', round((time.time() - start) * 100))
 
             yield from asyncio.sleep(1 / 60.)
