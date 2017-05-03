@@ -7,7 +7,6 @@ from io import BytesIO
 
 import shutter
 from PIL import Image
-import pygame
 
 logger = logging.getLogger("tailor.shutter_camera")
 
@@ -67,17 +66,18 @@ class ShutterCamera:
                 raw = self._device_context.capture_preview()
             except shutter.ShutterError:
                 return
-            return self.convert_raw_to_pil(raw)
+            # return self.convert_raw_to_pil(raw)
+            return raw
 
     async def capture_image(self, filename=None):
         """ Capture full image (engages full camera mechanisms)
         """
-        loop = asyncio.get_event_loop()
+        executor = asyncio.get_event_loop().run_in_executor
         with (await self._lock):
-            future = loop.run_in_executor(None,
-                                          self._device_context.capture_image)
+            future = executor(None, self._device_context.capture_image)
             await future
-        return self.convert_raw_to_pil(future.result())
+        # return self.convert_raw_to_pil(future.result())
+        return future.result()
 
     async def download_preview(self):
         """ Capture preview image and return data

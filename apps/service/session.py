@@ -1,15 +1,25 @@
 # -*- coding: utf-8 -*-
+"""
+
+countdown between images
+submits tasks to be processed by mp queue
+
+"""
 import asyncio
 import logging
 import multiprocessing as mp
 import sys
 import threading
 import traceback
+import re
+import os
+from io import BytesIO
 from os import cpu_count
 from os.path import join
 
 import pygame
 import requests
+from PIL import Image
 
 from apps.service.async_helpers import timing_generator
 from apps.service.worker import run_worker
@@ -17,6 +27,9 @@ from tailor.config import pkConfig
 from tailor.plugins.composer import TemplateRenderer
 
 logger = logging.getLogger("tailor.service")
+
+# reduce lookups in to the PIL package namespace
+pil_open = Image.open
 
 # make sure pygame sound lib is working
 pygame.init()
@@ -35,13 +48,12 @@ class Session:
         self.started = False
         self.idle = False
 
-        # TODO: load from config
-        self.countdown_time = 10
-        self.extra_wait_time = 5
-        self.time_to_wait_after_capture = 3
+    @staticmethod
+    def deconstruct_image(image):
+        # return objects suitable for pickle/marshal/serialization
+        return image.mode, image.size, image.tobytes()
 
-    @asyncio.coroutine
-    def countdown(self, duration):
+    async def countdown(self, duration):
         """ countdown from whole seconds
         """
         duration = int(duration)
@@ -49,17 +61,11 @@ class Session:
             self.countdown_value = duration - i
             if self.countdown_value < 4:
                 bell0.play()
-            yield from asyncio.sleep(1)
+            await asyncio.sleep(1)
 
         self.countdown_value = 0
 
-    @staticmethod
-    def deconstruct_image(image):
-        # return objects suitable for pickle/marshal
-        return image.mode, image.size, image.tobytes()
-
     def queue_image_save(self, image, filename):
-        print(filename)
         data = self.deconstruct_image(image)
         self.mp_queue.put(("save", data, (filename,)))
 
@@ -72,11 +78,18 @@ class Session:
         data = self.deconstruct_image(image)
         self.mp_queue.put(("double", data, (filename,)))
 
-    @asyncio.coroutine
-    def render_template(self, root):
+    def queue_data_save(self, data, filename):
+        self.mp_queue.put(("data save", data, filename))
+
+    async def render_template(self, root):
+        """
+        
+        :param root: 
+        :return: Image
+        """
         # render the composite image (async)
         renderer = TemplateRenderer()
-        composite = yield from renderer.render_all(root)
+        composite = await renderer.render_all(root)
         return composite
 
     def start_workers(self):
@@ -84,18 +97,18 @@ class Session:
         # since processes cannot fork, there will always be a fixed
         # amount of time for an interpreter to spin up.
         # use 'spawn' for predictable cross-platform use
-        cxt = mp.get_context('spawn')
-        self.mp_queue = cxt.JoinableQueue()
-        self.mp_workers = list()
-        for i in range(cpu_count()):
+        def start_worker():
             worker = cxt.Process(target=run_worker, args=(self.mp_queue,))
             worker.daemon = True
             worker.start()
-            self.mp_workers.append(worker)
+            return worker
+
+        cxt = mp.get_context('spawn')
+        self.mp_queue = cxt.JoinableQueue()
+        self.mp_workers = [start_worker() for i in range(cpu_count())]
 
     def wait_for_workers(self):
         # TODO: not block here with sync api?
-        # TODO: implement template-based doubler
         for i in self.mp_workers:
             self.mp_queue.put(None)  # signal the workers to stop
         self.mp_queue.join()
@@ -104,17 +117,60 @@ class Session:
     def format_number(id):
         return '{:05d}'.format(id)
 
-    def name_image(self, prefix, session, capture):
-        return '{}-{}-{}.{}'.format(prefix, self.format_number(session), self.format_number(capture),
-                                 pkConfig['compositor']['filetype'])
+    def guess_image_extension(self, ext=None):
+        """ Get best guess file extension for the image
+        
+        :param ext: 
+        :return: 
+        """
+        if ext is None:
+            return pkConfig['compositor']['filetype']
 
-    def name_composite(self, prefix, session):
-        return '{}-{}.{}'.format(prefix, self.format_number(session),
-                                    pkConfig['compositor']['filetype'])
+        # TODO: something better!
+        return 'jpg'
 
-    def determine_initial_capture_id(self):
+    def name_image(self, prefix, session, capture, ext=None):
+        """ Generate name for individual images
+        
+        :param prefix: 
+        :param session: 
+        :param capture: 
+        :return: 
+        """
+        ext = self.guess_image_extension(ext)
+
+        return '{}-{}-{}.{}'.format(prefix,
+                                    self.format_number(session),
+                                    self.format_number(capture),
+                                    ext)
+
+    def name_composite(self, prefix, session, ext=None):
+        """ Generate name for composite images
+        
+        :param prefix: 
+        :param session: 
+        :return: 
+        """
+        ext = self.guess_image_extension(ext)
+
+        return '{}-{}.{}'.format(prefix,
+                                 self.format_number(session),
+                                 ext)
+
+    def capture_path(self, session_id, capture_id):
+        paths = pkConfig['paths']
+
+        return join(paths['event_originals'],
+                    'original',
+                    self.name_image('original', session_id, capture_id))
+
+    @staticmethod
+    def determine_initial_capture_id():
+        """ ...
+        
+        :return: 
+        """
         # here be dragons
-        import re, os
         regex = re.compile('^(.*?)-(\d+)$')
 
         try:
@@ -131,7 +187,8 @@ class Session:
         except IOError:
             return 0
 
-    def mark_session_complete(self, filename):
+    @staticmethod
+    def mark_session_complete(filename):
         def mark():
             with open(pkConfig['paths']['event_log'], 'a') as fp:
                 fp.write(filename + '\n')
@@ -145,8 +202,31 @@ class Session:
             except IOError:
                 pass
 
-    @asyncio.coroutine
-    def start(self, camera, root):
+    @staticmethod
+    def convert_raw_to_pil(raw):
+        return pil_open(BytesIO(raw))
+
+    @staticmethod
+    def play_capture_sound(final=False):
+        if final:
+            bell1.play()           # sound to indicate that session is closed
+        else:
+            finished.play()        # sound to indicate that photo was taken
+
+    def get_timer(self, needed_captures):
+        """ Get generator used to wait between captures
+        
+        :param needed_captures: number of images needed to capture
+        :rtype: generator
+        """
+        # TODO: load from config
+        countdown_time = 10
+        extra_wait_time = 5
+
+        return timing_generator(countdown_time, needed_captures,
+                                countdown_time + extra_wait_time)
+
+    async def start(self, camera, root):
         """ new session
 
         Take 4 photos
@@ -161,52 +241,46 @@ class Session:
         self.start_workers()  # each worker is a separate python process
         self.started = True
 
-        paths = pkConfig['paths']
         needed_captures = root.needed_captures()
         session_id = self.determine_initial_capture_id()
         capture_id = 0
-
-        # TODO: handle camera errors
         errors = 0
-        timing = timing_generator(self.countdown_time, needed_captures,
-                                  self.countdown_time + self.extra_wait_time)
 
-        for final, wait_time in timing:
-            logger.debug('waiting %s seconds', wait_time)
-
-            yield from self.countdown(wait_time)
+        for final, wait_time in self.get_timer(needed_captures):
+            await self.countdown(wait_time)
 
             try:
-                image = yield from camera.download_capture()
+                # this image will be whatever format the camera is set to
+                raw_image = await camera.download_capture()
             except:
                 errors += 1
                 traceback.print_exc(file=sys.stdout)
                 logger.debug('failed capture %s/3', errors)
                 continue
 
+            self.idle = True           # indicate that picture is taken, getting ready for next
             self.finished = final      # indicate that the session has all required photos
             errors = 0                 # reset errors after each successful capture
             capture_id += 1
 
-            if final:
-                bell1.play()           # sound to indicate that session is closed
-            else:
-                finished.play()        # sound to indicate that photo was taken
+            # the template renderer expects to use pillow images
+            # add images to the template for rendering
+            image = self.convert_raw_to_pil(raw_image)
+            root.push_image(image)
 
-            self.idle = True           # indicate that picture is taken, getting ready for next
-            root.push_image(image)     # add images to the template for rendering
-
-            path = join(paths['event_originals'], 'original', self.name_image('original', session_id, capture_id))
-            print(path)
-            self.queue_image_save(image, path)  # add this image to the worker queue
+            # save the image as it was returned from the camera
+            self.queue_data_save(raw_image, None)
 
             # give camera some fixed time to process exposure (may not be needed)
-            yield from asyncio.sleep(self.time_to_wait_after_capture)
+            # TODO: get from config
+            time_to_wait_after_capture = 3
+            await asyncio.sleep(time_to_wait_after_capture)
 
             self.idle = False          # indicate that the camera is now busy
 
-        composite = yield from self.render_template(root)
+        composite = await self.render_template(root)
 
+        paths = pkConfig['paths']
         composites_folder = paths['event_composites']
         composite_filename = self.name_composite('composite', session_id)
         composite_path = join(composites_folder, 'original', composite_filename)

@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+
+operations for the mp queue
+
+"""
 from PIL import Image
 
 from tailor.config import pkConfig
@@ -14,8 +19,18 @@ def save_image(image, filename):
     image.save(filename, **kwargs)
 
 
+def write(data, filename):
+    """
+    
+    :type data: bytes
+    :type filename: str
+    :rtype: None 
+    """
+    with open(filename, 'wb') as fp:
+        fp.write(data)
+
+
 def save(data, args):
-    print(args[0])
     save_image(make_image(data), args[0])
 
 
@@ -36,14 +51,15 @@ def double(data, args):
 
 
 def run_worker(queue):
-    func_table = {i.__name__: i for i in (save, thumbnail, double)}
+    func_table = {i.__name__: i for i in (save, thumbnail, double, write)}
 
     # start our task queue worker
     item = queue.get()
+
     while item is not None:
         task, data, args = item       # split task name and the payload
         func_table[task](data, args)  # execute task with data
-        queue.task_done()       # mark done so queue can be joined
-        item = queue.get()      # wait for a new task
+        queue.task_done()             # mark done so queue can be joined
+        item = queue.get()            # wait for a new task
 
     queue.task_done()
