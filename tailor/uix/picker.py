@@ -2,6 +2,7 @@
 import logging
 import os
 import queue
+import io
 from functools import partial
 from urllib.parse import urlparse
 
@@ -11,7 +12,7 @@ from kivy.core.image import Image as CoreImage
 from kivy.core.image import ImageData
 from kivy.core.window import Window
 from kivy.factory import Factory
-from kivy.graphics.texture import Texture
+from kivy.graphics.texture import TextureRegion
 from kivy.loader import Loader
 from kivy.network.urlrequest import UrlRequest
 from kivy.properties import *
@@ -152,29 +153,42 @@ class PickerScreen(Screen):
     @staticmethod
     def update_texture(texture, image_data):
         # needed when opengl context is lost...not worried about that now
-        texture.blit_buffer(image_data[3])
+        # TODO: file extension testing
+        data = io.BytesIO(image_data)
+        data = CoreImage(data, ext="jpg", nocache=True, keep_data=True).image._data[0].data
+        texture.blit_buffer(data)
         texture.flip_vertical()
         texture.flip_horizontal()
 
-    def create_preview_texture(self, initial_data):
-        w, h, mode, data = initial_data
-        im_data = ImageData(w, h, mode.lower(), data)
-        texture = Texture.create_from_data(im_data)
+    def create_preview_texture(self, initial_data, aspect):
+        # TODO: file extension testing
+        data = io.BytesIO(initial_data)
+        image = CoreImage(data, ext="jpg", nocache=True)
+        texture = image.texture
+
         # add_reload_observer is required for loading texture info
         # after the openGL context is lost and images need to be reloaded
         # currently, losing opengl context is not tested
         texture.add_reload_observer(self.update_texture)
-        texture.flip_vertical()
         texture.flip_horizontal()
-        return texture
 
-    def set_preview_texture(self, imdata):
+        # only works for wide images!
+        h = image.height
+        w = image.height * aspect
+        x = (image.width - w) / 2
+        y = 0
+        region = TextureRegion(x, y, w, h, texture)
+
+        self.preview_data = texture
+        self.preview_texture = region
+
+    def set_preview_texture(self, imdata, aspect):
         # textures must be created in the main thread;
         # this is a limitation in pygame
         if self.preview_texture is None:
-            self.preview_texture = self.create_preview_texture(imdata)
+            self.create_preview_texture(imdata, aspect)
         else:
-            self.update_texture(self.preview_texture, imdata)
+            self.update_texture(self.preview_data, imdata)
 
         return self.preview_texture
 
@@ -186,27 +200,28 @@ class PickerScreen(Screen):
         # self.preview_widget.bind(on_touch_down=self.on_touch_down)
         self.add_widget(self.preview_widget)
 
-    def get_raw_image_from_queue(self):
+    def get_packet_from_queue(self):
         """ Eventually move to a generic camera widget
 
         :return:
         """
+        # want to block on the first frame
         block = self.preview_widget is None
         try:
-            stuff = self.preview_handler.queue.get(block)
-            session, imdata = stuff
-
+            return self.preview_handler.queue.get(block)
         except queue.Empty:
-            return None, None
-
-        return session, imdata
+            return None
 
     # P R E V I E W   W I D G E T
     def update_preview(self, *args, **kwargs):
-        session, imdata = self.get_raw_image_from_queue()
+        packet = self.get_packet_from_queue()
 
-        if session:
-            self.set_preview_texture(imdata)
+        if packet:
+            session = packet['session']
+            imdata = packet['image_data']
+            aspect = packet['aspect_ratio']
+
+            self.set_preview_texture(imdata, aspect)
             if self.preview_widget is None:
                 self.set_preview_widget()
 

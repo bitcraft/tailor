@@ -3,15 +3,10 @@
 """
 import asyncio
 import logging
-from io import BytesIO
 
 import shutter
-from PIL import Image
 
 logger = logging.getLogger("tailor.shutter_camera")
-
-# reduce lookups in to the PIL package namespace
-pil_open = Image.open
 
 
 class ShutterCamera:
@@ -53,10 +48,6 @@ class ShutterCamera:
     # def reset(self):
     #     yield from self.close()
     #     yield from self.open()
-
-    @staticmethod
-    def convert_raw_to_pil(raw):
-        return pil_open(BytesIO(raw))
 
     async def capture_preview(self):
         """ Capture preview image (doesn't engage curtain)

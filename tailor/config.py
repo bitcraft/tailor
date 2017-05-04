@@ -37,7 +37,6 @@ def reload(path):
 
     # TODO: eventually incorporate zeroconf discovery
     paths = {
-        'print_hot_folder': hot_print_folder,
         'app_root_path': app_root_path,
         'app_resources': app_resources_path,
         'app_sounds': jpath(app_resources_path, 'sounds'),

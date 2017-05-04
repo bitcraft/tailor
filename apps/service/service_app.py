@@ -49,6 +49,7 @@ class ServiceApp:
         self.session = mock_session(0, False, False, False)
 
     def run(self):
+        logger.debug('service app starting...')
         self.running = True
         self.template_filename = pkConfig['paths']['event_template']
         self.make_folders()  # build folder structure to store photos
@@ -114,6 +115,7 @@ class ServiceApp:
         for folder_name in names.split():
             path = pkConfig['paths'][folder_name]
             path = os.path.normpath(path)
+            logger.debug('making folder: {}'.format(path))
             os.makedirs(path, mode=0o777, exist_ok=True)
 
         names = 'event_originals event_composites'
@@ -122,13 +124,11 @@ class ServiceApp:
                 path = pkConfig['paths'][folder_name]
                 path = os.path.join(path, modifier)
                 path = os.path.normpath(path)
+                logger.debug('making folder: {}'.format(path))
                 os.makedirs(path, mode=0o777, exist_ok=True)
 
-        os.makedirs(pkConfig['paths']['print_hot_folder'],
-                    mode=0o777,
-                    exist_ok=True)
-
     async def wait_for_trigger(self, future, camera):
+        logger.debug('waiting for trigger...')
         await future
         template_graph_root = YamlTemplateBuilder().read(self.template_filename)
         self.session = Session()
@@ -136,6 +136,7 @@ class ServiceApp:
         self.running = False
 
     async def wait_for_socket_open_trigger(self, camera, reader, writer):
+        logger.debug('socket trigger started')
         writer.close()  # drop the connection right away
         template_graph_root = YamlTemplateBuilder().read(self.template_filename)
         self.session = Session()
@@ -148,22 +149,18 @@ class ServiceApp:
         This streams cbor formatted 'packets' for information to a kiosk process.
         The kiosk generally lives on the same machine, but can be a remote computer.
         
-        For the contents of each packet, look at the dictionary "data", below.
-        Image data is a tuple that follows the PIL.Image object constructor, but is
-        generic enough for any library to use.  It is simply size, mode, and pixels.
-        
         :param camera: 
         :param reader: 
         :param writer: 
         :return: 
         """
-        crop = Autocrop()
-        import time
-
+        logger.debug('sending previews')
         while 1:
-            start = time.time()
+            # msg = await reader.read(1)
+            # if not msg == 1:
+            #     continue
+
             image = await camera.download_preview()
-            image = crop.process(image, (0, 0, 465 * 2, 435 * 2))
 
             # this is the data packet for the kiosk to read
             data = {
@@ -173,7 +170,8 @@ class ServiceApp:
                     'finished': self.session.finished,
                     'timer_value': self.session.countdown_value,
                 },
-                'image_data': (image.size[0], image.size[1], image.mode, image.tobytes())
+                'image_data': image,
+                'aspect_ratio': 1.58 / 1.45  # TODO: get from template
             }
 
             # format the pack for the wire
@@ -193,7 +191,5 @@ class ServiceApp:
                 writer.close()
                 break
 
-            print('finished frame drain', round((time.time() - start) * 100))
-
             # limit amount of frames sent
-            await asyncio.sleep(1 / 60.)
+            await asyncio.sleep(1 / 40.)

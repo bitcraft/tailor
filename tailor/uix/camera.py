@@ -121,20 +121,17 @@ class PreviewHandler:
         def func():
             self.running = True
             queue_put = self.queue.put
-
             sock = None
 
             while self.running:
                 if sock is None:
                     sock = self.open_socket(self.host, self.port)
 
+                # sock.send(b'\x01')
                 packet = self.get_packet(sock)
 
                 if packet:
-                    session = packet['session']
-                    imdata = packet['image_data']
-
-                    queue_put((session, imdata))
+                    queue_put(packet)
 
                 else:
                     print('could not decode packet, giving up')

@@ -22,14 +22,13 @@ def save_image(image, filename):
     image.save(filename, **kwargs)
 
 
-def write(data, filename):
+def write(data, args):
     """
     
     :type data: bytes
-    :type filename: str
     :rtype: None 
     """
-    with open(filename, 'wb') as fp:
+    with open(args[0], 'wb') as fp:
         fp.write(data)
 
 
@@ -69,19 +68,22 @@ def run_worker(queue):
 
 
 class WorkerPool:
+    def __init__(self):
+        self.cxt = mp.get_context('spawn')
+        self.mp_queue = self.cxt.JoinableQueue()
+        self.mp_workers = list()
+
     def start_workers(self):
         # not using pool because it would be slower on windows
         # since processes cannot fork, there will always be a fixed
         # amount of time for an interpreter to spin up.
         # use 'spawn' for predictable cross-platform use
         def start_worker():
-            worker = cxt.Process(target=run_worker, args=(self.mp_queue,))
+            worker = self.cxt.Process(target=run_worker, args=(self.mp_queue,))
             worker.daemon = True
             worker.start()
             return worker
 
-        cxt = mp.get_context('spawn')
-        self.mp_queue = cxt.JoinableQueue()
         self.mp_workers = [start_worker() for i in range(cpu_count())]
 
     def wait_for_workers(self):
@@ -109,4 +111,4 @@ class WorkerPool:
         self.mp_queue.put(("double", data, (filename,)))
 
     def queue_data_save(self, data, filename):
-        self.mp_queue.put(("data save", data, (filename,)))
+        self.mp_queue.put(("write", data, (filename,)))

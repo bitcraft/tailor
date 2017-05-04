@@ -125,12 +125,12 @@ class Session:
                                  self.format_number(session),
                                  ext)
 
-    def capture_path(self, session_id, capture_id):
+    def capture_path(self, session_id, capture_id, ext=None):
         paths = pkConfig['paths']
 
         return join(paths['event_originals'],
                     'original',
-                    self.name_image('original', session_id, capture_id))
+                    self.name_image('original', session_id, capture_id, ext))
 
     @staticmethod
     def determine_initial_capture_id():
@@ -214,7 +214,9 @@ class Session:
         needed_captures = template_root.needed_captures()
         session_id = self.determine_initial_capture_id()
 
-        for capture_id, final, wait_time in enumerate(self.get_timer(needed_captures)):
+        for capture_id, timer in enumerate(self.get_timer(needed_captures)):
+            final, wait_time = timer
+
             await self.countdown(wait_time)
 
             for attempt in range(max_failures):
@@ -237,7 +239,8 @@ class Session:
             image = self.convert_raw_to_pil(raw_image)
             template_root.push_image(image)
 
-            pool.queue_data_save(raw_image, None)
+            path = self.capture_path(session_id, capture_id, 'jpg')
+            pool.queue_data_save(raw_image, path)
 
             self.idle = False          # indicate that the camera is not busy
             self.finished = final      # indicate that the session has all required photos
