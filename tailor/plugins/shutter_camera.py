@@ -63,11 +63,9 @@ class ShutterCamera:
         """
         with (await self._lock):
             try:
-                raw = self._device_context.capture_preview()
+                return self._device_context.capture_preview()
             except shutter.ShutterError:
                 return
-            # return self.convert_raw_to_pil(raw)
-            return raw
 
     async def capture_image(self, filename=None):
         """ Capture full image (engages full camera mechanisms)
@@ -76,7 +74,6 @@ class ShutterCamera:
         with (await self._lock):
             future = executor(None, self._device_context.capture_image)
             await future
-        # return self.convert_raw_to_pil(future.result())
         return future.result()
 
     async def download_preview(self):
@@ -84,11 +81,9 @@ class ShutterCamera:
 
         :return:
         """
-        image = await self.capture_preview()
-        return image
+        return await self.capture_preview()
 
     async def download_capture(self):
         """ Capture a full image and return data
         """
-        image = await self.capture_image()
-        return image
+        return await self.capture_image()

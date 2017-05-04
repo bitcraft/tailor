@@ -7,22 +7,20 @@ submits tasks to be processed by mp queue
 """
 import asyncio
 import logging
-import multiprocessing as mp
 import sys
 import threading
 import traceback
 import re
 import os
 from io import BytesIO
-from os import cpu_count
 from os.path import join
 
 import pygame
 import requests
 from PIL import Image
 
+from apps.service.worker import WorkerPool
 from apps.service.async_helpers import timing_generator
-from apps.service.worker import run_worker
 from tailor.config import pkConfig
 from tailor.plugins.composer import TemplateRenderer
 
@@ -35,23 +33,25 @@ pil_open = Image.open
 pygame.init()
 pygame.mixer.init()
 
-bell0 = pygame.mixer.Sound('tailor/resources/sounds/bell.wav')
-bell1 = pygame.mixer.Sound('tailor/resources/sounds/long_bell.wav')
-finished = pygame.mixer.Sound('tailor/resources/sounds/whistle.wav')
+
+def load_sound(filename):
+    path = join(pkConfig['paths']['app_sounds'], filename)
+    return pygame.mixer.Sound(path)
 
 
 class Session:
     def __init__(self):
-        self.countdown_value = 0
+        # the following attributes are used by the service_app,
+        # which will read them and send that data to the kiosk.
         self.countdown_value_changed = threading.Event()
+        self.countdown_value = 0
         self.finished = False
         self.started = False
         self.idle = False
 
-    @staticmethod
-    def deconstruct_image(image):
-        # return objects suitable for pickle/marshal/serialization
-        return image.mode, image.size, image.tobytes()
+        self.sounds = dict()
+        for name, fn in pkConfig['sounds'].items():
+            self.sounds[name] = load_sound(fn)
 
     async def countdown(self, duration):
         """ countdown from whole seconds
@@ -60,26 +60,10 @@ class Session:
         for i in range(duration):
             self.countdown_value = duration - i
             if self.countdown_value < 4:
-                bell0.play()
+                self.sounds['countdown-tick'].play()
             await asyncio.sleep(1)
 
         self.countdown_value = 0
-
-    def queue_image_save(self, image, filename):
-        data = self.deconstruct_image(image)
-        self.mp_queue.put(("save", data, (filename,)))
-
-    def queue_image_thumbnail(self, image, filename):
-        small_size = 200, 500
-        data = self.deconstruct_image(image)
-        self.mp_queue.put(("thumbnail", data, (small_size, filename,)))
-
-    def queue_image_double(self, image, filename):
-        data = self.deconstruct_image(image)
-        self.mp_queue.put(("double", data, (filename,)))
-
-    def queue_data_save(self, data, filename):
-        self.mp_queue.put(("data save", data, filename))
 
     async def render_template(self, root):
         """
@@ -92,30 +76,14 @@ class Session:
         composite = await renderer.render_all(root)
         return composite
 
-    def start_workers(self):
-        # not using pool because it would be slower on windows
-        # since processes cannot fork, there will always be a fixed
-        # amount of time for an interpreter to spin up.
-        # use 'spawn' for predictable cross-platform use
-        def start_worker():
-            worker = cxt.Process(target=run_worker, args=(self.mp_queue,))
-            worker.daemon = True
-            worker.start()
-            return worker
-
-        cxt = mp.get_context('spawn')
-        self.mp_queue = cxt.JoinableQueue()
-        self.mp_workers = [start_worker() for i in range(cpu_count())]
-
-    def wait_for_workers(self):
-        # TODO: not block here with sync api?
-        for i in self.mp_workers:
-            self.mp_queue.put(None)  # signal the workers to stop
-        self.mp_queue.join()
-
     @staticmethod
-    def format_number(id):
-        return '{:05d}'.format(id)
+    def format_number(value):
+        """
+        
+        :type value: int
+        :return: str
+        """
+        return '{:05d}'.format(value)
 
     def guess_image_extension(self, ext=None):
         """ Get best guess file extension for the image
@@ -206,12 +174,11 @@ class Session:
     def convert_raw_to_pil(raw):
         return pil_open(BytesIO(raw))
 
-    @staticmethod
-    def play_capture_sound(final=False):
+    def play_capture_sound(self, final=False):
         if final:
-            bell1.play()           # sound to indicate that session is closed
+            self.sounds['finish-session'].play()
         else:
-            finished.play()        # sound to indicate that photo was taken
+            self.sounds['finish-capture'].play()
 
     def get_timer(self, needed_captures):
         """ Get generator used to wait between captures
@@ -226,59 +193,55 @@ class Session:
         return timing_generator(countdown_time, needed_captures,
                                 countdown_time + extra_wait_time)
 
-    async def start(self, camera, root):
+    async def start(self, camera, template_root):
         """ new session
 
         Take 4 photos
         Each photo has 3 attempts to take a photo
         If we get 4 photos, or 3 failed attempts, then exit
 
-        :param root: template graph
+        :param template_root: template graph
         :param camera: camera object
         """
         logger.debug('starting new session')
 
-        self.start_workers()  # each worker is a separate python process
+        pool = WorkerPool()
+        pool.start_workers()
+        max_failures = 3
+
         self.started = True
+        self.finished = False
 
-        needed_captures = root.needed_captures()
+        needed_captures = template_root.needed_captures()
         session_id = self.determine_initial_capture_id()
-        capture_id = 0
-        errors = 0
 
-        for final, wait_time in self.get_timer(needed_captures):
+        for capture_id, final, wait_time in enumerate(self.get_timer(needed_captures)):
             await self.countdown(wait_time)
 
-            try:
-                # this image will be whatever format the camera is set to
-                raw_image = await camera.download_capture()
-            except:
-                errors += 1
-                traceback.print_exc(file=sys.stdout)
-                logger.debug('failed capture %s/3', errors)
-                continue
+            for attempt in range(max_failures):
+                try:
+                    raw_image = await camera.download_capture()
+                    break
+                except:
+                    self.sounds['error'].play()
+                    traceback.print_exc(file=sys.stdout)
+                    logger.debug('failed capture %s/3', attempt)
+
+            else:
+                raise RuntimeError
 
             self.idle = True           # indicate that picture is taken, getting ready for next
-            self.finished = final      # indicate that the session has all required photos
-            errors = 0                 # reset errors after each successful capture
-            capture_id += 1
+            self.play_capture_sound(final)
 
             # the template renderer expects to use pillow images
             # add images to the template for rendering
             image = self.convert_raw_to_pil(raw_image)
-            root.push_image(image)
+            template_root.push_image(image)
 
-            # save the image as it was returned from the camera
-            self.queue_data_save(raw_image, None)
+            pool.queue_data_save(raw_image, None)
 
-            # give camera some fixed time to process exposure (may not be needed)
-            # TODO: get from config
-            time_to_wait_after_capture = 3
-            await asyncio.sleep(time_to_wait_after_capture)
-
-            self.idle = False          # indicate that the camera is now busy
-
-        composite = await self.render_template(root)
+            self.idle = False          # indicate that the camera is not busy
+            self.finished = final      # indicate that the session has all required photos
 
         paths = pkConfig['paths']
         composites_folder = paths['event_composites']
@@ -287,11 +250,12 @@ class Session:
         composite_small_path = join(composites_folder, 'small', composite_filename)
         print_path = join(paths['event_prints'], composite_filename)
 
-        self.queue_image_save(composite, composite_path)
-        self.queue_image_thumbnail(composite, composite_small_path)
-        self.queue_image_double(composite, print_path)
+        composite = await self.render_template(template_root)
 
-        self.wait_for_workers()  # blocking!
+        pool.queue_image_save(composite, composite_path)
+        pool.queue_image_thumbnail(composite, composite_small_path)
+        pool.queue_image_double(composite, print_path)
+        pool.wait_for_workers()  # blocking!
 
         # print the double
         # TODO: not use the http service?
@@ -300,4 +264,4 @@ class Session:
 
         self.mark_session_complete(composite_filename)
 
-        return root
+        return template_root

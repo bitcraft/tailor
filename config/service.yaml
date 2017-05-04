@@ -2,6 +2,7 @@
 camera:
   name: canon
   plugin: shutter
+  preview_file_ext: jpg
 compositor:
   template: standard.yaml
   filetype: png
@@ -12,8 +13,7 @@ paths:
   images: "/home/retrobooth/events/"
   make-images-path: true
 sounds:
-  countdown: bell.wav
+  countdown-tick: bell.wav
   finish-capture: whistle.wav
   finish-session: long_bell.wav
   error: error.wav
-

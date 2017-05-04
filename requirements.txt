@@ -24,7 +24,7 @@ uvloop
 kivy==1.9.1
 pillow-simd
 zeroconf
-flask
+sanic
 cbor
 natsort
 netifaces

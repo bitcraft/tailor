@@ -16,6 +16,7 @@ logger = logging.getLogger('tailor.camera')
 def recv(sock, length, max_read=4096):
     """ read data from port for exactly length bytes
     """
+    # TODO: generator interface to allow byte consumption past packet boundary
     data = bytearray()
     while length:
         get = min(length, max_read)
@@ -54,7 +55,6 @@ class TailorStreamingCamera(CameraBase):
             return
 
         if self._texture is None:
-            # Create the texture
             self._texture = Texture.create(self._resolution)
             self._texture.flip_vertical()
             self.dispatch('on_load')
@@ -86,7 +86,6 @@ class PreviewHandler:
         # maximum amount of bytes to request each socket read
         # value is just guesswork
         self.max_read = 262144
-        self.max_read = 4096
 
     @staticmethod
     def open_socket(host, port):

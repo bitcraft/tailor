@@ -99,8 +99,8 @@ kivy and pygame.  I will be investigating a stand-alone distribution Q1 2017.
 Remote Operation
 ----------------
 
-Currently, this project requires a dedicated PC, touch screen monitor, and an
-arduino.  In the near future, it will be possible to run the the booth with
+Currently, this project requires a dedicated PC.  A touch screen monitor
+is recommended. In the near future, it will be possible to run the the booth with
 a dedicated embedded system and a tablet touch screen PC for control (no ios or
 android...yet).
 
@@ -171,8 +171,8 @@ Printer Settings
 WIP
 
 
-Advanced Use
-------------
+REST API
+--------
 
 Tailor exposes a webserver on port 5000.  The api can be found in:
 apps/server/server.py

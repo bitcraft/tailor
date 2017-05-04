@@ -4,6 +4,9 @@
 operations for the mp queue
 
 """
+from os import cpu_count
+import multiprocessing as mp
+
 from PIL import Image
 
 from tailor.config import pkConfig
@@ -63,3 +66,47 @@ def run_worker(queue):
         item = queue.get()            # wait for a new task
 
     queue.task_done()
+
+
+class WorkerPool:
+    def start_workers(self):
+        # not using pool because it would be slower on windows
+        # since processes cannot fork, there will always be a fixed
+        # amount of time for an interpreter to spin up.
+        # use 'spawn' for predictable cross-platform use
+        def start_worker():
+            worker = cxt.Process(target=run_worker, args=(self.mp_queue,))
+            worker.daemon = True
+            worker.start()
+            return worker
+
+        cxt = mp.get_context('spawn')
+        self.mp_queue = cxt.JoinableQueue()
+        self.mp_workers = [start_worker() for i in range(cpu_count())]
+
+    def wait_for_workers(self):
+        # TODO: not block here with sync api?
+        for i in self.mp_workers:
+            self.mp_queue.put(None)  # signal the workers to stop
+        self.mp_queue.join()
+
+    @staticmethod
+    def deconstruct_image(image):
+        # return objects suitable for pickle/marshal/serialization
+        return image.mode, image.size, image.tobytes()
+
+    def queue_image_save(self, image, filename):
+        data = self.deconstruct_image(image)
+        self.mp_queue.put(("save", data, (filename,)))
+
+    def queue_image_thumbnail(self, image, filename):
+        small_size = 200, 500
+        data = self.deconstruct_image(image)
+        self.mp_queue.put(("thumbnail", data, (small_size, filename,)))
+
+    def queue_image_double(self, image, filename):
+        data = self.deconstruct_image(image)
+        self.mp_queue.put(("double", data, (filename,)))
+
+    def queue_data_save(self, data, filename):
+        self.mp_queue.put(("data save", data, (filename,)))
