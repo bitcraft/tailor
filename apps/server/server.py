@@ -29,7 +29,9 @@ class PrintQueueManager(threading.Thread):
         while self.running:
             filename = print_queue.get()
             src = os.path.join(prints_folder, filename)
-            smart_copy(src, pkConfig['paths']['print_hot_folder'])
+
+            # TODO: print
+
             if print_interval:
                 time.sleep(print_interval)
 

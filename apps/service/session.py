@@ -186,9 +186,8 @@ class Session:
         :param needed_captures: number of images needed to capture
         :rtype: generator
         """
-        # TODO: load from config
-        countdown_time = 10
-        extra_wait_time = 5
+        countdown_time = pkConfig['session']['countdown-time']
+        extra_wait_time = pkConfig['session']['extra-wait-time']
 
         return timing_generator(countdown_time, needed_captures,
                                 countdown_time + extra_wait_time)
@@ -207,7 +206,7 @@ class Session:
 
         pool = WorkerPool()
         pool.start_workers()
-        max_failures = 3
+        max_failures = pkConfig['session']['retries']
 
         self.started = True
         self.finished = False

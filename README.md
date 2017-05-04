@@ -161,7 +161,6 @@ Working Folders
 
 Found in config/service.yaml.  Change the enteries under "paths":
 
-* The printer-ready output goes to "print-hot-folder"
 * The camera output and other images all go under "images"
 
 

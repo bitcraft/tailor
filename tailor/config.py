@@ -30,7 +30,6 @@ def reload(path):
     app_resources_path = jpath(app_root_path, 'tailor', 'resources')
     all_templates_path = jpath(app_resources_path, 'templates')
     all_images_path = pkConfig['paths']['images']
-    hot_print_folder = os.path.normpath(pkConfig['paths']['print-hot-folder'])
 
     event_name = kiosk_cfg['event']['name']
     event_template = kiosk_cfg['event']['template']
