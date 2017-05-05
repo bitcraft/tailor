@@ -120,7 +120,6 @@ class TemplateRenderer:
             # TODO: move these functions into a processing chain
             area = self.convert_rect(node.parent.rect, root.dpi)
             image = Autocrop().process(node.data, area)
-            print(area)
             return image, area
         # TODO: lazy loading of images
         return None, None

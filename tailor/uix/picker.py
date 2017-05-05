@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
+import io
 import logging
 import os
 import queue
-import io
 from functools import partial
 from urllib.parse import urlparse
 
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.image import Image as CoreImage
-from kivy.core.image import ImageData
 from kivy.core.window import Window
 from kivy.factory import Factory
 from kivy.graphics.texture import TextureRegion
@@ -153,9 +152,13 @@ class PickerScreen(Screen):
     @staticmethod
     def update_texture(texture, image_data):
         # needed when opengl context is lost...not worried about that now
+
         # TODO: file extension testing
+        # load a image from bytes,
+        # but also keep the data, so the texture can be reused
         data = io.BytesIO(image_data)
         data = CoreImage(data, ext="jpg", nocache=True, keep_data=True).image._data[0].data
+
         texture.blit_buffer(data)
         texture.flip_vertical()
         texture.flip_horizontal()
@@ -172,7 +175,7 @@ class PickerScreen(Screen):
         texture.add_reload_observer(self.update_texture)
         texture.flip_horizontal()
 
-        # only works for wide images!
+        # TODO: only works for wide images!
         h = image.height
         w = image.height * aspect
         x = (image.width - w) / 2
@@ -317,7 +320,6 @@ class PickerScreen(Screen):
                 allow_stretch=True)
             widget.bind(on_touch_down=self.on_image_touch)
             self.grid.add_widget(widget)
-            print('new kivy image!')
         self.scroll_to_end()
 
     def check_new_photos(self, dt=None):
@@ -374,7 +376,7 @@ class PickerScreen(Screen):
         try:
             next_state = transitions[transition]
         except KeyError:
-            print('invalid state transitioning to:', state)
+            logger.critical('invalid state transitioning to: {}'.format(state))
             raise RuntimeError
         else:
             self.state = state

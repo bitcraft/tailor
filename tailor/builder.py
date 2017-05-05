@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Support loading template graphs from specially formatted files
 """
+import logging
 import os.path
 
 from tailor.config import pkConfig
@@ -12,6 +13,8 @@ __all__ = ['cast_list_float',
            'create_root_node',
            'create_area_node',
            'create_image_node']
+
+logger = logging.getLogger('tailor.TemplateBuilder')
 
 
 def cast_list_float(values):
@@ -110,7 +113,7 @@ class TemplateBuilder:
         except KeyError:
             # all handlers get args from dict, so a KeyError
             # indicates the required info. is missing
-            print(node_type, dict_graph)
+            logger.critical('template syntax error')
             raise TemplateBuilder.SyntaxError
 
         return node

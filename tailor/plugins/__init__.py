@@ -1,4 +1,8 @@
+import logging
+
 from . import composer, dummy_camera, filesystem
+
+logger = logging.getLogger('tailor.plugins')
 
 try:
     from . import opencv_camera
@@ -10,7 +14,7 @@ except ImportError:
 try:
     from . import shutter_camera
 except:
-    print('cannot load shutter')
+    logger.debug('cannot load shutter plugin')
     pass
 
 try:
@@ -45,7 +49,7 @@ def get_camera():
         camera = pygame_camera.PygameCamera()
 
     else:
-        print("cannot find camera plugin")
+        logger.critical("cannot find camera plugin")
         raise RuntimeError
 
     return camera

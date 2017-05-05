@@ -77,7 +77,7 @@ class TailorStreamingCamera(CameraBase):
 class PreviewHandler:
     # TODO: allow thread to signal to parent that it cannot get data
     def __init__(self):
-        self.queue = queue.Queue(maxsize=2)
+        self.queue = queue.Queue(maxsize=1)
         self.thread = None
         self.running = False
         self.host = 'localhost'
@@ -111,8 +111,9 @@ class PreviewHandler:
 
         try:
             packet = cbor.loads(data)
-        except:
-            print('preview packet decode error')
+            # TODO: check for more exceptions, IDK
+        except (ValueError, EOFError):
+            logger.debug('preview packet decode error')
             return
 
         return packet
@@ -136,7 +137,7 @@ class PreviewHandler:
                     queue_put(packet)
 
                 else:
-                    print('could not decode packet, giving up')
+                    logger.debug('could not decode packet, giving up')
                     sock.close()
                     sock = None
 

@@ -105,7 +105,7 @@ class ServiceApp:
                 loop.run_until_complete(asyncio.wait(self.running_tasks))
 
             except asyncio.CancelledError:
-                print('cancellation error was raised')
+                logger.critical('cancellation error was raised')
                 pass
 
     @staticmethod
