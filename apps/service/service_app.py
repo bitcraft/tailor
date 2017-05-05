@@ -156,10 +156,12 @@ class ServiceApp:
         """
         logger.debug('sending previews')
         while 1:
-            # msg = await reader.read(1)
-            # if not msg == 1:
-            #     continue
+            # the 1 byte indicates that the consumer wants a frame
+            msg = await reader.read(1)
+            if not msg == b'\x01':
+                continue
 
+            # TODO: move to some sort of queue, so previews can be shared across connections
             image = await camera.download_preview()
 
             # this is the data packet for the kiosk to read
@@ -192,4 +194,4 @@ class ServiceApp:
                 break
 
             # limit amount of frames sent
-            await asyncio.sleep(1 / 40.)
+            await asyncio.sleep(1 / 60.)

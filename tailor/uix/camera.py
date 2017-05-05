@@ -127,7 +127,9 @@ class PreviewHandler:
                 if sock is None:
                     sock = self.open_socket(self.host, self.port)
 
-                # sock.send(b'\x01')
+                # the 1 byte signals that the a preview is needed
+                sock.send(b'\x01')
+
                 packet = self.get_packet(sock)
 
                 if packet:
