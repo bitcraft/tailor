@@ -2,13 +2,16 @@
 """
 script to run a local, self contained server
 
+python 3.6 or higher required
+
 currently is a candidate to use asyncio
 """
 import logging
 import time
+import platform
+import os
+from os.path import split
 from subprocess import Popen, call
-
-from platform.unix import release_gvfs_from_camera
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('tailor.launcher')
@@ -19,10 +22,13 @@ processes = (
     ('kiosk_cmd', 'apps/kiosk/__main__.py'))
 
 # TODO: find python cmd name on whatever platform
-python_cmd = '/usr/bin/python3'
+system = platform.system()
 
+if system == 'Linux':
+    python_cmd = '/usr/bin/python3'
 
-# python_cmd = 'C:/python34/python.exe'
+elif system == 'Windows':
+    python_cmd = "C:\\Users\\Leif\\AppData\\Local\\Programs\\Python\\Python36\\python.exe"
 
 
 # TODO: use subprocess.run
@@ -33,17 +39,21 @@ def run_processes():
         logger.debug('starting process %s', name)
         args = [python_cmd, cmd]
         proc = Popen(args)
-        time.sleep(5)
+        time.sleep(2)
         yield proc
 
 
 if __name__ == '__main__':
     # TODO: check for running in gnome environment
     # TODO: release_gvfs_from_camera fails in windows.  provide better check in future
-    try:
-        release_gvfs_from_camera()
-    except FileNotFoundError:
-        pass
+
+    if system == 'Linux':
+        from tailor.core.unix import release_gvfs_from_camera
+
+        try:
+            release_gvfs_from_camera()
+        except FileNotFoundError:
+            pass
 
     running_processes = list()
 
@@ -62,7 +72,9 @@ if __name__ == '__main__':
                 time.sleep(.1)
 
     except:
-        # TODO: more useful info
+        import traceback
+
+        traceback.print_last()
         logger.debug('an exception was raised and program will now terminate')
 
     finally:
@@ -87,7 +99,8 @@ if __name__ == '__main__':
     # so here is my heavy handed hack until i get it
     # figured out
     # TODO: better process cleanup
-    try:
-        call(['killall', '-KILL', 'python3'], timeout=10)
-    except FileNotFoundError:
-        pass
+    if system == 'Linux':
+        try:
+            call(['killall', '-KILL', 'python3'], timeout=10)
+        except FileNotFoundError:
+            pass

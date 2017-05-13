@@ -15,7 +15,6 @@ from contextlib import ExitStack
 from functools import partial
 
 import cbor
-import uvloop
 
 from apps.service.session import Session
 from tailor.plugins import get_camera
@@ -26,8 +25,12 @@ from tailor.zc import load_services_from_config, zc_service_context
 
 logger = logging.getLogger("tailor.service")
 
-# use uvloop
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+# use uvloop, if possible
+try:
+    import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except ImportError:
+    logger.debug("uvloop not found, using default loop")
 
 # set ProactorEventLoop, to support subprocess on Windows OS
 if os.name == 'nt':
