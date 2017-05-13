@@ -2,11 +2,14 @@
 # ==================================
 # python -m pip install --upgrade pip wheel setuptools
 
-# uncomment group below if installing kivy for first time
-# =======================================================
+# my be no longer required on win32, not sure
+# ===========================================
 # pypiwin32
-# kivy.deps.sdl2
-# kivy.deps.glew
+
+# recommended to install before kivy
+# ==================================
+kivy.deps.sdl2
+kivy.deps.glew
 
 # pygame is required for sounds until i figure out kivy audio
 # ===========================================================
