@@ -9,12 +9,10 @@ from multiprocessing import Queue
 from os.path import join
 
 from flask import Flask, request, jsonify, send_from_directory
-from flask.ext.socketio import SocketIO, emit
 
 from tailor.config import pkConfig
 
 app = Flask(__name__)
-socketio = SocketIO(app)
 
 print_queue = Queue()
 prints_folder = pkConfig['paths']['event_prints']
@@ -31,7 +29,9 @@ class PrintQueueManager(threading.Thread):
         while self.running:
             filename = print_queue.get()
             src = os.path.join(prints_folder, filename)
-            smart_copy(src, pkConfig['paths']['print_hot_folder'])
+
+            # TODO: print
+
             if print_interval:
                 time.sleep(print_interval)
 

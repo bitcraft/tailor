@@ -6,14 +6,14 @@ Photoshop to create template images.
 """
 import asyncio
 
-from tailor.builder import JSONTemplateBuilder
+from tailor.builder import YamlTemplateBuilder
 from tailor.plugins.composer.renderer import TemplateRenderer
 
 
 async def test_render():
     renderer = TemplateRenderer()
-    builder = JSONTemplateBuilder()
-    root = builder.read('tailor/resources/templates/test_template.json')
+    builder = YamlTemplateBuilder()
+    root = builder.read('tailor/resources/templates/standard.yaml')
 
     from PIL import Image
 

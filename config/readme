@@ -1,19 +1,19 @@
-arduino.json
+arduino.yaml
 ============
 
 
 
-kiosk.json
+kiosk.yaml
 ==========
 
 
-server.json
+server.yaml
 ===========
 
 print-queue => interval :  time to wait between print jobs.  useful for finicky printers.
 
 
-service.json
+service.yaml
 ============
 
 camera => plugin :  shutter, pygame, opencv, or dummy

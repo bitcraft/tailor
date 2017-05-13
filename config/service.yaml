@@ -1,0 +1,22 @@
+---
+camera:
+  name: canon
+  plugin: shutter
+  preview_file_ext: jpg
+compositor:
+  template: standard.yaml
+  filetype: png
+  pil_options:
+    compress_level: 1
+paths:
+  images: "/home/retrobooth/events/"
+  make-images-path: true
+sounds:
+  countdown-tick: bell.wav
+  finish-capture: whistle.wav
+  finish-session: long_bell.wav
+  error: error.wav
+session:
+  countdown-time: 10
+  extra-wait-time: 5
+  retries: 3

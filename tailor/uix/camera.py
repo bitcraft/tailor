@@ -3,19 +3,20 @@ import queue
 import socket
 import threading
 import struct
+import logging
 
 import cbor
 from kivy.clock import Clock
 from kivy.core.camera import CameraBase
-from kivy.core.image import ImageData
 from kivy.graphics.texture import Texture
 
-from uix.utils import logger
+logger = logging.getLogger('tailor.camera')
 
 
 def recv(sock, length, max_read=4096):
     """ read data from port for exactly length bytes
     """
+    # TODO: generator interface to allow byte consumption past packet boundary
     data = bytearray()
     while length:
         get = min(length, max_read)
@@ -30,6 +31,7 @@ class TailorStreamingCamera(CameraBase):
     """ Currently not used!
         Conceptually, this is just a simple widget for streaming uncompressed video frames
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.queue = queue.Queue()
@@ -53,7 +55,6 @@ class TailorStreamingCamera(CameraBase):
             return
 
         if self._texture is None:
-            # Create the texture
             self._texture = Texture.create(self._resolution)
             self._texture.flip_vertical()
             self.dispatch('on_load')
@@ -76,7 +77,7 @@ class TailorStreamingCamera(CameraBase):
 class PreviewHandler:
     # TODO: allow thread to signal to parent that it cannot get data
     def __init__(self):
-        self.queue = queue.Queue(maxsize=2)
+        self.queue = queue.Queue(maxsize=1)
         self.thread = None
         self.running = False
         self.host = 'localhost'
@@ -110,8 +111,9 @@ class PreviewHandler:
 
         try:
             packet = cbor.loads(data)
-        except:
-            print('preview packet decode error')
+            # TODO: check for more exceptions, IDK
+        except (ValueError, EOFError):
+            logger.debug('preview packet decode error')
             return
 
         return packet
@@ -120,22 +122,22 @@ class PreviewHandler:
         def func():
             self.running = True
             queue_put = self.queue.put
-
             sock = None
 
             while self.running:
                 if sock is None:
                     sock = self.open_socket(self.host, self.port)
 
+                # the 1 byte signals that the a preview is needed
+                sock.send(b'\x01')
+
                 packet = self.get_packet(sock)
 
                 if packet:
-                    session = packet['session']
-                    imdata = ImageData(*packet['image_data'])
-                    queue_put((session, imdata))
+                    queue_put(packet)
 
                 else:
-                    print('could not decode packet, giving up')
+                    logger.debug('could not decode packet, giving up')
                     sock.close()
                     sock = None
 

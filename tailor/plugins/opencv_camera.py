@@ -40,17 +40,13 @@ class OpenCVCamera:
 
     def open(self):
         # TODO: make async
-        dc = cv2.VideoCapture(self._device_index)
-
-        # give time for webcam to init.
-        time.sleep(2)
+        self._device_context = cv2.VideoCapture(self._device_index)
+        time.sleep(2) # give time for camera to init.
 
         # 'prime' the capture context...
         # some webcams might not init fully until a capture
         # is done.  so we do a capture here to force device to be ready
-        dc.read()
-
-        self._device_context = dc
+        self._device_context.read()
 
     def close(self):
         self._device_context.release()
@@ -59,13 +55,31 @@ class OpenCVCamera:
         self.close()
         self.open()
 
-    @asyncio.coroutine
-    def capture_frame(self):
+    @staticmethod
+    def convert_frame_to_image(frame):
+        return Image.fromarray(frame)
+
+    @staticmethod
+    async def save_preview():
+        """ Capture a preview image and save to a file
+        """
+        logger.debug('capture_preview, not implemented')
+
+    @staticmethod
+    async def save_capture(filename=None):
+        """ Capture a full image and save to a file
+        """
+        # frame = self.capture_frame()
+        # cv2.imwrite('capture.jpg', frame)
+        # return 'capture.jpg'
+        logger.debug('capture_image, not implemented')
+
+    async def capture_frame(self):
         """ Capture a single frame
 
         :return:
         """
-        with (yield from self._lock):
+        with (await self._lock):
             ret, frame = self._device_context.read()
 
         if ret:
@@ -75,46 +89,24 @@ class OpenCVCamera:
 
         return rgb
 
-    @staticmethod
-    def convert_frame_to_image(frame):
-        return Image.fromarray(frame)
-
-    @asyncio.coroutine
-    def capture_image(self):
+    async def capture_image(self):
         """ get frame, decode, and return pil image
 
         :return:
         """
-        frame = yield from self.capture_frame()
+        frame = await self.capture_frame()
         image = self.convert_frame_to_image(frame)
         return image
 
-    @asyncio.coroutine
-    def save_preview(self):
-        """ Capture a preview image and save to a file
-        """
-        logger.debug('capture_preview, not implemented')
-
-    @asyncio.coroutine
-    def save_capture(self, filename=None):
-        """ Capture a full image and save to a file
-        """
-        # frame = self.capture_frame()
-        # cv2.imwrite('capture.jpg', frame)
-        # return 'capture.jpg'
-        logger.debug('capture_image, not implemented')
-
-    @asyncio.coroutine
-    def download_capture(self):
+    async def download_capture(self):
         """ Capture a full image and return data
         """
         logger.debug('download_capture')
-        image = yield from self.capture_image()
+        image = await self.capture_image()
         return image
 
-    @asyncio.coroutine
-    def download_preview(self):
+    async def download_preview(self):
         """ Capture preview image and return data
         """
-        image = yield from self.capture_image()
+        image = await self.capture_image()
         return image

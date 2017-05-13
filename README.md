@@ -85,23 +85,22 @@ This is a general list of requirements.  Certain functions of this
 software may require additional dependencies.
 
 -  Debian Linux, OS X 10.x, or Windows 7+
--  Python 3.4+
+-  Python 3.5+
 -  Kivy 1.9+
--  Pygame
 
 
 Windows OS Support
 ------------------
 
 Tailor works on Windows, but only supports webcams right now, and requires
-kivy and pygame.  I will be investigating a stand-alone distribution Q1 2016.
+kivy and pygame.  I will be investigating a stand-alone distribution Q1 2017.
 
 
 Remote Operation
 ----------------
 
-Currently, this project requires a dedicated PC, touch screen monitor, and an
-arduino.  In the near future, it will be possible to run the the booth with
+Currently, this project requires a dedicated PC.  A touch screen monitor
+is recommended. In the near future, it will be possible to run the the booth with
 a dedicated embedded system and a tablet touch screen PC for control (no ios or
 android...yet).
 
@@ -150,7 +149,7 @@ making it easier for others.  Right now, here are a few step to get going:
 Camera Settings
 ---------------
 
-Found in config/service.json.  Change "camera" "plugin" to one of the following:
+Found in config/service.yaml.  Change "camera" "plugin" to one of the following:
 
 * "shutter" for tethered dslr cameras
 * "pygame" or "opencv" for webcams
@@ -160,9 +159,8 @@ Found in config/service.json.  Change "camera" "plugin" to one of the following:
 Working Folders
 ---------------
 
-Found in config/service.json.  Change the enteries under "paths":
+Found in config/service.yaml.  Change the enteries under "paths":
 
-* The printer-ready output goes to "print-hot-folder"
 * The camera output and other images all go under "images"
 
 
@@ -172,8 +170,8 @@ Printer Settings
 WIP
 
 
-Advanced Use
-------------
+REST API
+--------
 
 Tailor exposes a webserver on port 5000.  The api can be found in:
 apps/server/server.py

@@ -3,15 +3,10 @@
 """
 import asyncio
 import logging
-from io import BytesIO
 
 import shutter
-from PIL import Image
 
 logger = logging.getLogger("tailor.shutter_camera")
-
-# reduce lookups in to the PIL package namespace
-pil_open = Image.open
 
 
 class ShutterCamera:
@@ -54,45 +49,32 @@ class ShutterCamera:
     #     yield from self.close()
     #     yield from self.open()
 
-    @staticmethod
-    def convert_raw_to_pil(raw):
-        return pil_open(BytesIO(raw))
-
-    @asyncio.coroutine
-    def capture_preview(self):
+    async def capture_preview(self):
         """ Capture preview image (doesn't engage curtain)
         """
-        with (yield from self._lock):
+        with (await self._lock):
             try:
-                image = self._device_context.capture_preview()
-                return self.convert_raw_to_pil(image)
+                return self._device_context.capture_preview()
             except shutter.ShutterError:
-                # errors are ignored since preview images are not important
                 return
 
-    @asyncio.coroutine
-    def capture_image(self, filename=None):
+    async def capture_image(self, filename=None):
         """ Capture full image (engages full camera mechanisms)
         """
-        loop = asyncio.get_event_loop()
-        with (yield from self._lock):
-            future = loop.run_in_executor(None,
-                                          self._device_context.capture_image)
-            yield from future
-        return self.convert_raw_to_pil(future.result())
+        executor = asyncio.get_event_loop().run_in_executor
+        with (await self._lock):
+            future = executor(None, self._device_context.capture_image)
+            await future
+        return future.result()
 
-    @asyncio.coroutine
-    def download_preview(self):
+    async def download_preview(self):
         """ Capture preview image and return data
 
         :return:
         """
-        image = yield from self.capture_preview()
-        return image
+        return await self.capture_preview()
 
-    @asyncio.coroutine
-    def download_capture(self):
+    async def download_capture(self):
         """ Capture a full image and return data
         """
-        image = yield from self.capture_image()
-        return image
+        return await self.capture_image()

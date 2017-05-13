@@ -15,14 +15,19 @@ from contextlib import ExitStack
 from functools import partial
 
 import cbor
+import uvloop
 
 from apps.service.session import Session
-from tailor import plugins
-from tailor.builder import JSONTemplateBuilder
+from tailor.plugins import get_camera
+from tailor.builder import YamlTemplateBuilder
 from tailor.config import pkConfig
+from tailor.plugins.composer.filters.autocrop import Autocrop
 from tailor.zc import load_services_from_config, zc_service_context
 
 logger = logging.getLogger("tailor.service")
+
+# use uvloop
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # set ProactorEventLoop, to support subprocess on Windows OS
 if os.name == 'nt':
@@ -43,41 +48,13 @@ class ServiceApp:
         self.template_filename = None
         self.session = mock_session(0, False, False, False)
 
-    @staticmethod
-    def get_camera():
-        # camera
-        camera_cfg = pkConfig['camera']
-        camera_plugin = camera_cfg['plugin']
-        # camera_name = camera_cfg['name']
-
-        # TODO: Error handling
-        if camera_plugin == "dummy":
-            camera = plugins.dummy_camera.DummyCamera()
-        elif camera_plugin == "shutter":
-            # if camera_name:
-            #     import re
-            #     regex = re.compile(camera_name)
-            # else:
-            #     regex = None
-            # TODO: regex is broken because of a py3 bug w/shutter
-            regex = None
-            camera = plugins.shutter_camera.ShutterCamera(regex)
-        elif camera_plugin == "opencv":
-            camera = plugins.opencv_camera.OpenCVCamera()
-        elif camera_plugin == "pygame":
-            camera = plugins.pygame_camera.PygameCamera()
-        else:
-            print("cannot find camera plugin")
-            raise RuntimeError
-
-        return camera
-
     def run(self):
+        logger.debug('service app starting...')
         self.running = True
         self.template_filename = pkConfig['paths']['event_template']
-        self.make_folders()            # build folder structure to store photos
+        self.make_folders()  # build folder structure to store photos
         loop = asyncio.get_event_loop()
-        camera = self.get_camera()
+        camera = get_camera()
 
         # arduino
         # serial_device = AsyncSerial()
@@ -124,11 +101,11 @@ class ServiceApp:
             task = loop.create_task(coro)
             self.running_tasks.append(task)
 
-            # loop.run_until_complete(task)
             try:
                 loop.run_until_complete(asyncio.wait(self.running_tasks))
+
             except asyncio.CancelledError:
-                print('cancellation error was raised')
+                logger.critical('cancellation error was raised')
                 pass
 
     @staticmethod
@@ -138,6 +115,7 @@ class ServiceApp:
         for folder_name in names.split():
             path = pkConfig['paths'][folder_name]
             path = os.path.normpath(path)
+            logger.debug('making folder: {}'.format(path))
             os.makedirs(path, mode=0o777, exist_ok=True)
 
         names = 'event_originals event_composites'
@@ -146,41 +124,47 @@ class ServiceApp:
                 path = pkConfig['paths'][folder_name]
                 path = os.path.join(path, modifier)
                 path = os.path.normpath(path)
+                logger.debug('making folder: {}'.format(path))
                 os.makedirs(path, mode=0o777, exist_ok=True)
 
-        os.makedirs(pkConfig['paths']['print_hot_folder'],
-                    mode=0o777,
-                    exist_ok=True)
-
-    @asyncio.coroutine
-    def wait_for_trigger(self, future, camera):
-        yield from future
-
-        template_graph_root = JSONTemplateBuilder().read(self.template_filename)
+    async def wait_for_trigger(self, future, camera):
+        logger.debug('waiting for trigger...')
+        await future
+        template_graph_root = YamlTemplateBuilder().read(self.template_filename)
         self.session = Session()
-        task = self.session.start(camera, template_graph_root)
-
-        yield from task
+        await self.session.start(camera, template_graph_root)
         self.running = False
 
-    @asyncio.coroutine
-    def wait_for_socket_open_trigger(self, camera, reader, writer):
-        # drop the connection right away
-        writer.close()
-
-        template_graph_root = JSONTemplateBuilder().read(self.template_filename)
+    async def wait_for_socket_open_trigger(self, camera, reader, writer):
+        logger.debug('socket trigger started')
+        writer.close()  # drop the connection right away
+        template_graph_root = YamlTemplateBuilder().read(self.template_filename)
         self.session = Session()
-        task = self.session.start(camera, template_graph_root)
-
-        yield from task
+        await self.session.start(camera, template_graph_root)
         self.running = False
 
-    @asyncio.coroutine
-    def camera_preview_threaded_queue(self, camera, reader, writer):
+    async def camera_preview_threaded_queue(self, camera, reader, writer):
+        """ Stream information and images to the kiosk process
+        
+        This streams cbor formatted 'packets' for information to a kiosk process.
+        The kiosk generally lives on the same machine, but can be a remote computer.
+        
+        :param camera: 
+        :param reader: 
+        :param writer: 
+        :return: 
+        """
+        logger.debug('sending previews')
         while 1:
-            image = yield from camera.download_preview()
-            from tailor.plugins.composer.filters.autocrop import Autocrop
-            image = Autocrop().process(image, (0, 0, 465 * 3, 435 * 3))
+            # the 1 byte indicates that the consumer wants a frame
+            msg = await reader.read(1)
+            if not msg == b'\x01':
+                continue
+
+            # TODO: move to some sort of queue, so previews can be shared across connections
+            image = await camera.download_preview()
+
+            # this is the data packet for the kiosk to read
             data = {
                 'session': {
                     'idle': self.session.idle,
@@ -188,16 +172,26 @@ class ServiceApp:
                     'finished': self.session.finished,
                     'timer_value': self.session.countdown_value,
                 },
-                'image_data': (image.size[0], image.size[1], image.mode.lower(), image.tobytes())
+                'image_data': image,
+                'aspect_ratio': 1.58 / 1.45  # TODO: get from template
             }
+
+            # format the pack for the wire
             payload = cbor.dumps(data)
+
+            # prepend the length of the cbor data
             writer.write(struct.pack('Q', len(payload)))
+
+            # send it over the wire
             writer.write(payload)
 
+            # attempt to empty the buffer, may fail if other end hangs up
             try:
-                yield from writer.drain()
-            except (ConnectionResetError, ConnectionResetError):
+                await writer.drain()
+
+            except (ConnectionResetError, ConnectionResetError, BrokenPipeError):
                 writer.close()
                 break
 
-            yield from asyncio.sleep(1 / 60.)
+            # limit amount of frames sent
+            await asyncio.sleep(1 / 60.)

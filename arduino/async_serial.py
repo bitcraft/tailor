@@ -39,7 +39,6 @@ class AsyncSerial:
         self._serial_device.write(bytes(self._outgoing_buffer))
         self._outgoing_buffer.clear()
 
-    @asyncio.coroutine
     def close(self):
         self._serial_device.close()
         self._serial_device = None
@@ -49,7 +48,6 @@ class SelectSerial:
     """
     Only works on unix/linux...no windows!
     ...and no way to make it work on windows either :(
-
 
     lots of hacks here, as i am in a lack of time
 
@@ -90,7 +88,6 @@ class SelectSerial:
     #     result = self._serial_device.write(self._outgoing_buffer)
     #     self._outgoing_buffer.clear()
 
-    @asyncio.coroutine
     def close(self):
         loop = self.loop
         if loop is None:

@@ -51,8 +51,7 @@ class DummyCamera:
         """
         logger.debug('capture_image, not implemented')
 
-    @asyncio.coroutine
-    def download_capture(self):
+    async def download_capture(self):
         """ Capture a full image and return data
         """
         logger.debug('download_capture')
@@ -62,8 +61,7 @@ class DummyCamera:
         im = Image.new('RGB', self.image_size, (r, g, b))
         return im
 
-    @asyncio.coroutine
-    def download_preview(self):
+    async def download_preview(self):
         """ Capture preview image and return data
         """
         logger.debug('download_preview')

@@ -38,12 +38,10 @@ class TemplateRenderer:
             return None, None
         return func(node)
 
-    @asyncio.coroutine
     def render_all(self, root):
         """ Render a new image and all nodes.  Must pass in the root node.
 
         :param root: Root node
-        :rtype: Image
         """
         def func():
             base_image = self.create_blank_image(root)
@@ -122,7 +120,6 @@ class TemplateRenderer:
             # TODO: move these functions into a processing chain
             area = self.convert_rect(node.parent.rect, root.dpi)
             image = Autocrop().process(node.data, area)
-            print(area)
             return image, area
         # TODO: lazy loading of images
         return None, None

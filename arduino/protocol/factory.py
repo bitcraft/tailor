@@ -119,7 +119,6 @@ def parse(handler):
             handler(c)
 
         else:
-            print(hex(byte))
             raise UnhandledPacketType
 
 
