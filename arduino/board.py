@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import asyncio
 
-from .protocol.factory import parse, build
+from .protocol.factory import build, parse
 
 
 class Board:

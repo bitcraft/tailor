@@ -6,6 +6,7 @@ class Autocrop:
     """ Crop is correctly centered.  No need to adjust or test.
 
     """
+
     def process(self, image, area):
         # x1 = y1 = 0
         # x2, y2 = image.size

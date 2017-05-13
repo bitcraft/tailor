@@ -7,14 +7,15 @@ deps and works cross platform, but doesn't correctly
 advertise services (seems to announce just get_packet.)
 """
 
-import yaml
 import logging
 import socket
 from contextlib import contextmanager
 
-# from zeroconf import ServiceInfo, Zeroconf
+import yaml
 
 from . import net
+
+# from zeroconf import ServiceInfo, Zeroconf
 
 logger = logging.getLogger('tailor.zc')
 

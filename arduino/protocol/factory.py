@@ -2,7 +2,7 @@
 """
 Provide Factory class to generate and parse packet data
 """
-from .commands import command_names, command_lookup
+from .commands import command_lookup, command_names
 
 
 class UnhandledPacketType(Exception):

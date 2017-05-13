@@ -20,7 +20,6 @@ from apps.service.session import Session
 from tailor.plugins import get_camera
 from tailor.builder import YamlTemplateBuilder
 from tailor.config import pkConfig
-from tailor.plugins.composer.filters.autocrop import Autocrop
 from tailor.zc import load_services_from_config, zc_service_context
 
 logger = logging.getLogger("tailor.service")
@@ -28,6 +27,7 @@ logger = logging.getLogger("tailor.service")
 # use uvloop, if possible
 try:
     import uvloop
+
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 except ImportError:
     logger.debug("uvloop not found, using default loop")

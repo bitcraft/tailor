@@ -8,7 +8,7 @@ import time
 from multiprocessing import Queue
 from os.path import join
 
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
 
 from tailor.config import pkConfig
 

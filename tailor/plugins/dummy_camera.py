@@ -76,4 +76,4 @@ class DummyCamera:
         fp = io.BytesIO()
         im = Image.new('RGB', self.image_size, (128, 0, 0))
         im.save(fp, format='JPEG')
-        return  fp.getvalue()
+        return fp.getvalue()

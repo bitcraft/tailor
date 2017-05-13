@@ -10,7 +10,7 @@ from PIL import Image
 
 from .filters.autocrop import Autocrop
 
-__all__ = ('TemplateRenderer', )
+__all__ = ('TemplateRenderer',)
 
 
 class TemplateRenderer:
@@ -43,6 +43,7 @@ class TemplateRenderer:
 
         :param root: Root node
         """
+
         def func():
             base_image = self.create_blank_image(root)
 

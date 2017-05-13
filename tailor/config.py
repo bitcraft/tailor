@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-import yaml
 import logging
 import os.path
+
+import yaml
 
 __all__ = ('Config',)
 
