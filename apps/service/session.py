@@ -256,7 +256,7 @@ class Session:
 
         pool.queue_image_save(composite, composite_path)
         pool.queue_image_thumbnail(composite, composite_small_path)
-        pool.queue_image_double(composite, print_path)
+        pool.queue_image_pad_double(composite, print_path)
         pool.wait_for_workers()  # blocking!
 
         # print the double
