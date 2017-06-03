@@ -1,12 +1,23 @@
 # -*- coding: utf-8 -*-
 """ Camera interface for the python-gphoto2 wrapper.
 """
+import platform
 import asyncio
 import logging
 
 import gphoto2 as gp
 
 logger = logging.getLogger("tailor.gphoto2_camera")
+
+
+def release_from_tight_grip_of_operating_system():
+    if platform.system() == 'Linux':
+        from tailor.core.unix import release_gvfs_from_camera
+
+        try:
+            release_gvfs_from_camera()
+        except FileNotFoundError:
+            pass
 
 
 class GphotoCamera:
@@ -26,16 +37,27 @@ class GphotoCamera:
         self.close()
 
     def open(self):
+        self.open_camera()
+
+    def open_camera(self):
         # the following needs to be changed into some
         # kind of context manager aware delay to allow
         # the camera to get ready in a context manager
+        release_from_tight_grip_of_operating_system()
+
         ctx = gp.gp_context_new()
         error, camera = gp.gp_camera_new()
         gp.check_result(gp.gp_camera_init(camera, ctx))
+
+        # TODO: check if camera cannot be used for some reason
+
         self._camera = camera
         self._context = ctx
 
     def close(self):
+        self.close_camera()
+
+    def close_camera(self):
         # the following isn't going to work with async yet
         # self.close()
         gp.check_result(gp.gp_camera_exit(self._camera, self._context))
@@ -82,6 +104,7 @@ class GphotoCamera:
             return bytes(data)
 
         executor = asyncio.get_event_loop().run_in_executor
+
         with (await self._lock):
             future = executor(None, capture)
             await future

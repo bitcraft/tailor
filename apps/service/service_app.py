@@ -10,6 +10,7 @@ import asyncio
 import logging
 import struct
 import os
+import platform
 from collections import namedtuple
 from contextlib import ExitStack
 from functools import partial
@@ -38,6 +39,15 @@ if os.name == 'nt':
 
 # used to create a dummy session when app is first started
 mock_session = namedtuple('mock_session', 'countdown_value started finished idle')
+
+system = platform.system()
+if system == 'Linux':
+    from tailor.core.unix import release_gvfs_from_camera
+
+    try:
+        release_gvfs_from_camera()
+    except FileNotFoundError:
+        pass
 
 
 class ServiceApp:

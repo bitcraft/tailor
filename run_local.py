@@ -9,8 +9,6 @@ currently is a candidate to use asyncio
 import logging
 import time
 import platform
-import os
-from os.path import split
 from subprocess import Popen, call
 
 logging.basicConfig(level=logging.DEBUG)

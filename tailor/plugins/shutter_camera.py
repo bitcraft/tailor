@@ -3,10 +3,21 @@
 """
 import asyncio
 import logging
+import platform
 
 import shutter
 
 logger = logging.getLogger("tailor.shutter_camera")
+
+
+def release_from_tight_grip_of_operating_system():
+    if platform.system() == 'Linux':
+        from tailor.core.unix import release_gvfs_from_camera
+
+        try:
+            release_gvfs_from_camera()
+        except FileNotFoundError:
+            pass
 
 
 class ShutterCamera:
@@ -25,9 +36,11 @@ class ShutterCamera:
         # the following needs to be changed into some
         # kind of context manager aware delay to allow
         # the camera to get ready in a context manager
+        self.open_camera()
+
+    def open_camera(self):
+        release_from_tight_grip_of_operating_system()
         self._device_context = shutter.Camera(self._device_name_regex)
-        import time
-        time.sleep(1)
 
     def __exit__(self, *args):
         # the following isn't going to work with async yet
@@ -56,7 +69,10 @@ class ShutterCamera:
             try:
                 return self._device_context.capture_preview()
             except shutter.ShutterError:
-                return
+                logger.critical("cannot capture preview, attempting to get camera")
+                release_from_tight_grip_of_operating_system()
+                await(asyncio.sleep(1))
+                self.open_camera()
 
     async def capture_image(self, filename=None):
         """ Capture full image (engages full camera mechanisms)
