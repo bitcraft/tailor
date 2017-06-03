@@ -58,6 +58,15 @@ def get_camera():
         else:
             camera = pygame_camera.PygameCamera()
 
+    elif camera_plugin == "gphoto2":
+        try:
+            from . import gphoto2_camera
+        except:
+            pass
+
+        else:
+            camera = gphoto2_camera.GphotoCamera()
+
     if camera is None:
         logger.critical("cannot find camera plugin, using dummy")
         camera = dummy_camera.DummyCamera()

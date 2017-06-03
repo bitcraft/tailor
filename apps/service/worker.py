@@ -7,7 +7,7 @@ operations for the mp queue
 from os import cpu_count
 import multiprocessing as mp
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 from tailor.config import pkConfig
 

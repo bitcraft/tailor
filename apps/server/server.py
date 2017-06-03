@@ -29,9 +29,7 @@ class PrintQueueManager(threading.Thread):
         while self.running:
             filename = print_queue.get()
             src = os.path.join(prints_folder, filename)
-
-            # TODO: print
-
+            smart_copy(src, '/home/retrobooth/smb-printsrv/')
             if print_interval:
                 time.sleep(print_interval)
 

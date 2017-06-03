@@ -1,7 +1,7 @@
 ---
 camera:
   name: canon
-  plugin: shutter
+  plugin: gphoto2
   preview_file_ext: jpg
 compositor:
   template: standard.yaml
