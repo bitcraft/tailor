@@ -52,8 +52,32 @@ def double(data, args):
     save_image(base, args[0])
 
 
+def pad_double(data, args):
+    cw = 1200
+    ch = 1800
+
+    w = 26
+    h = 52
+
+    iw = cw + w
+    ih = ch + h
+
+    left = w // 2
+    top = h // 2
+
+    mid = (cw // 2) + left
+
+    image = make_image(data)
+    base = Image.new('RGBA', (iw, ih))
+    areas = ((left, top), (mid, top))
+    for area in areas:
+        base.paste(image, area, mask=image)
+
+    save_image(base, args[0])
+
+
 def run_worker(queue):
-    func_table = {i.__name__: i for i in (save, thumbnail, double, write)}
+    func_table = {i.__name__: i for i in (save, thumbnail, double, write, pad_double)}
 
     # start our task queue worker
     item = queue.get()
@@ -109,6 +133,10 @@ class WorkerPool:
     def queue_image_double(self, image, filename):
         data = self.deconstruct_image(image)
         self.mp_queue.put(("double", data, (filename,)))
+
+    def queue_image_pad_double(self, image, filename):
+        data = self.deconstruct_image(image)
+        self.mp_queue.put(("pad_double", data, (filename,)))
 
     def queue_data_save(self, data, filename):
         self.mp_queue.put(("write", data, (filename,)))
