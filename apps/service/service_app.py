@@ -8,9 +8,9 @@ manages plugin workflow, basically
 """
 import asyncio
 import logging
-import struct
 import os
 import platform
+import struct
 from collections import namedtuple
 from contextlib import ExitStack
 from functools import partial
@@ -18,9 +18,9 @@ from functools import partial
 import cbor
 
 from apps.service.session import Session
-from tailor.plugins import get_camera
 from tailor.builder import YamlTemplateBuilder
 from tailor.config import pkConfig
+from tailor.plugins import get_camera
 from tailor.zc import load_services_from_config, zc_service_context
 
 logger = logging.getLogger("tailor.service")
@@ -66,6 +66,7 @@ class ServiceApp:
         self.running = True
         self.template_filename = pkConfig['paths']['event_template']
         self.make_folders()  # build folder structure to store photos
+        self.clients = list()
         loop = asyncio.get_event_loop()
         camera = get_camera()
 
@@ -156,6 +157,26 @@ class ServiceApp:
         await self.session.start(camera, template_graph_root)
         self.running = False
 
+    @staticmethod
+    def create_packet(session, image):
+        # this is the data packet for the kiosk to read
+        data = {
+            'session': {
+                'idle': session.idle,
+                'started': session.started,
+                'finished': session.finished,
+                'timer_value': session.countdown_value,
+            },
+            'image_data': image,
+            'aspect_ratio': 1.58 / 1.45  # TODO: get from template
+        }
+
+        # format the pack for the wire
+        encoded_data = cbor.dumps(data)
+        length = struct.pack('Q', len(encoded_data))
+
+        return length + encoded_data
+
     async def camera_preview_threaded_queue(self, camera, reader, writer):
         """ Stream information and images to the kiosk process
         
@@ -174,32 +195,13 @@ class ServiceApp:
             if not msg == b'\x01':
                 continue
 
-            # TODO: move to some sort of queue, so previews can be shared across connections
             image = await camera.download_preview()
+            payload = self.create_packet(self.session, image)
 
-            # this is the data packet for the kiosk to read
-            data = {
-                'session': {
-                    'idle': self.session.idle,
-                    'started': self.session.started,
-                    'finished': self.session.finished,
-                    'timer_value': self.session.countdown_value,
-                },
-                'image_data': image,
-                'aspect_ratio': 1.58 / 1.45  # TODO: get from template
-            }
-
-            # format the pack for the wire
-            payload = cbor.dumps(data)
-
-            # prepend the length of the cbor data
-            writer.write(struct.pack('Q', len(payload)))
-
-            # send it over the wire
-            writer.write(payload)
-
-            # attempt to empty the buffer, may fail if other end hangs up
             try:
+                # send it over the wire
+                # TODO: move to some sort of queue, so previews can be shared across connections
+                writer.write(payload)
                 await writer.drain()
 
             except (ConnectionResetError, ConnectionResetError, BrokenPipeError):

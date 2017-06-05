@@ -6,14 +6,14 @@
 # ===========================================
 # pypiwin32
 
-# recommended to install before kivy
-# ==================================
-kivy.deps.sdl2
-kivy.deps.glew
+# recommended to install before kivy, possibly windows only
+# =========================================================
+# kivy.deps.sdl2
+# kivy.deps.glew
 
 # pygame is required for sounds until i figure out kivy audio
 # ===========================================================
-pygame==1.9.3
+pygame
 
 # camera providers
 # ================
