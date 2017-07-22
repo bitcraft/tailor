@@ -86,24 +86,30 @@ class PickerScreen(Screen):
 
         #   E X I T   B U T T O N
         # this button is used to exit the large camera preview window
-        # def exit_preview(widget, touch):
-        #     if widget.collide_point(touch.x, touch.y):
-        #         self.change_state('normal')
-        # self.preview_exit = Factory.ExitButton(
-        #     source=image_path('chevron-right.gif'))
-        # self.preview_exit.bind(on_touch_down=exit_preview)
-        # self.preview_exit.size_hint = None, None
-        # self.preview_exit.width = 64
-        # self.preview_exit.height = 175
-        # # self.preview_exit.x = 1280
-        # # self.preview_exit.y = (1024 / 2) - (self.preview_exit.height / 2)
-        # self.preview_exit.pos_hint = {'x': 1, 'center_y': .5}
-        # self.view.add_widget(self.preview_exit)
+        def exit_preview(widget, touch):
+            if widget.collide_point(touch.x, touch.y):
+                self.change_state('normal')
+
+        self.preview_exit = Factory.ExitButton(
+            source=image_path('chevron-right.gif'))
+        self.preview_exit.bind(on_touch_down=exit_preview)
+        self.preview_exit.size_hint = None, None
+        self.preview_exit.width = 64
+        self.preview_exit.height = 175
+        # self.preview_exit.x = 1280
+        # self.preview_exit.y = (1024 / 2) - (self.preview_exit.height / 2)
+        self.preview_exit.pos_hint = {'x': 1, 'center_y': .5}
+        self.view.add_widget(self.preview_exit)
 
         #  P R E V I E W   B U T T O N
         button = search(self, 'previewbutton')
         button.bind(on_press=self.toggle_preview)
         self.preview_button = button
+
+        #  P R E V I E W   B U T T O N
+        button = search(self, 'adjustmentbutton')
+        button.bind(on_press=self.toggle_adjustment)
+        self.adjustment_button = button
 
         # the background has a parallax effect
         self.background.source = image_path('galaxy.jpg')
@@ -143,10 +149,15 @@ class PickerScreen(Screen):
 
     def toggle_preview(self, *args, **kwargs):
         if self.state == 'normal':
-            # self.scheduled_return_to_normal = False
             trigger_session_via_socket()
             self.change_state('preview')
         elif self.state == 'preview':
+            self.change_state('normal')
+
+    def toggle_adjustment(self, *args, **kwargs):
+        if self.state == 'normal':
+            self.change_state('adjustment')
+        elif self.state == 'adjustment':
             self.change_state('normal')
 
     @staticmethod
@@ -228,7 +239,8 @@ class PickerScreen(Screen):
             if self.preview_widget is None:
                 self.set_preview_widget()
 
-            self.set_preview_overlay_text(session)
+            if self.state == 'preview':
+                self.set_preview_overlay_text(session)
 
     def set_preview_overlay_text(self, session):
         # TODO: 'session', needs some documentation
@@ -369,8 +381,10 @@ class PickerScreen(Screen):
         transitions = {
             ('normal', 'focus'): self.transition_normal_focus,
             ('normal', 'preview'): self.transition_normal_preview,
+            ('normal', 'adjustment'): self.transition_normal_adjustment,
             ('focus', 'normal'): self.transition_focus_normal,
             ('preview', 'normal'): self.transition_preview_normal,
+            ('adjustment', 'normal'): self.transition_adjustment_normal,
         }
 
         try:
@@ -519,30 +533,12 @@ class PickerScreen(Screen):
         Clock.schedule_interval(self.update_preview, 1 / 120.)
 
         self.update_preview()
+        self.preview_widget.pos_hint = {'center_x': .5, 'center_y': .5}
+        self.preview_widget.size_hint = .95, 1
 
+        # make sure countdown text is on top
         self.remove_widget(self.countdown_label)
         self.add_widget(self.countdown_label)
-
-        # show the preview exit button
-        # ani = Animation(
-        #     pos_hint={'x': .95},
-        #     t='in_out_quad',
-        #     duration=.5)
-        # ani &= Animation(
-        #     opacity=1.0,
-        #     duration=.5)
-        # self.start_and_log(ani, self.preview_exit)
-
-        # # show the camera preview
-        # ani = Animation(
-        #     pos_hint={'x': 0, 'center_y': .5},
-        #     t='in_out_quad',
-        #     duration=.5)
-        # ani &= Animation(
-        #     opacity=1.0,
-        #     duration=.5)
-        # self.start_and_log(ani, self.preview_widget)
-        self.preview_widget.pos_hint = {'center_x': .5, 'center_y': .5}
 
         # hide the scrollview and drawer
         ani = Animation(
@@ -574,45 +570,7 @@ class PickerScreen(Screen):
         #  P R E V I E W  =>  N O R M A L
         self.scrollview_hidden = False
 
-        # hide the preview exit button
-        # ani = Animation(
-        #     pos_hint={'x': 1},
-        #     t='in_out_quad',
-        #     duration=.5)
-        # ani &= Animation(
-        #     opacity=0.0,
-        #     duration=.5)
-        # self.start_and_log(ani, self.preview_exit)
-
-        # # # hide the camera preview
-        # ani = Animation(
-        #     pos_hint={'y': 1},
-        #     t='in_out_quad',
-        #     duration=.5)
-        # # ani &= Animation(
-        # #     opacity=0.0,
-        # #     duration=.5)
-        # self.start_and_log(ani, self.preview_widget)
         self.preview_widget.pos_hint = {'y': 1}
-
-        # # # set the background to normal
-        # x, y = self._calc_bg_pos()
-        # ani = Animation(
-        #     y=y + 100,
-        #     x=x,
-        #     t='in_out_quad',
-        #     duration=.5)
-        # self.start_and_log(ani, self.background)
-        #
-        # # show the scrollview
-        # x, y = self._scrollview_pos[0], self.scrollview.original_y
-        # ani = Animation(
-        #     x=x,
-        #     y=y,
-        #     t='in_out_quad',
-        #     opacity=1.0,
-        #     duration=.5)
-        # self.start_and_log(ani, self.scrollview)
 
         # set the background to normal
         ani = Animation(
@@ -629,6 +587,76 @@ class PickerScreen(Screen):
             duration=.5)
         self.start_and_log(ani, search(self, 'scrollview_area'))
         self.start_and_log(ani, self.drawer)
+
+        # schedule a unlock
+        self.locked = True
+        Clock.schedule_once(self.unlock, .5)
+
+        # unschedule the preview updater
+        Clock.unschedule(self.update_preview)
+
+        self.preview_handler.stop()
+        self.preview_handler = None
+
+    def transition_normal_adjustment(self, *arkg, **kwargs):
+        # ====================================================================
+        #  N O R M A L  =>  A D J U S T M E N T
+        self.scrollview_hidden = True
+
+        self.preview_handler = PreviewHandler()
+        self.preview_handler.start()
+
+        # schedule an interval to update the preview widget
+        Clock.schedule_interval(self.update_preview, 1 / 120.)
+
+        self.update_preview()
+        self.preview_widget.pos_hint = {'center_x': .5, 'center_y': .5}
+        self.preview_widget.size_hint = .95 / 1.5, 1 / 1.5
+
+        # hide the scrollview
+        ani = Animation(
+            x=0,
+            y=-1000,
+            t='in_out_quad',
+            opacity=0.0,
+            duration=.7)
+        self.start_and_log(ani, search(self, 'scrollview_area'))
+
+        # start a simple animation on the background
+        x = self.background.pos_hint['x']
+        ani = Animation(
+            t='in_out_quad',
+            size_hint=(4, 2),
+            duration=.5)
+        ani += Animation(
+            pos_hint={'x': x + 1.5},
+            duration=480)
+        self.start_and_log(ani, self.background)
+
+        # schedule a unlock
+        self.locked = True
+        Clock.schedule_once(self.unlock, .5)
+
+    def transition_adjustment_normal(self, *args, **kwargs):
+        # ====================================================================
+        #  A D J U S T M E N T  =>  N O R M A L
+        self.scrollview_hidden = False
+        self.preview_widget.pos_hint = {'y': 1}
+
+        # set the background to normal
+        ani = Animation(
+            size_hint=(3, 1.5),
+            t='in_out_quad',
+            duration=.5)
+        self.start_and_log(ani, self.background)
+
+        # show the scrollview
+        ani = Animation(
+            y=0,
+            t='in_out_quad',
+            opacity=1.0,
+            duration=.5)
+        self.start_and_log(ani, search(self, 'scrollview_area'))
 
         # schedule a unlock
         self.locked = True

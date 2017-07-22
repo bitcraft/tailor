@@ -1,7 +1,7 @@
 ---
 camera:
   name: canon
-  plugin: gphoto2
+  plugin: dummy
   preview_file_ext: jpg
 compositor:
   template: standard.yaml

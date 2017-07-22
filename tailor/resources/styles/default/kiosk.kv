@@ -3,6 +3,9 @@
 <PreviewButton@Button>:
     text: '>> PRESS HERE TO START <<'
 
+<AdjustmentButton@Button>:
+    text: '>> Adjustments <<'
+
 <FocusWidget@Image>:
     allow_stretch: True
 
@@ -187,10 +190,13 @@
         BoxLayout:
             uniqueid: 'drawer'
             size_hint: 1, .1
-            orientation: 'vertical'
+            orientation: 'horizontal'
 
             PreviewButton:
                 uniqueid: 'previewbutton'
+
+            AdjustmentButton:
+                uniqueid: 'adjustmentbutton'
 
 <SinglePicker>:
     large_preview_size: 700, 700

@@ -179,20 +179,30 @@ class ServiceApp:
 
     async def camera_preview_threaded_queue(self, camera, reader, writer):
         """ Stream information and images to the kiosk process
-        
+
         This streams cbor formatted 'packets' for information to a kiosk process.
         The kiosk generally lives on the same machine, but can be a remote computer.
-        
-        :param camera: 
-        :param reader: 
-        :param writer: 
-        :return: 
+
+        :param camera:
+        :param reader:
+        :param writer:
+        :return:
         """
         logger.debug('sending previews')
         while 1:
             # the 1 byte indicates that the consumer wants a frame
             msg = await reader.read(1)
-            if not msg == b'\x01':
+
+            # need preview
+            if msg == b'\x01':
+                pass
+
+            # quit
+            elif msg == b'\xFF':
+                break
+
+            # anything else just ignore
+            else:
                 continue
 
             image = await camera.download_preview()

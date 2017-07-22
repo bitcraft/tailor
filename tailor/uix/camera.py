@@ -98,8 +98,8 @@ class PreviewHandler:
 
     def get_packet(self, sock):
         """ Get one frame from a socket
-        
-        :param sock: 
+
+        :param sock:
         :rtype: dict
         """
         # get the "header", just a 64-bit integer
@@ -138,10 +138,13 @@ class PreviewHandler:
 
                 else:
                     logger.debug('could not decode packet, giving up')
+                    sock.send(b'\xFF')
                     sock.close()
                     sock = None
 
             if sock:
+                logger.debug('stopping preview thread gracefully')
+                sock.send(b'\xFF')
                 sock.close()
 
         if self.thread is None:
