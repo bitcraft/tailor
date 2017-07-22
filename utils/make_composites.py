@@ -52,8 +52,6 @@ async def async_consume_images(template_master, renderer, image_queue):
             raise ValueError
         return image
 
-
-
     while 1:
         template = copy.deepcopy(template_master)
 
@@ -105,7 +103,7 @@ async def async_open(filename):
 async def main():
     template_filename = normpath('tailor/resources/templates/standard.yaml')
     template_master = YamlTemplateBuilder().read(template_filename)
-    folder = normpath(os.path.join("z:", "Dropbox", "photob", "erin-drew"))
+    folder = normpath(os.path.join("z:", "Dropbox", "photob", "kerry-jacob", "originals"))
     files = glob.glob('{0}/*.jpg'.format(folder))
     assert files
     files.sort()
@@ -126,7 +124,7 @@ async def main():
         template.push_image(image2)
         template.push_image(image3)
 
-        filename = 'session-erin-drew-{:05d}.jpg'.format(index)
+        filename = 'keri-jacob-session-{:05d}.jpg'.format(index)
         image = await renderer.render_all(template)
         double(image, filename)
         print(filename)
@@ -136,8 +134,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    import time
-
-    import asyncio
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())

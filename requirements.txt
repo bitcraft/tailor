@@ -33,3 +33,8 @@ natsort
 netifaces
 requests
 pyyaml
+
+
+# Hot folder printing
+# ===================
+pypubsub
