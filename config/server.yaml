@@ -1,6 +1,6 @@
 ---
 print-queue:
-  interval: 70
+  interval: 10
 interface:
   host: ''
   port: 5000

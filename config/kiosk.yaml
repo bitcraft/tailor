@@ -1,6 +1,6 @@
 ---
 event:
-  name: test
+  name: abi-ian
   template: standard.yaml
 graphics:
   display:

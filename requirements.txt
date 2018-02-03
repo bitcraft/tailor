@@ -18,8 +18,13 @@ pygame
 # camera providers
 # ================
 git+http://github.com/bitcraft/shutter.git
+gphoto2
 # opencv
 # pygame
+
+# PITA source install
+# git+git://github.com/jim-easterbrook/python-gphoto2
+# sudo apt install libgphoto2-6 libgphoto2-dev git build-essential swig python3-dev
 
 # everything else
 # ===============
