@@ -4,10 +4,10 @@
 operations for the mp queue
 
 """
-from os import cpu_count
 import multiprocessing as mp
+from os import cpu_count
 
-from PIL import Image, ImageOps
+from PIL import Image
 
 from tailor.config import pkConfig
 
@@ -18,7 +18,7 @@ def make_image(data):
 
 
 def save_image(image, filename):
-    kwargs = dict(pkConfig['compositor']['pil_options'])
+    kwargs = dict(pkConfig["compositor"]["pil_options"])
     image.save(filename, **kwargs)
 
 
@@ -28,7 +28,7 @@ def write(data, args):
     :type data: bytes
     :rtype: None 
     """
-    with open(args[0], 'wb') as fp:
+    with open(args[0], "wb") as fp:
         fp.write(data)
 
 
@@ -45,7 +45,7 @@ def thumbnail(data, args):
 
 def double(data, args):
     image = make_image(data)
-    base = Image.new('RGBA', (1200, 1800))
+    base = Image.new("RGBA", (1200, 1800))
     areas = ((0, 0), (600, 0))
     for area in areas:
         base.paste(image, area, mask=image)
@@ -68,7 +68,7 @@ def pad_double(data, args):
     mid = (cw // 2) + left
 
     image = make_image(data)
-    base = Image.new('RGBA', (iw, ih))
+    base = Image.new("RGBA", (iw, ih))
     areas = ((left, top), (mid, top))
     for area in areas:
         base.paste(image, area, mask=image)
@@ -83,17 +83,17 @@ def run_worker(queue):
     item = queue.get()
 
     while item is not None:
-        task, data, args = item       # split task name and the payload
+        task, data, args = item  # split task name and the payload
         func_table[task](data, args)  # execute task with data
-        queue.task_done()             # mark done so queue can be joined
-        item = queue.get()            # wait for a new task
+        queue.task_done()  # mark done so queue can be joined
+        item = queue.get()  # wait for a new task
 
     queue.task_done()
 
 
 class WorkerPool:
     def __init__(self):
-        self.cxt = mp.get_context('spawn')
+        self.cxt = mp.get_context("spawn")
         self.mp_queue = self.cxt.JoinableQueue()
         self.mp_workers = list()
 

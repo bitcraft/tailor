@@ -14,6 +14,7 @@
 # pygame is required for sounds until i figure out kivy audio
 # ===========================================================
 pygame
+flask
 
 # camera providers
 # ================
@@ -29,7 +30,7 @@ gphoto2
 # everything else
 # ===============
 uvloop
-kivy==1.9.1
+kivy==2.0.0rc2
 pillow-simd
 zeroconf
 sanic

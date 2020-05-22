@@ -15,21 +15,21 @@ from tailor.config import pkConfig
 app = Flask(__name__)
 
 print_queue = Queue()
-prints_folder = pkConfig['paths']['event_prints']
-monitor_folder = pkConfig['paths']['event_composites']
-glob_string = '*' + pkConfig['compositor']['filetype']
-regex = re.compile('^(.*?)-(\d+)$')
+prints_folder = pkConfig["paths"]["event_prints"]
+monitor_folder = pkConfig["paths"]["event_composites"]
+glob_string = "*" + pkConfig["compositor"]["filetype"]
+regex = re.compile("^(.*?)-(\d+)$")
 config = dict()
 
 
 class PrintQueueManager(threading.Thread):
     def run(self, *args, **kwargs):
-        print_interval = pkConfig['server']['print-queue']['interval']
+        print_interval = pkConfig["server"]["print-queue"]["interval"]
         self.running = True
         while self.running:
             filename = print_queue.get()
             src = os.path.join(prints_folder, filename)
-            smart_copy(src, '/home/retrobooth/smb-printsrv/')
+            smart_copy(src, "/home/retrobooth/smb-printsrv/")
             if print_interval:
                 time.sleep(print_interval)
 
@@ -39,8 +39,8 @@ class PrintQueueManager(threading.Thread):
 
 def get_filenames_to_serve():
     try:
-        with open(pkConfig['paths']['event_log']) as fp:
-            return [build_url(i) for i in fp.read().strip().split('\n')]
+        with open(pkConfig["paths"]["event_log"]) as fp:
+            return [build_url(i) for i in fp.read().strip().split("\n")]
     except IOError:
         return list()
 
@@ -50,20 +50,20 @@ def get_glob_string(path):
 
 
 def build_url(filename):
-    url = '{protocol}://{host}:{port}'.format(**config)
-    return '{}/files/{}'.format(url, filename)
+    url = "{protocol}://{host}:{port}".format(**config)
+    return "{}/files/{}".format(url, filename)
 
 
-@app.route('/files')
+@app.route("/files")
 def get_files():
-    files = {'files': get_filenames_to_serve()}
+    files = {"files": get_filenames_to_serve()}
     return jsonify(files)
 
 
-@app.route('/files/<filename>')
+@app.route("/files/<filename>")
 def retrieve_file(filename):
     # TODO: accept arbitrary sizes and cache
-    size = request.args.get('size', 'original')
+    size = request.args.get("size", "original")
 
     try:
         path = join(monitor_folder, size)
@@ -72,7 +72,7 @@ def retrieve_file(filename):
         pass
 
 
-@app.route('/print/<filename>')
+@app.route("/print/<filename>")
 def enqueue_filename_for_print(filename):
     print_queue.put(filename)
     return "ok"
@@ -100,10 +100,10 @@ def smart_copy(src, dest):
 
 
 def ServerApp():
-    config.update(pkConfig['remote_server'])
+    config.update(pkConfig["remote_server"])
     # config['host'] = guess_local_ip_addresses()
-    config['host'] = '127.0.0.1'
-    config['SECRET_KEY'] = 'secret!'
+    config["host"] = "127.0.0.1"
+    config["SECRET_KEY"] = "secret!"
 
     print_queue_thread = PrintQueueManager()
     print_queue_thread.daemon = True

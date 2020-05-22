@@ -16,7 +16,8 @@ if __name__ == "__main__":
     import os
 
     # hack to allow tailor to run without installing
-    sys.path.append(os.path.normpath(
-        os.path.join(os.path.dirname(__file__), '..', '..')))
+    sys.path.append(
+        os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    )
 
     main()

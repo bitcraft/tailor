@@ -34,14 +34,14 @@ except ImportError:
     logger.debug("uvloop not found, using default loop")
 
 # set ProactorEventLoop, to support subprocess on Windows OS
-if os.name == 'nt':
+if os.name == "nt":
     asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
 # used to create a dummy session when app is first started
-mock_session = namedtuple('mock_session', 'countdown_value started finished idle')
+mock_session = namedtuple("mock_session", "countdown_value started finished idle")
 
 system = platform.system()
-if system == 'Linux':
+if system == "Linux":
     from tailor.platform.unix import release_gvfs_from_camera
 
     try:
@@ -62,9 +62,9 @@ class ServiceApp:
         self.session = mock_session(0, False, False, False)
 
     def run(self):
-        logger.debug('service app starting...')
+        logger.debug("service app starting...")
         self.running = True
-        self.template_filename = pkConfig['paths']['event_template']
+        self.template_filename = pkConfig["paths"]["event_template"]
         self.make_folders()  # build folder structure to store photos
         self.clients = list()
         loop = asyncio.get_event_loop()
@@ -87,7 +87,8 @@ class ServiceApp:
             # TODO: unify this board trigger and the packet trigger
             if board:
                 task = loop.create_task(
-                    self.wait_for_trigger(board.wait_for_packet(), camera))
+                    self.wait_for_trigger(board.wait_for_packet(), camera)
+                )
                 self.running_tasks.append(task)
 
             # the servers defined below will not keep asyncio.wait from
@@ -105,13 +106,13 @@ class ServiceApp:
             # asyncio streaming protocol
             # https://docs.python.org/3/library/asyncio-stream.html
             func = partial(self.camera_preview_threaded_queue, camera)
-            coro = asyncio.start_server(func, '127.0.0.1', 22222, loop=loop)
+            coro = asyncio.start_server(func, "127.0.0.1", 22222, loop=loop)
             task = loop.create_task(coro)
             self.running_tasks.append(task)
 
             # wait for a camera trigger in highly inefficient manner
             func = partial(self.wait_for_socket_open_trigger, camera)
-            coro = asyncio.start_server(func, '127.0.0.1', 22223, loop=loop)
+            coro = asyncio.start_server(func, "127.0.0.1", 22223, loop=loop)
             task = loop.create_task(coro)
             self.running_tasks.append(task)
 
@@ -119,30 +120,30 @@ class ServiceApp:
                 loop.run_until_complete(asyncio.wait(self.running_tasks))
 
             except asyncio.CancelledError:
-                logger.critical('cancellation error was raised')
+                logger.critical("cancellation error was raised")
                 pass
 
     @staticmethod
     def make_folders():
         # make sure directory structure is usable
-        names = 'event_prints event_originals event_composites'
+        names = "event_prints event_originals event_composites"
         for folder_name in names.split():
-            path = pkConfig['paths'][folder_name]
+            path = pkConfig["paths"][folder_name]
             path = os.path.normpath(path)
-            logger.debug('making folder: {}'.format(path))
+            logger.debug("making folder: {}".format(path))
             os.makedirs(path, mode=0o777, exist_ok=True)
 
-        names = 'event_originals event_composites'
+        names = "event_originals event_composites"
         for folder_name in names.split():
-            for modifier in 'small original'.split():
-                path = pkConfig['paths'][folder_name]
+            for modifier in "small original".split():
+                path = pkConfig["paths"][folder_name]
                 path = os.path.join(path, modifier)
                 path = os.path.normpath(path)
-                logger.debug('making folder: {}'.format(path))
+                logger.debug("making folder: {}".format(path))
                 os.makedirs(path, mode=0o777, exist_ok=True)
 
     async def wait_for_trigger(self, future, camera):
-        logger.debug('waiting for trigger...')
+        logger.debug("waiting for trigger...")
         await future
         template_graph_root = YamlTemplateBuilder().read(self.template_filename)
         self.session = Session()
@@ -150,7 +151,7 @@ class ServiceApp:
         self.running = False
 
     async def wait_for_socket_open_trigger(self, camera, reader, writer):
-        logger.debug('socket trigger started')
+        logger.debug("socket trigger started")
         writer.close()  # drop the connection right away
         template_graph_root = YamlTemplateBuilder().read(self.template_filename)
         self.session = Session()
@@ -161,19 +162,19 @@ class ServiceApp:
     def create_packet(session, image):
         # this is the data packet for the kiosk to read
         data = {
-            'session': {
-                'idle': session.idle,
-                'started': session.started,
-                'finished': session.finished,
-                'timer_value': session.countdown_value,
+            "session": {
+                "idle": session.idle,
+                "started": session.started,
+                "finished": session.finished,
+                "timer_value": session.countdown_value,
             },
-            'image_data': image,
-            'aspect_ratio': 1.58 / 1.45  # TODO: get from template
+            "image_data": image,
+            "aspect_ratio": 1.58 / 1.45,  # TODO: get from template
         }
 
         # format the pack for the wire
         encoded_data = cbor.dumps(data)
-        length = struct.pack('Q', len(encoded_data))
+        length = struct.pack("Q", len(encoded_data))
 
         return length + encoded_data
 
@@ -188,17 +189,17 @@ class ServiceApp:
         :param writer:
         :return:
         """
-        logger.debug('sending previews')
+        logger.debug("sending previews")
         while 1:
             # the 1 byte indicates that the consumer wants a frame
             msg = await reader.read(1)
 
             # need preview
-            if msg == b'\x01':
+            if msg == b"\x01":
                 pass
 
             # quit
-            elif msg == b'\xFF':
+            elif msg == b"\xFF":
                 break
 
             # anything else just ignore
@@ -219,4 +220,4 @@ class ServiceApp:
                 break
 
             # limit amount of frames sent
-            await asyncio.sleep(1 / 60.)
+            await asyncio.sleep(1 / 60.0)

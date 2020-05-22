@@ -2,7 +2,7 @@
 from itertools import repeat
 
 __all__ = [
-    'timing_generator',
+    "timing_generator",
 ]
 
 
@@ -18,7 +18,7 @@ def timing_generator(interval, amount, initial=None):
     :param initial: if specified, this value will be used on 1st iteration
     :return: (bool, int)
     """
-    assert (amount > 0)
+    assert amount > 0
 
     if initial is not None:
         amount -= 1

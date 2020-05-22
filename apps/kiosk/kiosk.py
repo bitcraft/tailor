@@ -15,7 +15,7 @@ from tailor.uix.picker import PickerScreen
 
 logger = logging.getLogger("tailor.kiosk-loader")
 
-DEFAULT_VKEYBOARD_LAYOUT = 'email'
+DEFAULT_VKEYBOARD_LAYOUT = "email"
 
 
 class Manager(ScreenManager):
@@ -33,13 +33,11 @@ def load_custom_kv_styles():
     jpath = os.path.join
 
     # make kiosk work without installing tailor into python
-    app_root_path = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
+    app_root_path = os.path.realpath(os.path.join(__file__, "..", "..", ".."))
 
-    styles_path = jpath(app_root_path, 'tailor', 'resources', 'styles')
+    styles_path = jpath(app_root_path, "tailor", "resources", "styles")
 
-    kv_files = (
-        ('default', ('kiosk.kv',),),
-    )
+    kv_files = (("default", ("kiosk.kv",),),)
 
     for module, filenames in kv_files:
         func = partial(jpath, styles_path, module)
@@ -49,19 +47,19 @@ def load_custom_kv_styles():
 
 def new():
     # set keyboard behaviour to be a little like IOS
-    Config.set('kivy', 'keyboard_mode', 'dock')
-    Config.set('kivy', 'keyboard_layout', DEFAULT_VKEYBOARD_LAYOUT)
+    Config.set("kivy", "keyboard_mode", "dock")
+    Config.set("kivy", "keyboard_layout", DEFAULT_VKEYBOARD_LAYOUT)
 
     # set the display and touch screen up
     # TODO: load from cfg for customization
-    Config.set('graphics', 'width', 1280)
-    Config.set('graphics', 'height', 1024)
-    Config.set('postproc', 'retain_time', 150)
-    Config.set('postproc', 'retain_distance', 30)
+    Config.set("graphics", "width", 1280)
+    Config.set("graphics", "height", 1024)
+    Config.set("postproc", "retain_time", 150)
+    Config.set("postproc", "retain_distance", 30)
 
     load_custom_kv_styles()
 
     app = KioskApp()
-    app.manager.add_widget(PickerScreen(name='compositepicker'))
+    app.manager.add_widget(PickerScreen(name="compositepicker"))
 
     return app
