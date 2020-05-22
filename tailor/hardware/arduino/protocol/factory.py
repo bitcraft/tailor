@@ -14,6 +14,7 @@ class Container(dict):
     A generic container of attributes.
     Containers are the common way to express parsed data.
     """
+
     __slots__ = ["__keys_order__"]
 
     def __init__(self, **kw):

@@ -22,13 +22,13 @@ def double(filename, fn2):
     from PIL import Image
 
     image = Image.open(filename)
-    base = Image.new('RGBA', (1200, 1800))
+    base = Image.new("RGBA", (1200, 1800))
     areas = ((0, 0), (600, 0))
     for area in areas:
         base.paste(image, area, mask=image)
 
-    new = 'double-%s' % fn2
-    new = os.path.join(pkConfig['paths']['app_root_path'], new)
+    new = "double-%s" % fn2
+    new = os.path.join(pkConfig["paths"]["app_root_path"], new)
     base.save(new)
     return new
 
@@ -46,10 +46,11 @@ class IconAccordionItem(AccordionItem):
 
 
 class SharingControls(FloatLayout):
-    prints = BoundedNumericProperty(1, min=1, max=MAXIMUM_PRINTS,
-                                    errorhandler=handle_print_number_error)
+    prints = BoundedNumericProperty(
+        1, min=1, max=MAXIMUM_PRINTS, errorhandler=handle_print_number_error
+    )
 
-    email_addressee = StringProperty('')
+    email_addressee = StringProperty("")
     twitter_acct = StringProperty(
         # TODO: load from cfg
         # pkConfig['twitter']['account']
@@ -70,8 +71,8 @@ class SharingControls(FloatLayout):
             widget.on_touch_motion = derp
 
     def do_print(self):
-        filename = self.filename[self.filename.rindex('/') + 1:]
-        url = 'http://127.0.0.1:5000/print/' + filename
+        filename = self.filename[self.filename.rindex("/") + 1 :]
+        url = "http://127.0.0.1:5000/print/" + filename
         for i in range(self.prints):
             req = UrlRequest(url, print)
 
@@ -80,21 +81,17 @@ class SharingControls(FloatLayout):
 
         self.do_print()
 
-        layout = BoxLayout(orientation='vertical')
-        label = Label(
-            text='Your prints will be ready soon!',
-            font_size=30)
-        button = Button(
-            text='Awesome!',
-            font_size=30,
-            background_color=(0, 1, 0, 1))
+        layout = BoxLayout(orientation="vertical")
+        label = Label(text="Your prints will be ready soon!", font_size=30)
+        button = Button(text="Awesome!", font_size=30, background_color=(0, 1, 0, 1))
         layout.add_widget(label)
         layout.add_widget(button)
 
         popup = Popup(
-            title='Just thought you should know...',
+            title="Just thought you should know...",
             content=layout,
-            size_hint=(.5, .5))
+            size_hint=(0.5, 0.5),
+        )
 
         button.bind(on_release=popup.dismiss)
         popup.open()
@@ -105,21 +102,19 @@ class SharingControls(FloatLayout):
         thread.start()
         popup.dismiss()
 
-        layout = BoxLayout(orientation='vertical')
+        layout = BoxLayout(orientation="vertical")
         label = Label(
-            text='Just sent this image to:\n\n{}'.format(address),
-            font_size=30)
-        button = Button(
-            text='Awesome!',
-            font_size=30,
-            background_color=(0, 1, 0, 1))
+            text="Just sent this image to:\n\n{}".format(address), font_size=30
+        )
+        button = Button(text="Awesome!", font_size=30, background_color=(0, 1, 0, 1))
         layout.add_widget(label)
         layout.add_widget(button)
 
         popup = Popup(
-            title='Just thought you should know...',
+            title="Just thought you should know...",
             content=layout,
-            size_hint=(.5, .5))
+            size_hint=(0.5, 0.5),
+        )
 
         button.bind(on_release=popup.dismiss)
         from kivy.core.window import Window
@@ -129,85 +124,72 @@ class SharingControls(FloatLayout):
         popup.open()
 
     def confirm_print(self):
-        layout0 = BoxLayout(orientation='vertical')
-        layout1 = BoxLayout(orientation='horizontal')
+        layout0 = BoxLayout(orientation="vertical")
+        layout1 = BoxLayout(orientation="horizontal")
         label = Label(
-            text='You want to print {} copies?'.format(self.prints),
-            font_size=30)
+            text="You want to print {} copies?".format(self.prints), font_size=30
+        )
         button0 = Button(
-            text='Just do it!',
-            font_size=30,
-            background_color=(0, 1, 0, 1))
-        button1 = Button(
-            text='No',
-            font_size=30,
-            background_color=(1, 0, 0, 1))
+            text="Just do it!", font_size=30, background_color=(0, 1, 0, 1)
+        )
+        button1 = Button(text="No", font_size=30, background_color=(1, 0, 0, 1))
         layout1.add_widget(button1)
         layout1.add_widget(button0)
         layout0.add_widget(label)
         layout0.add_widget(layout1)
 
         popup = Popup(
-            title='Are you sure?',
+            title="Are you sure?",
             content=layout0,
-            size_hint=(.5, .5),
-            auto_dismiss=False)
+            size_hint=(0.5, 0.5),
+            auto_dismiss=False,
+        )
 
-        button0.bind(on_release=partial(
-            self.handle_print_touch, popup))
+        button0.bind(on_release=partial(self.handle_print_touch, popup))
 
         button1.bind(on_release=popup.dismiss)
         popup.open()
 
     def confirm_address(self):
         if not self.email_addressee:
-            layout = BoxLayout(orientation='vertical')
-            label = Label(
-                text='Please enter an email address',
-                font_size=30)
-            button = Button(
-                text='ok!',
-                font_size=30,
-                background_color=(0, 1, 0, 1))
+            layout = BoxLayout(orientation="vertical")
+            label = Label(text="Please enter an email address", font_size=30)
+            button = Button(text="ok!", font_size=30, background_color=(0, 1, 0, 1))
             layout.add_widget(label)
             layout.add_widget(button)
 
-            popup = Popup(
-                title='Oops!',
-                content=layout,
-                size_hint=(.5, .5))
+            popup = Popup(title="Oops!", content=layout, size_hint=(0.5, 0.5))
 
             button.bind(on_release=popup.dismiss)
 
         else:
-            layout0 = BoxLayout(orientation='vertical')
-            layout1 = BoxLayout(orientation='horizontal')
+            layout0 = BoxLayout(orientation="vertical")
+            layout1 = BoxLayout(orientation="horizontal")
             label = Label(
-                text='Is this email address correct?\n\n{}'.format(
-                    self.email_addressee),
-                font_size=30)
-            button0 = Button(
-                text='Yes',
+                text="Is this email address correct?\n\n{}".format(
+                    self.email_addressee
+                ),
                 font_size=30,
-                background_color=(0, 1, 0, 1))
-            button1 = Button(
-                text='No',
-                font_size=30,
-                background_color=(1, 0, 0, 1))
+            )
+            button0 = Button(text="Yes", font_size=30, background_color=(0, 1, 0, 1))
+            button1 = Button(text="No", font_size=30, background_color=(1, 0, 0, 1))
             layout1.add_widget(button1)
             layout1.add_widget(button0)
             layout0.add_widget(label)
             layout0.add_widget(layout1)
 
             popup = Popup(
-                title='Question',
+                title="Question",
                 content=layout0,
-                size_hint=(.5, .5),
-                auto_dismiss=False)
+                size_hint=(0.5, 0.5),
+                auto_dismiss=False,
+            )
 
-            button0.bind(on_release=partial(
-                self.do_email, popup, str(self.email_addressee),
-                str(self.filename)))
+            button0.bind(
+                on_release=partial(
+                    self.do_email, popup, str(self.email_addressee), str(self.filename)
+                )
+            )
 
             button1.bind(on_release=popup.dismiss)
 
@@ -223,11 +205,11 @@ class SharingControls(FloatLayout):
         self.prints -= 1
 
     def change_vkeyboard_email(self):
-        Config.set('kivy', 'keyboard_mode', 'dock')
-        Config.set('kivy', 'keyboard_layout', 'email')
+        Config.set("kivy", "keyboard_mode", "dock")
+        Config.set("kivy", "keyboard_layout", "email")
 
     def reset_email_textinput(self):
-        self.email_textinput = ''
+        self.email_textinput = ""
 
     def change_vkeyboard_normal(self):
-        Config.set('kivy', 'keyboard_layout', DEFAULT_VKEYBOARD_LAYOUT)
+        Config.set("kivy", "keyboard_layout", DEFAULT_VKEYBOARD_LAYOUT)

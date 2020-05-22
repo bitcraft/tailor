@@ -1,7 +1,7 @@
 import logging
 from subprocess import call
 
-logger = logging.getLogger('tailor.platform.unix')
+logger = logging.getLogger("tailor.platform.unix")
 
 
 def release_gvfs_from_camera():
@@ -12,5 +12,5 @@ def release_gvfs_from_camera():
     
     :return: None 
     """
-    logger.debug('releasing camera from gvfs...')
-    call(['gvfs-mount', '-s', 'gphoto2'], timeout=10)
+    logger.debug("releasing camera from gvfs...")
+    call(["gvfs-mount", "-s", "gphoto2"], timeout=10)

@@ -10,20 +10,21 @@ from PIL import Image
 
 from .filters.autocrop import Autocrop
 
-__all__ = ('TemplateRenderer',)
+__all__ = ("TemplateRenderer",)
 
 
 class TemplateRenderer:
     """
     Render template graphs using PIL
     """
-    image_mode = 'RGBA'
+
+    image_mode = "RGBA"
 
     def __init__(self):
         self.handlers = {
-            'area': self.render_area_node,
-            'image': self.render_image_node,
-            'placeholder': self.render_cropped_node
+            "area": self.render_area_node,
+            "image": self.render_image_node,
+            "placeholder": self.render_cropped_node,
         }
 
     def render_node(self, node):
@@ -89,7 +90,7 @@ class TemplateRenderer:
     @staticmethod
     def paste(upper, lower, top_left):
         # correctly handle the alpha channel transparency.
-        if upper.mode == 'RGBA':
+        if upper.mode == "RGBA":
             lower.paste(upper, top_left, mask=upper)
         else:
             lower.paste(upper, top_left)

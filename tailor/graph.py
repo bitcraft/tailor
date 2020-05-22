@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__all__ = ('Node',)
+__all__ = ("Node",)
 
 
 class Node:
@@ -40,8 +40,8 @@ class Node:
         """ Generator that yields nodes that require an image
         """
         for child in self.dfs_children():
-            if child.kind == 'placeholder':
-                if not hasattr(child, 'data'):
+            if child.kind == "placeholder":
+                if not hasattr(child, "data"):
                     yield child
 
     def needed_captures(self):
@@ -51,8 +51,8 @@ class Node:
 
     def push_image(self, data):
         for child in self.dfs_children():
-            if child.kind == 'placeholder':
-                if not hasattr(child, 'data'):
+            if child.kind == "placeholder":
+                if not hasattr(child, "data"):
                     child.data = data
                     return
 
@@ -60,7 +60,7 @@ class Node:
         """search through parents until a rect is found and return it
            if this node contains a rect, then return that
         """
-        if hasattr(self, 'rect'):
+        if hasattr(self, "rect"):
             return self.rect
         else:
             return self.parent.determine_rect()

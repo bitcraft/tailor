@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
+import logging
 import queue
 import socket
-import threading
 import struct
-import logging
+import threading
 
 import cbor
 from kivy.clock import Clock
 from kivy.core.camera import CameraBase
 from kivy.graphics.texture import Texture
 
-logger = logging.getLogger('tailor.camera')
+logger = logging.getLogger("tailor.camera")
 
 
 def recv(sock, length, max_read=4096):
@@ -35,7 +35,7 @@ class TailorStreamingCamera(CameraBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.queue = queue.Queue()
-        self._format = 'rgb'
+        self._format = "rgb"
 
     def init_camera(self):
         if not self.stopped:
@@ -57,7 +57,7 @@ class TailorStreamingCamera(CameraBase):
         if self._texture is None:
             self._texture = Texture.create(self._resolution)
             self._texture.flip_vertical()
-            self.dispatch('on_load')
+            self.dispatch("on_load")
         try:
             self._buffer = self._grab_last_frame()
             self._copy_to_gpu()
@@ -80,7 +80,7 @@ class PreviewHandler:
         self.queue = queue.Queue(maxsize=1)
         self.thread = None
         self.running = False
-        self.host = 'localhost'
+        self.host = "localhost"
         self.port = 22222
 
         # maximum amount of bytes to request each socket read
@@ -104,7 +104,7 @@ class PreviewHandler:
         """
         # get the "header", just a 64-bit integer
         data = recv(sock, 8, self.max_read)
-        length = struct.unpack('Q', data)[0]
+        length = struct.unpack("Q", data)[0]
 
         # get the rest of the data
         data = recv(sock, length, self.max_read)
@@ -113,7 +113,7 @@ class PreviewHandler:
             packet = cbor.loads(data)
             # TODO: check for more exceptions, IDK
         except (ValueError, EOFError):
-            logger.debug('preview packet decode error')
+            logger.debug("preview packet decode error")
             return
 
         return packet
@@ -129,7 +129,7 @@ class PreviewHandler:
                     sock = self.open_socket(self.host, self.port)
 
                 # the 1 byte signals that the a preview is needed
-                sock.send(b'\x01')
+                sock.send(b"\x01")
 
                 packet = self.get_packet(sock)
 
@@ -137,25 +137,25 @@ class PreviewHandler:
                     queue_put(packet)
 
                 else:
-                    logger.debug('could not decode packet, giving up')
-                    sock.send(b'\xFF')
+                    logger.debug("could not decode packet, giving up")
+                    sock.send(b"\xFF")
                     sock.close()
                     sock = None
 
             if sock:
-                logger.debug('stopping preview thread gracefully')
-                sock.send(b'\xFF')
+                logger.debug("stopping preview thread gracefully")
+                sock.send(b"\xFF")
                 sock.close()
 
         if self.thread is None:
-            logger.debug('starting the preview handler')
+            logger.debug("starting the preview handler")
             self.thread = threading.Thread(target=func)
             self.thread.daemon = True
             self.thread.start()
 
     def stop(self):
         if self.thread is None:
-            logger.debug('want to stop preview thread, but is not running')
+            logger.debug("want to stop preview thread, but is not running")
         else:
-            logger.debug('stopping the preview handler')
+            logger.debug("stopping the preview handler")
             self.running = False

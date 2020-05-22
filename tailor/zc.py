@@ -17,19 +17,18 @@ from . import net
 
 # from zeroconf import ServiceInfo, Zeroconf
 
-logger = logging.getLogger('tailor.zc')
+logger = logging.getLogger("tailor.zc")
 
-__all__ = [
-    'zc_service_context',
-    'load_services_from_config']
+__all__ = ["zc_service_context", "load_services_from_config"]
 
 config = dict()
 
 # fake service info
 from collections import namedtuple
 
-ServiceInfo = namedtuple('ServiceInfo',
-                         'name desc, addr, port, null0, null1, properties')
+ServiceInfo = namedtuple(
+    "ServiceInfo", "name desc, addr, port, null0, null1, properties"
+)
 
 
 @contextmanager
@@ -50,27 +49,27 @@ def zc_service_context(service_info):
 
 
 def new_service_from_config(service_data):
-    service_config = service_data['config']
-    type_name = service_config['type']
-    desc_label = service_config['description'] + '.' + type_name
+    service_config = service_data["config"]
+    type_name = service_config["type"]
+    desc_label = service_config["description"] + "." + type_name
 
-    addr = socket.inet_aton(config['addr'])
-    port = int(config['port'])
+    addr = socket.inet_aton(config["addr"])
+    port = int(config["port"])
 
-    properties = service_config['properties']
+    properties = service_config["properties"]
 
     return ServiceInfo(type_name, desc_label, addr, port, 0, 0, properties)
 
 
 def load_services_from_config():
     # TODO: move to more generic loader
-    filename = 'config/server.yaml'
+    filename = "config/server.yaml"
     with open(filename) as fp:
         data = yaml.load(fp)
 
-    interface_config = data['interface']
-    config['port'] = interface_config['port']
-    config['addr'] = net.guess_local_ip_addresses()
+    interface_config = data["interface"]
+    config["port"] = interface_config["port"]
+    config["addr"] = net.guess_local_ip_addresses()
 
-    for service_data in data['zeroconf-servers']:
+    for service_data in data["zeroconf-servers"]:
         yield new_service_from_config(service_data)

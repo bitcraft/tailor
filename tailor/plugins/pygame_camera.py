@@ -8,7 +8,7 @@ import time
 from PIL import Image
 from pygame.image import tostring
 
-logger = logging.getLogger('tailor.pygame_camera')
+logger = logging.getLogger("tailor.pygame_camera")
 
 
 class PygameCamera:
@@ -41,7 +41,7 @@ class PygameCamera:
 
         camera.init()
         cameras = camera.list_cameras()
-        dc = camera.Camera(cameras[self._device_index], self.default_resolution, 'RGB')
+        dc = camera.Camera(cameras[self._device_index], self.default_resolution, "RGB")
         dc.start()
 
         time.sleep(1)  # give time for webcam to init.
@@ -69,8 +69,9 @@ class PygameCamera:
             self._device_context.get_image(self._temp_surface)
 
     def convert_frame_to_image(self, frame):
-        return Image.frombytes('RGB', self._temp_surface.get_size(),
-                               tostring(self._temp_surface, 'RGB'))
+        return Image.frombytes(
+            "RGB", self._temp_surface.get_size(), tostring(self._temp_surface, "RGB")
+        )
 
     async def capture_image(self):
         """ get frame, decode, and return pil image
@@ -85,7 +86,7 @@ class PygameCamera:
     async def save_preview():
         """ Capture a preview image and save to a file
         """
-        logger.debug('capture_preview, not implemented')
+        logger.debug("capture_preview, not implemented")
 
     @staticmethod
     async def save_capture(filename=None):
@@ -94,12 +95,12 @@ class PygameCamera:
         # frame = self.capture_frame()
         # cv2.imwrite('capture.jpg', frame)
         # return 'capture.jpg'
-        logger.debug('capture_image, not implemented')
+        logger.debug("capture_image, not implemented")
 
     async def download_capture(self):
         """ Capture a full image and return data
         """
-        logger.debug('download_capture')
+        logger.debug("download_capture")
         image = await self.capture_image()
         return image
 

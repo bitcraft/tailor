@@ -7,14 +7,16 @@ import os.path
 from tailor.config import pkConfig
 from tailor.graph import Node
 
-__all__ = ['cast_list_float',
-           'TemplateBuilder',
-           'YamlTemplateBuilder',
-           'create_root_node',
-           'create_area_node',
-           'create_image_node']
+__all__ = [
+    "cast_list_float",
+    "TemplateBuilder",
+    "YamlTemplateBuilder",
+    "create_root_node",
+    "create_area_node",
+    "create_image_node",
+]
 
-logger = logging.getLogger('tailor.TemplateBuilder')
+logger = logging.getLogger("tailor.TemplateBuilder")
 
 
 def cast_list_float(values):
@@ -31,35 +33,35 @@ def cast_list_float(values):
 
 
 def create_area_node(raw_config):
-    data = raw_config['data']
-    rect = cast_list_float(data['rect'])
-    units = data.get('units', None)
+    data = raw_config["data"]
+    rect = cast_list_float(data["rect"])
+    units = data.get("units", None)
     try:
-        dpi = float(data['dpi'])
+        dpi = float(data["dpi"])
     except KeyError:
         dpi = None
-    return Node('area', {'rect': rect, 'units': units, 'dpi': dpi})
+    return Node("area", {"rect": rect, "units": units, "dpi": dpi})
 
 
 def create_root_node(raw_config):
-    if not raw_config['name'] == 'root':
+    if not raw_config["name"] == "root":
         raise YamlTemplateBuilder.SyntaxError
 
-    data = raw_config['data']
-    rect = cast_list_float(data['rect'])
-    units = data['units']
-    dpi = float(data['dpi'])
-    return Node('area', {'rect': rect, 'units': units, 'dpi': dpi})
+    data = raw_config["data"]
+    rect = cast_list_float(data["rect"])
+    units = data["units"]
+    dpi = float(data["dpi"])
+    return Node("area", {"rect": rect, "units": units, "dpi": dpi})
 
 
 def create_image_node(raw_config):
-    filename = raw_config['data']['filename']
-    path = os.path.join(pkConfig['paths']['app_templates'], filename)
-    return Node('image', {'filename': path})
+    filename = raw_config["data"]["filename"]
+    path = os.path.join(pkConfig["paths"]["app_templates"], filename)
+    return Node("image", {"filename": path})
 
 
 def create_placeholder_node(raw_config):
-    return Node('placeholder', raw_config['data'])
+    return Node("placeholder", raw_config["data"])
 
 
 class TemplateBuilder:
@@ -73,17 +75,17 @@ class TemplateBuilder:
 
     def __init__(self):
         self.handlers = {
-            'root': create_root_node,
-            'area': create_area_node,
-            'image': create_image_node,
-            'placeholder': create_placeholder_node
+            "root": create_root_node,
+            "area": create_area_node,
+            "image": create_image_node,
+            "placeholder": create_placeholder_node,
         }
 
     def build_graph(self, dict_graph):
         root = self.build_node(dict_graph)
 
         try:
-            children = dict_graph['children']
+            children = dict_graph["children"]
         except KeyError:
             # no children, so just return the root node
             return root
@@ -97,7 +99,7 @@ class TemplateBuilder:
 
     def build_node(self, dict_graph):
         try:
-            node_type = dict_graph['type']
+            node_type = dict_graph["type"]
         except KeyError:
             # missing the type name
             raise TemplateBuilder.SyntaxError
@@ -113,7 +115,7 @@ class TemplateBuilder:
         except KeyError:
             # all handlers get args from dict, so a KeyError
             # indicates the required info. is missing
-            logger.critical('template syntax error')
+            logger.critical("template syntax error")
             raise TemplateBuilder.SyntaxError
 
         return node

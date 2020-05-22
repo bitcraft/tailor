@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """ Camera interface for the python-gphoto2 wrapper.
 """
-import platform
 import asyncio
 import logging
+import platform
 
 import gphoto2 as gp
 
@@ -11,7 +11,7 @@ logger = logging.getLogger("tailor.gphoto2_camera")
 
 
 def release_from_tight_grip_of_operating_system():
-    if platform.system() == 'Linux':
+    if platform.system() == "Linux":
         from tailor.platform.unix import release_gvfs_from_camera
 
         try:
@@ -83,7 +83,9 @@ class GphotoCamera:
         """ Capture preview image (doesn't engage curtain)
         """
         with (await self._lock):
-            file = gp.check_result(gp.gp_camera_capture_preview(self._camera, self._context))
+            file = gp.check_result(
+                gp.gp_camera_capture_preview(self._camera, self._context)
+            )
             data = gp.check_result(gp.gp_file_get_data_and_size(file))
             return bytes(data)
 
@@ -94,11 +96,19 @@ class GphotoCamera:
         """
 
         def capture():
-            path = gp.check_result(gp.gp_camera_capture(self._camera, gp.GP_CAPTURE_IMAGE, self._context))
+            path = gp.check_result(
+                gp.gp_camera_capture(self._camera, gp.GP_CAPTURE_IMAGE, self._context)
+            )
 
-            file = gp.check_result(gp.gp_camera_file_get(
-                self._camera, path.folder, path.name,
-                gp.GP_FILE_TYPE_NORMAL, self._context))
+            file = gp.check_result(
+                gp.gp_camera_file_get(
+                    self._camera,
+                    path.folder,
+                    path.name,
+                    gp.GP_FILE_TYPE_NORMAL,
+                    self._context,
+                )
+            )
 
             data = gp.check_result(gp.gp_file_get_data_and_size(file))
             return bytes(data)

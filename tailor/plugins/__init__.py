@@ -11,16 +11,16 @@ import logging
 
 from . import composer, dummy_camera, filesystem
 
-logger = logging.getLogger('tailor.plugins')
+logger = logging.getLogger("tailor.plugins")
 
 
 def get_camera():
     from tailor.config import pkConfig
 
     camera = None
-    camera_cfg = pkConfig['camera']
-    camera_plugin = camera_cfg['plugin']
-    camera_name = camera_cfg['name']
+    camera_cfg = pkConfig["camera"]
+    camera_plugin = camera_cfg["plugin"]
+    camera_name = camera_cfg["name"]
 
     # TODO: Better error handling
     if camera_plugin == "dummy":
@@ -35,6 +35,7 @@ def get_camera():
         else:
             if camera_name:
                 import re
+
                 regex = re.compile(camera_name)
             else:
                 regex = None

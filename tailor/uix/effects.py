@@ -5,7 +5,7 @@ from kivy.clock import Clock
 from kivy.effects.dampedscroll import DampedScrollEffect
 from kivy.properties import *
 
-__all__ = ('TailorScrollEffect',)
+__all__ = ("TailorScrollEffect",)
 
 
 class TailorScrollEffect(DampedScrollEffect):
@@ -13,8 +13,9 @@ class TailorScrollEffect(DampedScrollEffect):
     this is a more computationally involved method of scrolling, but is more
     accurate...and works, mostly.
     """
+
     friction = NumericProperty(0.005)
-    min_velocity = NumericProperty(.1)
+    min_velocity = NumericProperty(0.1)
     spring_constant = NumericProperty(10.0)
     edge_damping = NumericProperty(0.5)
     max_history = None
@@ -77,9 +78,9 @@ class TailorScrollEffect(DampedScrollEffect):
                 rebound_force += self.overscroll * self.spring_constant
                 self.velocity -= rebound_force
                 if self.overscroll > 0 > self.velocity:
-                    stop_overscroll = 'max'
+                    stop_overscroll = "max"
                 elif self.overscroll < 0 < self.velocity:
-                    stop_overscroll = 'min'
+                    stop_overscroll = "min"
             else:
                 # no overscroll, or no significant amount of it
                 self.velocity *= friction
@@ -88,12 +89,12 @@ class TailorScrollEffect(DampedScrollEffect):
         self.apply_distance(self.velocity * dt)
 
         # stop moving after the overscroll rebound is finished
-        if stop_overscroll == 'min' and self.value >= self.min:
+        if stop_overscroll == "min" and self.value >= self.min:
             self.value = self.min
             self.velocity = 0
             return
 
-        if stop_overscroll == 'max' and self.value <= self.max:
+        if stop_overscroll == "max" and self.value <= self.max:
             self.value = self.max
             self.velocity = 0
             return

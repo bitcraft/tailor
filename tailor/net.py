@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-import re
 import logging
+import re
 
-logger = logging.getLogger('tailor.net')
+logger = logging.getLogger("tailor.net")
 try:
     import netifaces
 except ImportError:
-    logger.critical('cannot import netifances.  some network services disabled.')
+    logger.critical("cannot import netifances.  some network services disabled.")
     netifaces = None
 
-local_addr = re.compile('^(169\.254|127)')
+local_addr = re.compile("^(169\.254|127)")
 
 
 def ip_interfaces():
     if netifaces is None:
-        return ['127.0.0.1']
+        return ["127.0.0.1"]
 
     for iface in netifaces.interfaces():
         ifadresses = netifaces.ifaddresses(iface)
@@ -32,16 +32,16 @@ def guess_routable(addr):
 
 def guess_local_ip_addresses():
     if netifaces is None:
-        return '127.0.0.1'
+        return "127.0.0.1"
 
     for iface in ip_interfaces():
-        addr = iface['addr']
+        addr = iface["addr"]
         if guess_routable(addr):
             return addr
 
 
 def guess_unroutable_addresses():
     for iface in ip_interfaces():
-        addr = iface['addr']
+        addr = iface["addr"]
         if not guess_routable(addr):
             return addr

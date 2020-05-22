@@ -11,7 +11,7 @@ logger = logging.getLogger("tailor.shutter_camera")
 
 
 def release_from_tight_grip_of_operating_system():
-    if platform.system() == 'Linux':
+    if platform.system() == "Linux":
         from tailor.platform.unix import release_gvfs_from_camera
 
         try:
@@ -71,7 +71,7 @@ class ShutterCamera:
             except shutter.ShutterError:
                 logger.critical("cannot capture preview, attempting to get camera")
                 release_from_tight_grip_of_operating_system()
-                await(asyncio.sleep(1))
+                await (asyncio.sleep(1))
                 self.open_camera()
 
     async def capture_image(self, filename=None):

@@ -8,7 +8,7 @@ class AsyncSerial:
     """polling, yuck!...works on win, mac, and linux though
     """
 
-    def __init__(self, *, loop=None, port='/dev/ttyACM0', speed=57600):
+    def __init__(self, *, loop=None, port="/dev/ttyACM0", speed=57600):
         if loop is None:
             loop = asyncio.get_event_loop()
 
@@ -56,7 +56,7 @@ class SelectSerial:
     TODO: context protocol
     """
 
-    def __init__(self, *, loop=None, port='/dev/ttyACM0', speed=57600):
+    def __init__(self, *, loop=None, port="/dev/ttyACM0", speed=57600):
         if loop is None:
             loop = asyncio.get_event_loop()
 

@@ -20,15 +20,15 @@ class ColorTone:
             output = filename
 
         if type == 0:
-            negate = '-negate'
+            negate = "-negate"
         else:
-            negate = '-negate'
+            negate = "-negate"
 
-        cmd = 'convert {} \
+        cmd = "convert {} \
                -set colorspace RGB \
                ( -clone 0 -fill {} -colorize 100% ) \
                ( -clone 0 -colorspace gray {} ) \
-               -compose blend -define compose:args={},{} -composite {}'.format(
+               -compose blend -define compose:args={},{} -composite {}".format(
             filename, color, negate, level, 100 - level, output
         )
 
@@ -38,15 +38,14 @@ class ColorTone:
 
 class Vignette:
     @staticmethod
-    def process(filename, w, h, color0='none', color1='black', ratio=1.5,
-                output=None):
+    def process(filename, w, h, color0="none", color1="black", ratio=1.5, output=None):
         if output is None:
             output = filename
 
-        cmd = 'convert ( {} ) \
+        cmd = "convert ( {} ) \
                ( -size {}x{} radial-gradient:{}-{} -gravity center \
                -crop {}x{}+0+0 +repage ) \
-               -compose multiply -flatten {}'.format(
+               -compose multiply -flatten {}".format(
             filename, w, h, color0, color1, w, h, output
         )
 
@@ -61,19 +60,17 @@ class Toaster:
             output = filename
 
         # output = filename + '-toaster.miff'
-        scratch = filename + 'scratch.miff'
+        scratch = filename + "scratch.miff"
 
         # colortone
         # scratch = colortone(filename, '#330000', 100, 0, output=scratch)
         # scratch = colortone(filename, '#220000', 100, 0, output=scratch)
-        scratch = colortone(filename, '#110000', 105, 0, output=scratch)
+        scratch = colortone(filename, "#110000", 105, 0, output=scratch)
 
-        brightness = pkConfig.get('postprocessing', 'brightness')
+        brightness = pkConfig.get("postprocessing", "brightness")
 
         # contrast
-        cmd = 'convert {} -modulate {},105,100 {}'.format(
-            brightness, scratch, scratch
-        )
+        cmd = "convert {} -modulate {},105,100 {}".format(brightness, scratch, scratch)
 
         execute(cmd)
 
@@ -81,9 +78,9 @@ class Toaster:
         # scratch = vignette(scratch, w, h, 'none', 'LavenderBlush3')
         # scratch = vignette(scratch, w, h, '#FFD6C2', 'none')
         # scratch = vignette(scratch, w, h, '#E3C2B8', 'none')
-        scratch = vignette(scratch, w, h, '#b3a298', 'none')
+        scratch = vignette(scratch, w, h, "#b3a298", "none")
 
-        execute('convert {} {}'.format(scratch, output))
+        execute("convert {} {}".format(scratch, output))
         os.unlink(scratch)
 
         return output

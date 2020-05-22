@@ -20,7 +20,7 @@ from PIL import Image
 # - brew tap homebrew/science
 # - brew install opencv
 
-logger = logging.getLogger('tailor.opencvcamera')
+logger = logging.getLogger("tailor.opencvcamera")
 
 
 class OpenCVCamera:
@@ -41,7 +41,7 @@ class OpenCVCamera:
     def open(self):
         # TODO: make async
         self._device_context = cv2.VideoCapture(self._device_index)
-        time.sleep(2) # give time for camera to init.
+        time.sleep(2)  # give time for camera to init.
 
         # 'prime' the capture context...
         # some webcams might not init fully until a capture
@@ -63,7 +63,7 @@ class OpenCVCamera:
     async def save_preview():
         """ Capture a preview image and save to a file
         """
-        logger.debug('capture_preview, not implemented')
+        logger.debug("capture_preview, not implemented")
 
     @staticmethod
     async def save_capture(filename=None):
@@ -72,7 +72,7 @@ class OpenCVCamera:
         # frame = self.capture_frame()
         # cv2.imwrite('capture.jpg', frame)
         # return 'capture.jpg'
-        logger.debug('capture_image, not implemented')
+        logger.debug("capture_image, not implemented")
 
     async def capture_frame(self):
         """ Capture a single frame
@@ -101,7 +101,7 @@ class OpenCVCamera:
     async def download_capture(self):
         """ Capture a full image and return data
         """
-        logger.debug('download_capture')
+        logger.debug("download_capture")
         image = await self.capture_image()
         return image
 
