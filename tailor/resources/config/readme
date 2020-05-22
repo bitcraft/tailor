@@ -1,20 +1,24 @@
+config
+======
+these are the defaults for the config files
+
+
 arduino.yaml
 ============
-
+arduino config
 
 
 kiosk.yaml
 ==========
+kiosk config
 
 
 server.yaml
 ===========
-
 print-queue => interval :  time to wait between print jobs.  useful for finicky printers.
 
 
 service.yaml
 ============
-
 camera => plugin :  shutter, pygame, opencv, or dummy
 compositor => pil_options:  options to pass to pillow when saving
