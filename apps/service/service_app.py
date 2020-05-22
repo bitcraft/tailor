@@ -42,7 +42,7 @@ mock_session = namedtuple('mock_session', 'countdown_value started finished idle
 
 system = platform.system()
 if system == 'Linux':
-    from tailor.core.unix import release_gvfs_from_camera
+    from tailor.platform.unix import release_gvfs_from_camera
 
     try:
         release_gvfs_from_camera()

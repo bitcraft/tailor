@@ -154,7 +154,7 @@ handlers = {
 
 system = platform.system()
 if system == 'Linux':
-    from tailor.core.unix import release_gvfs_from_camera
+    from tailor.platform.unix import release_gvfs_from_camera
 
     try:
         release_gvfs_from_camera()

@@ -46,7 +46,7 @@ if __name__ == '__main__':
     # TODO: release_gvfs_from_camera fails in windows.  provide better check in future
 
     if system == 'Linux':
-        from tailor.core.unix import release_gvfs_from_camera
+        from tailor.platform.unix import release_gvfs_from_camera
 
         try:
             release_gvfs_from_camera()
