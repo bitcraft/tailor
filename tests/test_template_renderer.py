@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+import sys
 from unittest import TestCase
 
-import sys
 sys.path.extend(['..', '.'])
 
 from tailor.builder import YamlTemplateBuilder
