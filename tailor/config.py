@@ -4,8 +4,6 @@ import os.path
 
 import yaml
 
-__all__ = ("Config",)
-
 logger = logging.getLogger("tailor.config")
 
 pkConfig = dict()
