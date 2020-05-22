@@ -9,7 +9,7 @@ except ImportError:
     logger.critical("cannot import netifances.  some network services disabled.")
     netifaces = None
 
-local_addr = re.compile("^(169\.254|127)")
+local_addr = re.compile(r"^(169\.254|127)")
 
 
 def ip_interfaces():
