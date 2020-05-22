@@ -18,7 +18,7 @@ print_queue = Queue()
 prints_folder = pkConfig["paths"]["event_prints"]
 monitor_folder = pkConfig["paths"]["event_composites"]
 glob_string = "*" + pkConfig["compositor"]["filetype"]
-regex = re.compile("^(.*?)-(\d+)$")
+regex = re.compile(r"^(.*?)-(\d+)$")
 config = dict()
 
 
