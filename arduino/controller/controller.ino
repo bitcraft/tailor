@@ -1,27 +1,25 @@
-/*
- photobooth arduino control
-
- pin 2:   switch to start photo session
- pin 3:   unused switch
- pin 4-7: relay
- pin 10:  servo
-
- protocol: command/argument
-
- outgoing => to host:
- 0x00: reserved
- 0x01: switch trigger [value: pin number]
-
- incoming => from host:
- 0x80: set tilt [value: 0-180 ]
- 0x81: engage relay [0-3]
- 0x82: disengage relay [0-3]
-
- All relays are turned off when arduino is started
-
-This file is copyright Leif Theden 2012-2015.
-GPL v3
- */
+//  photobooth arduino control
+//
+//  pin 2:   switch to start photo session
+//  pin 3:   unused switch
+//  pin 4-7: relay
+//  pin 10:  servo
+//
+//  protocol: command/argument
+//
+//  outgoing => to host:
+//  0x00: reserved
+//  0x01: switch trigger [value: pin number]
+//
+//  incoming => from host:
+//  0x80: set tilt [value: 0-180 ]
+//  0x81: engage relay [0-3]
+//  0x82: disengage relay [0-3]
+//
+//  All relays are turned off when arduino is started
+//
+// This file is copyright Leif Theden 2012-2015.
+// GPL v3
 
 #include <Servo.h>
 
