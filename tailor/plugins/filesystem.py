@@ -5,7 +5,7 @@ import re
 
 logger = logging.getLogger("tailor.filesystem")
 
-regex = re.compile("^(.*?)-(\d+)$")
+regex = re.compile(r"^(.*?)-(\d+)$")
 
 
 def _incremental_naming(path):
